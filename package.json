@@ -3,18 +3,17 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
-    "lint": "expo lint"
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
+    "@gorhom/bottom-sheet": "^5.2.3",
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
+    "dayjs": "^1.11.13",
     "expo": "~53.0.20",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.7",
@@ -28,22 +27,40 @@
     "expo-symbols": "~0.4.5",
     "expo-system-ui": "~5.0.10",
     "expo-web-browser": "~14.2.0",
+    "lodash.debounce": "^4.0.8",
+    "lodash.get": "^4.4.2",
+    "lodash.isequal": "^4.5.0",
+    "lodash.set": "^4.3.2",
     "react": "19.0.0",
+    "react-content-loader": "^7.1.1",
     "react-dom": "19.0.0",
     "react-native": "0.79.5",
+    "react-native-calendars": "^1.1313.0",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
+    "react-native-paper": "^5.14.5",
     "react-native-reanimated": "~3.17.4",
+    "react-native-root-siblings": "^5.0.1",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
+    "react-native-svg": "15.11.2",
+    "react-native-uuid": "^2.0.3",
     "react-native-web": "~0.20.0",
-    "react-native-webview": "13.13.5"
+    "react-native-webview": "13.13.5",
+    "zod": "^4.0.17",
+    "zustand": "^5.0.7",
+    "lottie-react-native": "7.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@types/lodash.debounce": "^4.0.9",
+    "@types/lodash.get": "^4.4.9",
+    "@types/lodash.isequal": "^4.5.8",
+    "@types/lodash.set": "^4.3.9",
     "@types/react": "~19.0.10",
-    "typescript": "~5.8.3",
     "eslint": "^9.25.0",
-    "eslint-config-expo": "~9.2.0"
+    "eslint-config-expo": "~9.2.0",
+    "typescript": "~5.8.3"
   },
   "private": true
 }
