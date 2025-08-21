@@ -1,6 +1,8 @@
 import { AntDesign, Entypo, FontAwesome, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { DimensionValue, StyleProp, TextStyle, ViewStyle } from "react-native";
 import { VariantProp } from "react-native-paper/lib/typescript/components/Typography/types";
+import * as z from "zod";
+
 export const ICON_REGISTRY = {
     A: AntDesign,
     E: Entypo,
@@ -11,6 +13,7 @@ export const ICON_REGISTRY = {
 
 export type IFieldBase = {
     bind?: string;
+    keySource?: string;
     visibleIf?: string;
     requiredKeys?: string[];
     disabled?: boolean | string;
@@ -65,6 +68,8 @@ export type IInputField = IFieldBase & {
     style?: StyleProp<ViewStyle>;
     showPassword?: boolean;
     setShowPassWord?: (show: boolean) => void;
+    texRight?: string;
+    autoCapitalize?: "none" | "sentences" | "words" | "characters";
     upperCase?: boolean;
     height?: DimensionValue
 };
@@ -238,3 +243,16 @@ export type ISchemaUIProps = {
     errors?: Record<string, string>,
     dataActionMap?: any
 };
+
+export type ISource = Record<string, {
+    data?: any[],
+    tableWin?: ITableWin,
+    url?: string, type?: 'post' | 'get', requiredKeys?: string[], dataPost?: Record<string, any>, getColor?: (item: IData) => string
+}>
+
+export interface ISchemaForm {
+    view: IRowsColsField;
+    dataSource?: ISource,
+    dataDefault?: Record<string, any>,
+    zod?: z.ZodObject
+}

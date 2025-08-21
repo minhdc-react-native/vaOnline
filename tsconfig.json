@@ -19,6 +19,9 @@
       "hooks/*": [
         "src/hooks/*"
       ],
+      "schemaUI/*": [
+        "src/schemaUI/*"
+      ],
       "utils/*": [
         "src/utils/*"
       ],

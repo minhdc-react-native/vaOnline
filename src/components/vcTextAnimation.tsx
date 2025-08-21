@@ -4,29 +4,14 @@ import { Text, useTheme } from 'react-native-paper';
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring } from 'react-native-reanimated';
 
 export const TextDrop = ({ text, heightDrop = 200 }: { text: string, heightDrop?: number }) => {
-    const letters = useMemo(() => {
-        return text
-            .split("")     // ['C', 'R', 'M']
-            .map(char => ({
-                char,
-                color: randomColor()
-            }));
-    }, []);
-
-    const animations = letters.map(() => useSharedValue(-1 * heightDrop)); // bắt đầu ở trên màn hình
-
-    useEffect(() => {
-        animations.forEach((anim, index) => {
-            anim.value = withDelay(
-                index * 150, // mỗi chữ rơi chậm hơn 150ms
-                withSpring(0, {
-                    damping: 6,
-                    stiffness: 120,
-                })
-            );
-        });
-    }, []);
     const { colors } = useTheme();
+    const letters = useMemo(() => {
+        return text.split("").map(char => ({
+            char,
+            color: randomColor()
+        }));
+    }, [text]);
+
     return (
         <View
             style={{
@@ -41,28 +26,56 @@ export const TextDrop = ({ text, heightDrop = 200 }: { text: string, heightDrop?
                 borderColor: colors.elevation.level5
             }}
         >
-            {letters.map((item, index) => {
-                const animatedStyle = useAnimatedStyle(() => ({
-                    transform: [{ translateY: animations[index].value }],
-                }));
-
-                return (
-                    <Animated.View key={index} style={animatedStyle}>
-                        <Text
-                            variant="displayMedium"
-                            style={{
-                                fontWeight: 'bold',
-                                color: item.color,
-                            }}
-                        >
-                            {item.char}
-                        </Text>
-                    </Animated.View>
-                );
-            })}
+            {letters.map((item, index) => (
+                <AnimatedChar
+                    key={index}
+                    char={item.char}
+                    color={item.color}
+                    delay={index * 150}
+                    heightDrop={heightDrop}
+                />
+            ))}
         </View>
     );
-}
+};
+
+const AnimatedChar = ({ char, color, delay, heightDrop }: {
+    char: string;
+    color: string;
+    delay: number;
+    heightDrop: number;
+}) => {
+    const translateY = useSharedValue(-1 * heightDrop);
+
+    useEffect(() => {
+        translateY.value = withDelay(
+            delay,
+            withSpring(0, {
+                damping: 6,
+                stiffness: 120,
+            })
+        );
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: translateY.value }],
+    }));
+
+    return (
+        <Animated.View style={animatedStyle}>
+            <Text
+                variant="displayMedium"
+                style={{
+                    fontWeight: 'bold',
+                    color,
+                }}
+            >
+                {char}
+            </Text>
+        </Animated.View>
+    );
+};
+
 
 function randomColor() {
     // Hue từ 0 - 360 (vòng màu)

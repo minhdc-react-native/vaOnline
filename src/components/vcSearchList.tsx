@@ -1,6 +1,6 @@
-import { api } from "@/api/apiMethods";
 import { schemaItemSearch } from "@/app/(window)/schema";
 import { VACOMTheme } from "@/theme/theme";
+import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
 import { EvilIcons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetFlatList } from "@gorhom/bottom-sheet";
@@ -38,7 +38,7 @@ const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange
     const { showToast } = useToast();
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['50%', '70%', '90%'], []);
-    const [data, setData] = useState<IDataWin[]>([]);
+    const [data, setData] = useState<IData[]>([]);
     const [loading, setLoading] = useState(false);
     const [txtSearch, setTxtSearch] = useState("");
 

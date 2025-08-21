@@ -48,3 +48,13 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+token git: nothingvacom
+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
+
+
+
+https://www.flaticon.com/
+
+https://snack.expo.dev/@react-native-paper/react-native-paper-example_v5
+https://callstack.github.io/react-native-paper/docs/components/ActivityIndicator

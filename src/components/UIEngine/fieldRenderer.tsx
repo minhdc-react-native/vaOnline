@@ -190,7 +190,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             switch (field.format?.type) {
                 case "selectMulti":
                     const ids = value ? value.split(field.format?.separator ?? ",") : [];
-                    const dataMapMulti = dataSourceMap.get(field.bind!);
+                    const dataMapMulti = dataSourceMap.get(field.keySource || field.bind!);
                     return (<View style={[{ flexDirection: "row", flexWrap: "wrap", gap: 2 }, field.style]}>
                         {ids.map((id: string) => {
                             return (
@@ -201,7 +201,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                         })}
                     </View>)
                 case "status":
-                    const itemStatus: any = dataSourceMap.get(field.bind!)?.get(value) || { id: '?', value: "???", color: colors.secondary };
+                    const itemStatus: any = dataSourceMap.get(field.keySource || field.bind!)?.get(value) || { id: '?', value: "???", color: colors.secondary };
                     return (<View style={[
                         {
                             flexDirection: "row", alignItems: "center", gap: 5, paddingVertical: 2, paddingHorizontal: 5, borderRadius: 5,
@@ -251,9 +251,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                     } else if (field.format?.type === "date") {
                         valueText = Helper.getFormattedDate(valueText, field.format.formatDate, field.format.removeTime ?? true)
                     } else if (field.format?.type === "select" && !Helper.isEmpty(value)) {
-                        valueText = dataSourceMap.get(field.bind!)?.get(value)?.[field.format.fValue ?? "value"] || '???';
+                        valueText = dataSourceMap.get(field.keySource || field.bind!)?.get(value)?.[field.format.fValue ?? "value"] || '???';
                     } else if (field.format?.type === "tag" && !Helper.isEmpty(value)) {
-                        const itemTag = dataSourceMap.get(field.bind!)?.get(value);
+                        const itemTag = dataSourceMap.get(field.keySource || field.bind!)?.get(value);
                         valueText = itemTag?.[field.format.fValue ?? "value"] || '???';
                         addStyle = { paddingVertical: 2, paddingHorizontal: 5, borderWidth: 0.5, borderColor: colors.elevation.level5, backgroundColor: colors.elevation.level1, borderRadius: 10 };
                     }
@@ -261,7 +261,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                         <View style={[field.style]}>
                             {labelText && <Text style={[styles.label, field.labelStyle]}>{labelText}</Text>}
                             <Text key={key} variant={field.variant} numberOfLines={field.numberOfLines}
-                                style={[addStyle, field.textStyle, field.format?.type === "number" && Number(valueText) < 0 && { color: colors.primary }, isBold && { fontWeight: "bold" }]} >{valueText}</Text>
+                                style={[addStyle as any, field.textStyle, field.format?.type === "number" && Number(valueText) < 0 && { color: colors.primary }, isBold && { fontWeight: "bold" }]} >{valueText}</Text>
                         </View>
                     );
             }
@@ -348,7 +348,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             const isPassword = field.typeInput === "password" ? true : false;
             const rightFix = isPassword ?
                 <TextInput.Icon icon={showPassword ? 'eye' : 'eye-off'}
-                    onPress={() => setShowPassWord?.(!showPassword)} color={"rgb(119, 86, 81)"} /> : undefined
+                    onPress={() => setShowPassWord?.(!showPassword)} color={"rgb(119, 86, 81)"} /> :
+                (field.texRight ? <TextInput.Affix text={field.texRight} /> : undefined)
             return (
                 <View key={`${key}view`} style={field.style}>
                     <TextInput
@@ -357,7 +358,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                         mode="outlined"
                         disabled={disabled}
                         readOnly={disabled}
+                        onBlur={() => handleAction('onBlur', field.bind)}
                         secureTextEntry={isPassword && !showPassword}
+                        autoCapitalize={field.autoCapitalize}
                         value={value}
                         right={rightFix}
                         multiline={isMulti}
@@ -377,7 +380,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                 <View key={`${key}view`} style={[{ flexDirection: "row", alignItems: "center", gap: 5 }, field.style]}>
                     {field.label !== undefined && <Text style={[{ fontWeight: 'bold' }, field.labelStyle]}>{field.label}</Text>}
                     <View style={{ flex: 1 }}>
-                        <SegmentedButtons density="small" key={key} buttons={dataSource[field.bind!] ?? []} value={value} onValueChange={(value) => !disabled && setValue(value)} />
+                        <SegmentedButtons density="small" key={key} buttons={dataSource[field.keySource || field.bind!] ?? []} value={value} onValueChange={(value) => !disabled && setValue(value)} />
                         {field.bind && errors?.[field.bind] !== undefined && (
                             <View style={[styles.tooltip, { borderColor: colors.vacom.borderColor, backgroundColor: "rgb(255, 218, 214)" }]}>
                                 <Text style={styles.tooltipText}>{errors?.[field.bind]}</Text>
@@ -410,7 +413,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             const labelList = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
-                    <VcSelectList disabled={disabled} data={dataSource[field.bind!] ?? []} label={labelList} key={key} clean={field.clean}
+                    <VcSelectList disabled={disabled} data={dataSource[field.keySource || field.bind!] ?? []} label={labelList} key={key} clean={field.clean}
                         fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit}
                         fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={(itemSelected) => {
                             let valueChange: any = { [field.bind!]: itemSelected?.[field.fId ?? "id"] };
@@ -432,7 +435,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             const labelListMulti = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[field.style]}>
-                    <VcSelectListMulti data={dataSource[field.bind!] ?? []} label={labelListMulti} key={key}
+                    <VcSelectListMulti data={dataSource[field.keySource || field.bind!] ?? []} label={labelListMulti} key={key}
                         fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit}
                         fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={(values) => setValue(values)} disabled={disabled} />
                     {field.bind && errors?.[field.bind] !== undefined && (
@@ -474,7 +477,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         case "option":
             return <View key={`${key}view`} style={field.style}>
                 <VcOptions disabled={disabled} textStyle={field.textStyle} label={field.label} value={value}
-                    onChange={setValue} data={dataSource[field.bind!] ?? []} />
+                    onChange={setValue} data={dataSource[field.keySource || field.bind!] ?? []} />
             </View>
         case 'button':
             return <View key={`${key}view`} style={field.style}>
