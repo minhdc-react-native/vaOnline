@@ -69,6 +69,7 @@ export type IInputField = IFieldBase & {
     showPassword?: boolean;
     setShowPassWord?: (show: boolean) => void;
     texRight?: string;
+    leftIcon?: { name: string, size?: number, color?: string };
     autoCapitalize?: "none" | "sentences" | "words" | "characters";
     upperCase?: boolean;
     height?: DimensionValue

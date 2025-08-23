@@ -85,7 +85,7 @@ const VcSelectList = ({ label, placeholder, data, value, onChange, fDisplay, typ
                     <Text variant="bodyLarge" numberOfLines={1} style={{ color: itemSelected ? "#000" : colors.backdrop, paddingLeft: 8 }}>{
                         itemSelected ? (fDisplay?.field ? (itemSelected[fDisplay.field] ?? '???') : (typeDisplay !== "both" ? (itemSelected[fDisplay?.fValue ||
                             fValue] ?? '???') : "".concat((itemSelected[fDisplay?.fId || fId] ?? '???'), " - ").concat((itemSelected[fDisplay?.fValue || fValue] ?? '???')))) :
-                            (placeholder || label || "Chọn mã...")
+                            (placeholder || label || "Chọn...")
                     }</Text>
                 </View>}
                 {itemSelected && clean && !disabled ? (rightIcon || <Pressable
@@ -177,7 +177,7 @@ const ItemView = ({ item, onPress, isSelect, typeDisplay, fDisplay, fId, fValue,
     );
 }
 
-const HeaderView = ({ setSearchText, label = "Chọn mã", tableWin, closeModal, isNewEdit }: {
+const HeaderView = ({ setSearchText, label = "Chọn", tableWin, closeModal, isNewEdit }: {
     setSearchText: (value: string) => void;
     label?: string;
     tableWin?: ITableWin;

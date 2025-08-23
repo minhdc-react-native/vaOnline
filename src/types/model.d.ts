@@ -11,7 +11,11 @@ declare global {
         id: string | number;
         [key: string]: any;
     }
-
+    interface DrawerItem {
+        label: DrawerLabel;
+        path: string;
+        icon: string;
+    }
     interface IMenuWin {
         id: string,
         tableWin: ITableWin,

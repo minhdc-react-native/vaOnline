@@ -1,4 +1,5 @@
 import { ISchemaForm } from "@/components/UIEngine/types";
+import { theme } from "@/theme/theme";
 import * as z from "zod";
 import { zRequiredString } from "./zodHelpers";
 
@@ -10,12 +11,14 @@ export const loginForm: ISchemaForm = {
                 type: "input",
                 bind: "domain",
                 label: "Liên kết",
+                leftIcon: { name: "web", color: "darkblue" },
                 autoCapitalize: "none",
                 texRight: ".vaonline.vn"
             },
             {
                 type: "input",
                 bind: "username",
+                leftIcon: { name: "account" },
                 autoCapitalize: "characters",
                 label: "Tên truy cập"
             },
@@ -23,6 +26,7 @@ export const loginForm: ISchemaForm = {
                 type: "input",
                 bind: "pass",
                 label: "Mật khẩu",
+                leftIcon: { name: "key-chain-variant", color: theme.colors.primary },
                 typeInput: "password"
             },
             {

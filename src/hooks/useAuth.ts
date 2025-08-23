@@ -1,6 +1,6 @@
 import { VcData } from "@/constants/vcData";
 import { api } from "@/utils/apiMethods";
-import { clearRemember, clearToken, getToken, getYear, saveOrgUnit, saveRemember, saveToken, saveYear } from "@/utils/vcStorage";
+import { clearRemember, clearToken, getToken, saveOrgUnit, saveRemember, saveToken, saveYear } from "@/utils/vcStorage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useFeedback } from "./useFeedback";
@@ -13,6 +13,7 @@ export const useAuth = () => {
     const [licenseInfo, setLicenseInfo] = useState<IData>();
     const { setLoading, showToast, showPopup } = useFeedback();
     const setYears = useDataApp((state) => state.setYears);
+    const setCurrentYear = useDataApp((state) => state.setCurrentYear);
     useEffect(() => {
         const checkLogin = async () => {
             const token = await getToken();
@@ -58,10 +59,8 @@ export const useAuth = () => {
                     await clearRemember();
                 }
                 setYears(res.nam);
-                const currentYear = await getYear();
-                if (!currentYear) {
-                    await saveYear(res.nam?.[0].NAM);
-                }
+                saveYear(res.nam?.[0].NAM);
+                setCurrentYear(res.nam?.[0].NAM);
                 //
                 router.replace("/list-app");
             },

@@ -1,32 +1,35 @@
-import React, { use } from 'react';
-import { useRouter, usePathname, router } from 'expo-router';
-import { Avatar, IconButton, useTheme } from 'react-native-paper';
-import { AntDesign, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { VcData } from '@/constants/vcData';
-import { useAuth } from '@/context/auth';
-import { useSelector } from 'react-redux';
-import { IVcStore } from '@/redux/vcStore';
+import { useAuth } from '@/hooks/useAuth';
+import { useDataApp } from '@/hooks/zustand/useDataApp';
+import { getRemember, saveYear } from '@/utils/vcStorage';
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router, usePathname } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Avatar, IconButton, useTheme } from 'react-native-paper';
+import VcSelectList from './vcSelectList';
 
-const drawerItems: DrawerItem[] = [
-    { label: 'dashboard', path: '/dashboard', icon: 'view-dashboard-outline' },
-    { label: 'work', path: '/work', icon: 'firework' },
-    { label: 'business', path: '/business', icon: 'briefcase-outline' },
-    { label: 'deployment', path: '/deployment', icon: 'cloud-upload-outline' },
-    { label: 'development', path: '/development', icon: 'code-tags' },
-    { label: 'catalogs', path: '/catalogs', icon: 'book-outline' },
-    { label: 'reports', path: '/reports', icon: 'file-chart-outline' },
-    { label: 'system', path: '/system', icon: 'cog-outline' },
-    // { label: 'chat', path: '/chat', icon: 'chat-processing' },
-];
-
-export function CustomDrawerContent() {
-    const { colors } = useTheme();
-    const router = useRouter();
+export function CustomDrawerContent({ drawerItems }: { drawerItems: DrawerItem[] }) {
     const pathname = usePathname();
-    const user = useSelector((state: IVcStore) => state.app.user);
     const { logout } = useAuth();
+    const [remember, setRemember] = useState<any>(null);
+    const years = useDataApp((state) => state.years);
+    const currentYear = useDataApp((state) => state.currentYear);
+    const setCurrentYear = useDataApp((state) => state.setCurrentYear);
+
+    const { colors } = useTheme();
+    const onSelectYear = async (year: any) => {
+        saveYear(year.NAM);
+        setCurrentYear(year.NAM);
+    }
+    useEffect(() => {
+        const getStorage = async () => {
+            const remember = await getRemember();
+            setRemember(remember);
+        }
+        getStorage();
+    }, []);
     return (
         <LinearGradient
             colors={[colors.secondary, '#fff', '#fff', colors.secondary]}
@@ -36,9 +39,10 @@ export function CustomDrawerContent() {
             <View style={styles.avatar} >
                 <Pressable onPress={() => { }} style={{ borderWidth: 1, borderRadius: 50, borderColor: colors.background }}>
                     <Avatar.Image style={{ backgroundColor: colors.backdrop }}
-                        source={user.logo ? { uri: user.logo } : require("@/assets/images/empty-user.png")} size={100} />
+                        source={require("@/assets/images/empty-user.png")} size={50} />
                 </Pressable>
-                <Text style={{ textAlign: "center", fontSize: 20, fontWeight: "bold", color: colors.secondary }}>{user.useName}</Text>
+                <Text numberOfLines={1} style={{ textAlign: "center", fontSize: 15, fontWeight: "bold", color: colors.secondary, marginBottom: 10 }}>{remember?.username}</Text>
+                <VcSelectList style={{ width: 120 }} tableWin='Year' value={currentYear ?? ''} fId='NAM' fValue='NAM' data={years} onChange={onSelectYear} />
             </View>
             <View style={styles.content}>
                 {drawerItems.map((item) => (
@@ -53,13 +57,6 @@ export function CustomDrawerContent() {
         </LinearGradient>
     );
 }
-type DrawerLabel = 'dashboard' | 'work' | 'business' | 'deployment' | 'development' | 'catalogs' | 'reports' | 'system' | 'chat';
-
-interface DrawerItem {
-    label: DrawerLabel;
-    path: string;
-    icon: string;
-}
 
 interface IProgs {
     item: DrawerItem,
@@ -70,7 +67,7 @@ const ItemDrawer = ({ item, pathname }: IProgs) => {
     const { colors } = useTheme();
     return (
         <TouchableOpacity
-            onPress={() => !isSelected && router.push(item.path)}
+            onPress={() => !isSelected && router.push(item.path as any)}
             style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -88,7 +85,7 @@ const ItemDrawer = ({ item, pathname }: IProgs) => {
                     style={{ marginRight: 16 }}
                 />
                 <Text style={{ fontSize: 16, color: isSelected ? colors.background : colors.secondary }}>
-                    {VcData.drawerTitle[item.label]}
+                    {VcData.drawerTitle[item.label as keyof typeof VcData.drawerTitle]}
                 </Text>
             </>
         </TouchableOpacity>
@@ -99,16 +96,19 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
+        paddingTop: 100
     },
     content: {
     },
     avatar: {
         gap: 10,
         marginBottom: 20,
-        alignSelf: "center"
+        alignSelf: "center",
+        alignItems: "center"
     },
     logout: {
+        flex: 1,
         alignSelf: "center",
         alignItems: "center",
         marginVertical: 20

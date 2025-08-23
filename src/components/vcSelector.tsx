@@ -17,14 +17,13 @@ interface IItem {
 interface IProgs {
     data: IItem[];
     value?: string | number | null | undefined;
-    fId?: string; fValue?: string;
     onChange?: (value: IItem) => void;
     containerStyle?: StyleProp<ViewStyle>;
     itemStyle?: StyleProp<ViewStyle>;
-    disabled?: boolean
+    type?: 'box' | 'line'
 }
 
-const VcSelector = ({ data, value, fId = 'id', fValue = 'value', onChange, containerStyle, itemStyle, disabled }: IProgs) => {
+const VcSelector = ({ data, value, onChange, containerStyle, itemStyle, type = "line" }: IProgs) => {
     const { colors } = useTheme();
 
     const [wrapperWidth, setWrapperWidth] = useState(0);
@@ -35,7 +34,7 @@ const VcSelector = ({ data, value, fId = 'id', fValue = 'value', onChange, conta
     }, [data?.length, wrapperWidth]);
 
     // index ban đầu theo value (fallback về 0 nếu không tìm thấy)
-    const initialIndex = Math.max(0, data.findIndex((item: any) => item[fId] === value));
+    const initialIndex = Math.max(0, data.findIndex(item => item.id === value));
     const [selectedIndex, setSelectedIndex] = useState(initialIndex);
 
     const translateX = useSharedValue(initialIndex * itemWidth);
@@ -47,14 +46,13 @@ const VcSelector = ({ data, value, fId = 'id', fValue = 'value', onChange, conta
     });
 
     const onSelect = (index: number) => {
-        if (disabled) return;
         setSelectedIndex(index);
         onChange?.(data[index]);
     };
 
     // Khi value từ cha đổi -> cập nhật selectedIndex
     useEffect(() => {
-        const newIndex = Math.max(0, data.findIndex((item: any) => item[fId] === value));
+        const newIndex = Math.max(0, data.findIndex(item => item.id === value));
         setSelectedIndex(newIndex);
     }, [value, data]);
 
@@ -70,7 +68,7 @@ const VcSelector = ({ data, value, fId = 'id', fValue = 'value', onChange, conta
     return (
         <View style={[styles.container, containerStyle]}>
             <View
-                style={[styles.wrapper, { backgroundColor: colors.background }]}
+                style={[styles.wrapper, { backgroundColor: colors.background }, type === "box" && { borderRadius: 5 }]}
                 onLayout={onWrapperLayout}
             >
                 {/* slider */}
@@ -78,16 +76,22 @@ const VcSelector = ({ data, value, fId = 'id', fValue = 'value', onChange, conta
                     style={[
                         styles.slider,
                         animatedStyle,
-                        {
+                        type === "box" && {
                             width: itemWidth,
+                            borderRadius: 5,
+                            borderWidth: StyleSheet.hairlineWidth,
                             borderColor: colors.primary,
                             backgroundColor: colors.elevation.level2,
-                        },
+                        }
                     ]}
-                />
-                {data.map((item: any, index) => (
+                >
+                    <View style={{ position: "absolute", bottom: 0, width: itemWidth }}>
+                        <View style={{ height: 2, borderRadius: 2, backgroundColor: colors.primary, marginHorizontal: itemWidth / 4 }} />
+                    </View>
+                </Animated.View>
+                {data.map((item, index) => (
                     <Pressable
-                        key={String(item[fId]) || String(index)}
+                        key={String(item.id) || String(index)}
                         style={[styles.item, { width: itemWidth }, itemStyle]}
                         onPress={() => onSelect(index)}
                         disabled={itemWidth === 0}
@@ -100,10 +104,11 @@ const VcSelector = ({ data, value, fId = 'id', fValue = 'value', onChange, conta
                             ]}
                             numberOfLines={1}
                         >
-                            {item[fValue]}
+                            {item.value}
                         </Text>
                     </Pressable>
                 ))}
+
             </View>
         </View>
     );
@@ -116,7 +121,7 @@ const styles = StyleSheet.create({
     },
     wrapper: {
         flexDirection: 'row',
-        borderRadius: 5,
+        // borderRadius: 5,
         position: 'relative',
         overflow: 'hidden',
         // Không set width ở đây để nó tự lấy theo cha
@@ -137,9 +142,9 @@ const styles = StyleSheet.create({
     slider: {
         position: 'absolute',
         height: '100%',
-        borderRadius: 5,
+        // borderRadius: 5,
         zIndex: 0,
-        borderWidth: StyleSheet.hairlineWidth,
+        // borderWidth: StyleSheet.hairlineWidth,
     },
 });
 

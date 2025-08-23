@@ -349,7 +349,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             const rightFix = isPassword ?
                 <TextInput.Icon icon={showPassword ? 'eye' : 'eye-off'}
                     onPress={() => setShowPassWord?.(!showPassword)} color={"rgb(119, 86, 81)"} /> :
-                (field.texRight ? <TextInput.Affix text={field.texRight} /> : undefined)
+                (field.texRight ? <TextInput.Affix text={`${field.texRight}`} textStyle={{ color: colors.secondary }} /> : undefined)
+            const leftIcon = field.leftIcon ? <TextInput.Icon icon={field.leftIcon.name} size={field.leftIcon.size} color={field.leftIcon.color ?? colors.secondary} /> : undefined;
             return (
                 <View key={`${key}view`} style={field.style}>
                     <TextInput
@@ -362,6 +363,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                         secureTextEntry={isPassword && !showPassword}
                         autoCapitalize={field.autoCapitalize}
                         value={value}
+                        left={leftIcon}
                         right={rightFix}
                         multiline={isMulti}
                         onChangeText={(value) => setValue(field.upperCase && value ? value.toUpperCase() : value)}
