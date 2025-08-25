@@ -1,6 +1,7 @@
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { VcHeaderWin } from "@/components/vcHeaderWin";
 import { VcTabBar } from "@/components/vcTabBar";
+import { useTranslation } from "@/context/TranslationContext";
 import { useWinPage } from "@/hooks/useWinPage";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -13,7 +14,7 @@ import { ItemWinListAction } from "./items/itemWinListAction";
 import NewEditWinMulti from "./newEditWinMulti";
 interface IProgs {
     menu?: {
-        menuId: string;
+        windowId: string;
         tableWin: ITableWin;
         id: string;
         title: string;
@@ -21,17 +22,17 @@ interface IProgs {
     }
 }
 const NewEditWinMaster = ({ menu }: IProgs) => {
-    const { menuId, tableWin, id, title } = useLocalSearchParams();
+    const { windowId, tableWin, id, title } = useLocalSearchParams();
     const titleWin = menu?.title || title?.toString();
     const fixTableWin = menu?.tableWin || tableWin?.toString() as ITableWin;
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
-
+    const { _ } = useTranslation();
     const {
         colors, schemaUI, resetItem, handleAction,
         itemData, dataSource, onChangeItemData, onBack, detail
     } = useWinPage({
-        menuId: menu?.menuId || menuId?.toString(),
+        windowId: menu?.windowId || windowId?.toString(),
         tableWin: fixTableWin,
         idItem: menu?.id || id?.toString(), typeWin: "(winMaster)"
     });
@@ -66,7 +67,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                 <SchemaUIEngine schema={schemaUI.config.itemShow} data={itemData} dataSource={dataSource} onChangeItemData={onChangeItemData} />
                 {schemaUI.action?.showEditMaster !== false && <IconButton mode="contained-tonal" style={{ position: "absolute", bottom: 0, right: -10 }} icon={'pencil'} onPress={() => setShowEditMaster(true)} />}
             </Card>
-            <VcTabBar style={{ borderRadius: 0, borderWidth: 0 }} value={detail.currentTab.id} data={detail.tabs} onPress={(tab: any) => detail.setCurrentTab(tab)} />
+            <VcTabBar style={{ borderRadius: 0, borderWidth: 0 }} value={detail.currentTab.TAB_TABLE} data={detail.tabs} onPress={(tab: any) => detail.setCurrentTab(tab)} />
             <Divider />
             <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
                 <SwipeListView
@@ -96,7 +97,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                 onPress={detail.handleActionDetail.new}
                 variant='primary'
             />}
-            {detail.showNewEdit && <NewEditWinMulti title={detail.currentTab.value}
+            {detail.showNewEdit && <NewEditWinMulti title={_(detail.currentTab.TAB_NAME)}
                 data={detail.itemDetail} schemaUi={detail.schemaWinDetail}
                 dataSource={dataSource} onSave={detail.handleActionDetail.update} titleButton="Hoàn thành" />}
 

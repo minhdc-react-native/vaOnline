@@ -54,7 +54,7 @@ export const api = {
                 callError?.(res.data);
                 return Promise.reject(res.data);
             }
-            callBack?.(res.data || res);
+            callBack?.(res);
             return res;
         } catch (error: any) {
             const msg = Helper.getMessageError(error?.response?.data || error);

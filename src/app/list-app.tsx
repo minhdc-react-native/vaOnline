@@ -5,13 +5,12 @@ import { useDataApp } from '@/hooks/zustand/useDataApp';
 import { saveYear } from '@/utils/vcStorage';
 import { AntDesign } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Card, Divider, Icon, IconButton, Text, useTheme } from 'react-native-paper';
 
 export default function ListApp() {
-    const { listApp, getListApp, infoDvcs, getInfoDvcs, getLicenseInfo, logout } = useAuth();
+    const { listApp, getListApp, infoDvcs, getInfoDvcs, getLicenseInfo, logout, onSelectApp } = useAuth();
     const years = useDataApp((state) => state.years);
     const currentYear = useDataApp((state) => state.currentYear);
     const setCurrentYear = useDataApp((state) => state.setCurrentYear);
@@ -19,9 +18,6 @@ export default function ListApp() {
     const onSelectYear = async (year: any) => {
         saveYear(year.NAM);
         setCurrentYear(year.NAM);
-    }
-    const onSelectApp = (id: string) => {
-        router.replace((VcData.routerApp as any)[id]);
     }
 
     useEffect(() => {

@@ -1,33 +1,38 @@
+import MenuScreen from '@/app/menu';
 import { CustomTabBar } from '@/components/customTabBar';
-import { useState } from 'react';
+import { useDataApp } from '@/hooks/zustand/useDataApp';
+import { useMemo, useState } from 'react';
 import { useWindowDimensions, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { SceneMap, TabView } from 'react-native-tab-view';
-import AccCatalogBalance from './acc-catalog-balance';
-import AccCatalogBank from './acc-catalog-bank';
-import AccCatalogGood from './acc-catalog-good';
-import AccCatalogOther from './acc-catalog-other';
-import AccCatalogPartner from './acc-catalog-partner';
+import { TabView } from 'react-native-tab-view';
 
-const renderScene = SceneMap({
-    partner: AccCatalogPartner,
-    good: AccCatalogGood,
-    balance: AccCatalogBalance,
-    bank: AccCatalogBank,
-    other: AccCatalogOther
-});
-const routes = [
-    { key: 'partner', title: 'Đối tượng' },
-    { key: 'good', title: 'Hàng hoá' },
-    { key: 'balance', title: 'Số dư' },
-    { key: 'bank', title: 'Ngân hàng' },
-    { key: 'other', title: 'Khác' }
+const allRoutes = [
+    { key: 'partner', title: 'Đối tượng', keyMenuWin: 'acCatalogPartner' },
+    { key: 'good', title: 'Hàng hoá', keyMenuWin: 'acCatalogGood' },
+    { key: 'balance', title: 'Số dư', keyMenuWin: 'acCatalogBalance' },
+    { key: 'bank', title: 'Ngân hàng', keyMenuWin: 'acCatalogBank' },
+    { key: 'other', title: 'Khác', keyMenuWin: 'acCatalogOther' },
 ];
+const menuMain = 'catalog';
 
 export default function CatalogAccounting() {
     const { colors } = useTheme();
     const layout = useWindowDimensions();
     const [index, setIndex] = useState(0);
+    const dataMenuWin = useDataApp((state) => state.dataMenuWin);
+
+    const hasPermission = (keyMenuWin: IKeyMenuWin) => {
+        return !!dataMenuWin[menuMain][keyMenuWin];
+    };
+
+    // Tạo routes hợp lệ
+    const routes = useMemo(() => allRoutes.filter(r => hasPermission(r.keyMenuWin as any)), []);
+
+    // Render scene động
+    const renderScene = ({ route }: { route: any }) => {
+        return <MenuScreen menuMain={menuMain} keyMenuWin={route.keyMenuWin} />;
+    };
+
     return (
         <View style={{ flex: 1, gap: 10, backgroundColor: colors.background }}>
             <TabView

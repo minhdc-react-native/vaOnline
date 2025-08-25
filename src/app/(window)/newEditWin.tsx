@@ -8,17 +8,17 @@ import { Button, Card } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const NewEditWin = () => {
-    const { menuId, tableWin, id, title, sDataMaster, sAction, sPermissions } = useLocalSearchParams();
+    const { windowId, tableWin, id, title, sDataMaster, sAction, sPermissions } = useLocalSearchParams();
     const titleWin = title?.toString();
     const actionNewEdit = JSON.parse(sAction?.toString());
     const fixTableWin = tableWin?.toString() as ITableWin;
-    const permissions = JSON.parse(sPermissions?.toString()) as IPermissionsWin;
+    const permissions = JSON.parse(sPermissions?.toString());
     const navigation = useNavigation();
     const {
         colors, schemaUI, resetItem,
         itemData, dataSource, onChangeItemData, handleAction, onBack, errors
     } = useWinPage({
-        menuId: menuId?.toString(),
+        windowId: windowId?.toString(),
         tableWin: fixTableWin,
         idItem: id?.toString()
     });

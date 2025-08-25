@@ -28,56 +28,45 @@ declare global {
         },
         row: number,
         col: number,
-        typeWin: '(window)' | '(winMaster)'
-    }
-
-    interface IPermissionsWin {
-        mnCopy?: 'mnCopy';
-        mnDelete?: 'mnDelete';
-        mnEdit?: 'mnEdit';
-        mnPlus?: 'mnPlus';
-        mnRefresh?: 'mnRefresh'
+        typeWin: '(window)' | '(winMaster)' | '(winTree)'
     }
 
     interface ITabWin {
         id: string;
-        value: string;
-        code: ITableWin;
-        realCode?: ITableWin;
-        refKey?: string | null;
-        hasQuickSearch?: boolean;
-        rowIdValue?: string;
+        TAB_TABLE: ITableWin;
+        TAB_NAME: string;
+        FOREIGN_KEY: string;
+        PERMISSION: { NEW: boolean, EDIT: boolean, DELETE: boolean }
     }
     interface IWinConfig {
-        permissions: IPermissionsWin,
-        // references: Record<string, any>,
         window: {
-            id: string;
-            code: ITableWin;
-            name: string;
-            tabs: ITabWin[]
-        },
-        voucherTemplates?: { id: string, value: string, code: string }[];
+            WINDOW_ID: string;
+            MA_CT: string;
+            WINDOW_NAME: string;
+            Tabs: ITabWin[]
+        }
     }
 
     interface IParamWin {
         continue?: boolean | null;
-        filterAdvanced: IFilterRows[];
         page: number;
         count: number;
-        filterRows: IFilterRows[];
-        menuId: string;
-        quickSearch: string;
+        filter: IFilter[];
+        infoparam: any;
         start: number;
         tlbparam: any[];
-        windowId: string;
+        window_id: string;
     }
 
-    interface IFilterRows { };
+    interface IFilter {
+        columnName: string,
+        columnType: string,
+        value: any
+    };
 
-    type ITableWin = 'Empty' | 'Year' | 'DMDT';
+    type ITableWin = 'Empty' | 'Year' | 'DMNHDT' | 'DMDT';
     type ITableSearch = 'Empty';
-
+    type IKeyMenuWin = 'acCatalogBalance' | 'acCatalogBank' | 'acCatalogGood' | 'acCatalogOther' | 'acCatalogPartner'
 
     var isNotEmpty: (value: any) => boolean;
 }

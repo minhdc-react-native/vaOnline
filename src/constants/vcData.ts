@@ -1,3 +1,5 @@
+import { DataMenuAccounting } from "./dataMenuAccounting";
+
 export const VcData = {
     listApp: ['d72ee2a8-88ff-45b4-9c04-41f71d93e282', '3dfaf3c6-cff1-47c9-9a25-e3533a433eb7', '52105373-95f1-40f3-9899-9b77852b7209'], // kế toán, hộ kinh doanh, quản trị
     iconApp: {
@@ -37,9 +39,17 @@ export const VcData = {
         { label: 'invoice', path: '/hkd/invoice', icon: 'file-document-outline' },
         { label: 'report', path: '/hkd/report', icon: 'chart-bar' },
         { label: 'system', path: '/hkd/system', icon: 'cog' }
-    ]
+    ],
+    menuApp: {
+        'd72ee2a8-88ff-45b4-9c04-41f71d93e282': DataMenuAccounting,
+        '3dfaf3c6-cff1-47c9-9a25-e3533a433eb7': null,
+        '52105373-95f1-40f3-9899-9b77852b7209': null
+    },
 }
-
-export const DataMenuWin: Record<string, IMenuWin[]> = {
-
+export interface IConfigDateMenuWin {
+    title: string,
+    data: IMenuWin[];
+    icon?: React.ReactNode;
+    expanded?: boolean;
+    disable?: boolean
 }

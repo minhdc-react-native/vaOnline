@@ -33,7 +33,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
         rowHeights,
         dataSource,
         showFilter,
-        voucherTemplates,
+        printSamples,
         permissions,
         resetSource,
         setFilterRows,
@@ -43,7 +43,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
         refreshData,
         handleLoadMore,
         handleRefresh
-    } = useWinPage({ menuId: itemMenuWin.id, tableWin: itemMenuWin.tableWin, typeWin: itemMenuWin.typeWin });
+    } = useWinPage({ windowId: itemMenuWin.id, tableWin: itemMenuWin.tableWin, typeWin: itemMenuWin.typeWin });
 
     const renderFooter = useCallback(() => {
         if (!loading.loadMore || loading.refresh) return <View style={{ height: 100 }} />
@@ -80,7 +80,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
         if (layoutHandleAction[actionName]) {
             typeParam.current = 'other';
             const action = layoutHandleAction[actionName];
-            const layoutAction = typeof action === "function" ? action({ printTemplateId: voucherTemplates ?? [] }) : action;
+            const layoutAction = typeof action === "function" ? action({ printTemplateId: printSamples ?? [] }) : action;
             const valueMap = layoutAction.valueMap || {};
             // lấy giá trị cũ đã lưu trước đó.
             if (data) {
@@ -94,7 +94,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
             setLayoutAction(layoutAction);
             onConfirm.current = callBack;
         }
-    }, [voucherTemplates])
+    }, [printSamples])
 
     const actionMap = useActionMap({ handleRefresh: handleRefresh, checkLayoutAction: checkLayoutAction });
 
@@ -191,7 +191,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
                 // ItemSeparatorComponent={() => <Divider style={{ marginHorizontal: 20 }} />}
                 ListFooterComponent={renderFooter}
             />
-            {(schemaUI.action?.new !== false && permissions?.mnPlus !== undefined) && <FAB
+            {(schemaUI.action?.new !== false && !!permissions?.NEW) && <FAB
                 icon="plus"
                 style={{
                     // width: 55,

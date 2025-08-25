@@ -19,7 +19,7 @@ export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = {
     const evalExpr = useEvalExpr(dataMaster);
 
     const schemaUI = useMemo(() => {
-        return schemaWin[currentTab.realCode || currentTab.code] ?? schemaWinEmpty;
+        return schemaWin[currentTab.TAB_TABLE] ?? schemaWinEmpty;
     }, [currentTab]);
 
     const numberAction: number = useMemo(() => {
@@ -33,13 +33,13 @@ export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = {
         await loadDataBegin();
         let promises: any[] = [];
         tabs.forEach((tab) => {
-            const fixRowId = tab.rowIdValue ? evalExpr(tab.rowIdValue) : idMaster;
-            promises.push(api.get({ link: `/api/app/data-object/tab-detail?tabId=${tab.id}&rowId=${fixRowId}` }));
+            const fixRowId = idMaster;
+            promises.push(api.get({ link: `/api/app/data-object/tab-detail?tabId=${tab.TAB_TABLE}&rowId=${fixRowId}` }));
         });
         await Promise.all(promises)
             .then((results) => {
                 tabs.map((tab, index) => {
-                    setData(prev => ({ ...prev, [tab.code]: results[index] }));
+                    setData(prev => ({ ...prev, [tab.TAB_TABLE]: results[index] }));
                 });
             })
             .catch(error => {
@@ -50,11 +50,11 @@ export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = {
     }, []);
 
     const refreshData = useCallback(() => {
-        const fixRowId = currentTab.rowIdValue ? evalExpr(currentTab.rowIdValue) : idMaster;
+        const fixRowId = idMaster;
         api.get({
-            link: `/api/app/data-object/tab-detail?tabId=${currentTab.id}&rowId=${fixRowId}`,
+            link: `/api/app/data-object/tab-detail?tabId=${currentTab.TAB_TABLE}&rowId=${fixRowId}`,
             callBack: (res) => {
-                setData(prev => ({ ...prev, [currentTab.code]: res }));
+                setData(prev => ({ ...prev, [currentTab.TAB_TABLE]: res }));
             },
             setLoading: setLoading
         });
@@ -72,7 +72,7 @@ export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = {
                 setDataItem({
                     id: UUID.v4(),
                     editmode: 1,
-                    [currentTab.refKey as string]: idMaster,
+                    [currentTab.FOREIGN_KEY as string]: idMaster,
                     ...newDefault
                 });
                 setShowNewEdit(true);
@@ -80,7 +80,7 @@ export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = {
             itemSelect: (index: number) => {
                 const isEdit = schemaUI.action?.edit !== false;
                 if (!isEdit) return;
-                setDataItem(data?.[currentTab.code]?.[index] ?? null);
+                setDataItem(data?.[currentTab.TAB_TABLE]?.[index] ?? null);
                 setShowNewEdit(true);
             },
             post: (data?: IData) => {
@@ -90,7 +90,7 @@ export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = {
                     return;
                 };
                 api.post({
-                    link: `/api/app/data-object/save-form/${currentTab.id}?editmode=${data.editmode === 1 ? 1 : 2}`,
+                    link: `/api/app/data-object/save-form/${currentTab.TAB_TABLE}?editmode=${data.editmode === 1 ? 1 : 2}`,
                     data: data,
                     callBack: (res) => {
                         setShowNewEdit(false);
@@ -107,7 +107,7 @@ export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = {
                     showCancel: true,
                     onConfirm: () => {
                         api.delete({
-                            link: `/api/app/data-object/form?tabId=${currentTab.id}&rowId=${rowId}`,
+                            link: `/api/app/data-object/form?tabId=${currentTab.TAB_TABLE}&rowId=${rowId}`,
                             data: dataItem,
                             callBack: (res) => refreshData(),
                             setLoading: setLoading
@@ -134,7 +134,7 @@ export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = {
     const loadDataBegin = async () => {
         let source: any = {};
         tabs.forEach((tab) => {
-            const _source = schemaWin[tab.code]?.dataSource ?? {};
+            const _source = schemaWin[tab.TAB_TABLE]?.dataSource ?? {};
             source = { ...source, ..._source };
         });
         // const schema = schemaWin[currentTab.code] ?? schemaWinEmpty;

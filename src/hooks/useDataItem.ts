@@ -1,9 +1,6 @@
-import { DataMenuWin } from '@/constants/vcData';
 import { create } from 'zustand';
 
 interface IDataItemWin {
-    menus: Partial<Record<keyof (typeof DataMenuWin), IMenuWin[]>> | null;
-    setMenus: (menus: Record<keyof (typeof DataMenuWin), IMenuWin[]>) => void;
     editMode: 'new' | 'edit' | null;
     setEditMode: (editMode: 'new' | 'edit' | null) => void;
     dataSources: Partial<Record<ITableWin, Record<string, any[]>>>;
@@ -20,11 +17,6 @@ interface IDataItemWin {
 }
 
 export const useDataItemWin = create<IDataItemWin>((set) => ({
-    menus: null,
-    setMenus: (menus: Record<string, IMenuWin[]>) =>
-        set((state) => ({
-            menus: menus
-        })),
     editMode: null,
     setEditMode: (editMode) =>
         set((state) => ({

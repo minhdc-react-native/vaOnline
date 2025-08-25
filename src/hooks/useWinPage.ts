@@ -3,9 +3,11 @@ import { useLoading } from "@/components/dialog/loadingProvider";
 import { usePopup } from "@/components/dialog/popupProvider";
 import { useToast } from "@/components/dialog/useToast";
 import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
+import { useTranslation } from "@/context/TranslationContext";
 import { VACOMTheme } from "@/theme/theme";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
+import { getSubDomain } from "@/utils/vcStorage";
 import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DimensionValue, LayoutChangeEvent } from "react-native";
@@ -14,26 +16,17 @@ import UUID from 'react-native-uuid';
 import { useDataItemWin } from "./useDataItem";
 import { useDataApp } from "./zustand/useDataApp";
 const backHandQuestion = { title: "Cảnh báo", message: "Dữ liệu đã thay đổi, bạn có muốn thoát không?" };
-interface ICurrentMenu {
-    id: string;
-    win: {
-        id: string;
-        table: ITableWin;
-        title: string;
-        hasQuickSearch: boolean
-    }
-    permissions: IPermissionsWin,
-}
+
 interface IProgs {
-    menuId: string;
+    windowId: string;
     tableWin: ITableWin;
     type?: 'page' | 'all',
     pageSize?: number,
     idItem?: string;
     loadingBegin?: boolean;
-    typeWin?: '(window)' | '(winMaster)';
+    typeWin?: '(window)' | '(winMaster)' | '(winTree)';
 }
-export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idItem, loadingBegin = false, typeWin = "(window)" }: IProgs) => {
+export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, idItem, loadingBegin = false, typeWin = "(window)" }: IProgs) => {
     const { colors } = useTheme<VACOMTheme>();
     const [rowHeights, setRowHeights] = useState<Record<string, DimensionValue>>({});
     const handleLayout = (itemId: string, event: LayoutChangeEvent) => {
@@ -53,7 +46,6 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
     const { showPopup } = usePopup();
     const [winConfig, setWinConfig] = useState<IWinConfig | null>();
     const [data, setData] = useState<IData[]>([]);
-    // const [itemData, setItemData] = useState<IDataWin>({ id: "" });
     const dataSources = useDataItemWin((state) => state.dataSources);
     const setDataSource = useDataItemWin((state) => state.setDataSource);
     const resetSource = useDataItemWin((state) => state.resetSource);
@@ -69,7 +61,7 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
     const onRemoveDetail = useDataItemWin((state) => state.onRemoveDetail);
 
     const resetItem = useDataItemWin((state) => state.resetItem);
-
+    const { _ } = useTranslation();
 
     const [infoData, setInfoData] = useState({
         total: 0,
@@ -78,51 +70,11 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
 
     const [params, setParams] = useState<IParamWin>();
 
-    // const currentMenu = useSelector((state: IVcStore) => state.app.other.currentMenu);
-    const [currentMenu, setCurrentMenu] = useState<ICurrentMenu | null>(null);
     const schemaUI = useMemo(() => {
         return schemaWin[tableWin] ?? schemaWinEmpty;
     }, []);
-
-    const urlGetPages = useRef('/api/app/data-object/pages'); // có thể thay đổi do bộ lọc...
-
     const getFilterRows = useCallback((values: Record<string, any>) => {
-        const valuesType = schemaUI.config.filterConfig?.valuesType;
-        const valueIgnoreFilter = schemaUI.config.filterConfig?.valueIgnoreFilter ?? [];
-        const fieldAdvanced = schemaUI.config.filterConfig?.fieldAdvanced ?? [];
-        const tlbParam = schemaUI.config.filterConfig?.tlbParam ?? [];
-
-        const valueFilterRow = Object.entries(values)
-            .filter(([field, value]) => !Helper.isEmpty(value) && valueIgnoreFilter.indexOf(field) < 0 && fieldAdvanced.indexOf(field) < 0 && tlbParam.indexOf(field) < 0);
-
-        const valueFilterAdvanced = Object.entries(values)
-            .filter(([field, value]) => !Helper.isEmpty(value) && valueIgnoreFilter.indexOf(field) < 0 && fieldAdvanced.indexOf(field) >= 0);
-
-        const valueFilterParam = Object.entries(values)
-            .filter(([field, value]) => !Helper.isEmpty(value) && valueIgnoreFilter.indexOf(field) < 0 && tlbParam.indexOf(field) >= 0);
-
-        const filterRows = valueFilterRow.map(([columnName, value]) => ({ columnName, columnType: valuesType?.[columnName]?.columnType ?? "string", value }));
-
-        const filterAdvanced = valueFilterAdvanced.map(([columnName, value]) => ({
-            columnName,
-            columnType: valuesType?.[columnName]?.columnType ?? "string",
-            compareField: valuesType?.[columnName]?.compareField,
-            operator: valuesType?.[columnName]?.operator,
-            value
-        }));
-
-        const filterParam = valueFilterParam.map(([columnName, value]) => ({
-            columnName,
-            fieldType: valuesType?.[columnName]?.columnType ?? "string",
-            operator: valuesType?.[columnName]?.operator,
-            value
-        }));
-        if (filterAdvanced.length > 0) {
-            urlGetPages.current = schemaUI.config.filterConfig?.urlFilter ?? '/api/app/data-object/pages';
-        } else {
-            urlGetPages.current = `/api/app/data-object/pages`
-        }
-        return { filterRows, filterAdvanced, filterParam };
+        return { filter: [], tlbparam: [] };
     }, []);
 
     const defaultFilter = useMemo(() => {
@@ -139,7 +91,7 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
 
     const showFilter = useMemo(() => {
         return {
-            showSearch: winConfig?.window.tabs[0].hasQuickSearch || false,
+            showSearch: !!schemaUI.fieldSearch,
             showFilter: schemaUI.config.filterConfig ? true : false
         };
     }, [winConfig]);
@@ -148,48 +100,34 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
         setParams({
             page: 1,
             count: pageSize,
-            filterAdvanced: defaultFilter.filterAdvanced,
-            filterRows: defaultFilter.filterRows,
-            menuId: menuId,
-            quickSearch: "",
+            filter: defaultFilter.filter ?? [],
             start: 0,
-            tlbparam: defaultFilter.filterParam,
-            windowId: dataConfig.window?.id
-        });
-        setCurrentMenu({
-            id: menuId,
-            win: {
-                id: dataConfig.window?.id,
-                table: dataConfig.window.code,
-                title: dataConfig.window?.name,
-                hasQuickSearch: dataConfig.window?.tabs[0].hasQuickSearch ?? false
-            },
-            permissions: dataConfig.permissions ?? {},
+            infoparam: null,
+            tlbparam: defaultFilter.tlbparam ?? [],
+            window_id: windowId
         });
         return {
-            permissions: dataConfig.permissions ?? {},
             // references: data.references ?? {},
             window: {
-                id: dataConfig.window?.id ?? "",
-                code: dataConfig.window.code ?? "",
-                name: dataConfig.window?.name ?? "",
-                tabs: (dataConfig.window?.tabs ?? []).map((tab: any): ITabWin => ({
+                WINDOW_ID: windowId,
+                MA_CT: dataConfig.MA_CT ?? "",
+                WINDOW_NAME: dataConfig.WINDOW_NAME ?? "",
+                Tabs: dataConfig.Tabs.map((tab: any): ITabWin => ({
                     id: tab.id ?? "",
-                    value: tab.name ?? "",
-                    code: tab.code ?? "",
-                    refKey: tab.refKey ?? "",
-                    hasQuickSearch: tab.hasQuickSearch ?? false,
+                    TAB_TABLE: tab.TAB_TABLE ?? "",
+                    FOREIGN_KEY: tab.FOREIGN_KEY ?? "",
+                    TAB_NAME: tab.TAB_NAME ?? "",
+                    PERMISSION: {
+                        NEW: !Helper.isEmpty(tab.INSERT_STORE_PROCEDURE),
+                        EDIT: !Helper.isEmpty(tab.UPDATE_STORE_PROCEDURE),
+                        DELETE: !Helper.isEmpty(tab.DELETE_STORE_PROCEDURE)
+                    }
                 }))
-            },
-            voucherTemplates: (dataConfig.voucherTemplates ?? []).map((template: any) => ({
-                id: template.id ?? "",
-                code: template.code ?? "",
-                value: template.name ?? ""
-            }))
+            }
         };
     }
     const tabMulti = useMemo(() => {
-        return (winConfig ? winConfig.window.tabs.shift() : []);
+        return (winConfig ? [...winConfig.window.Tabs].shift() : []);
     }, [winConfig]);
 
     const setTextSearch = (textSearch: string) => {
@@ -197,7 +135,7 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
             setParams(prev => prev ? {
                 ...prev,
                 page: 1, start: 0,
-                filterRows: [...prev.filterRows, { columnName: schemaUI.fieldSearch as string, columnType: "string", value: textSearch }]
+                filter: [...prev.filter, { columnName: schemaUI.fieldSearch as string, columnType: "string", value: textSearch }]
             } : undefined);
         } else {
             setParams(prev => prev ? { ...prev, page: 1, start: 0, quickSearch: textSearch } : undefined);
@@ -206,12 +144,12 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
 
     const setFilterRows = (values: Record<string, any>) => {
         const filter = getFilterRows(values);
-        setParams(prev => prev ? { ...prev, page: 1, start: 0, filterAdvanced: filter.filterAdvanced, filterRows: filter.filterRows, tlbparam: filter.filterParam } : undefined);
+        setParams(prev => prev ? { ...prev, page: 1, start: 0, filter: filter.filter, tlbparam: filter.tlbparam } : undefined);
     };
 
 
-    const getDataPage = useCallback(() => {
-        if (!winConfig?.permissions.mnRefresh) {
+    const getDataPage = useCallback(async () => {
+        if (!winConfig?.window.Tabs[0].PERMISSION.NEW) {
             showPopup({ title: "Thông báo", message: "Bạn không có quyền xem dữ liệu!" });
             return;
         }
@@ -220,9 +158,15 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
             setData([]);
         }
         stateLoading.current = { ...stateLoading.current, refresh: params?.page === 1 };
+        const domain = await getSubDomain();
         api.post({
-            link: urlGetPages.current,
+            link: `/api/System/GetDataByWindowNo`,
             data: params,
+            config: {
+                headers: {
+                    'x-tenant-name': domain
+                }
+            },
             callBack: (res: { data: IData[], total_count: number }) => {
                 const isHaveId = res.data.length > 0 ? res.data[0].id !== undefined : true;
                 const dataPage = isHaveId ? res.data : res.data.map(_item => ({ ..._item, id: UUID.v4() }))
@@ -232,11 +176,6 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
                     hasMore: dataPage.length > 0
                 }));
                 setData(prev => (params?.page === 1 ? dataPage : [...prev, ...dataPage]));
-            },
-            config: {
-                headers: {
-                    'X-Menu': menuId
-                }
             },
             setLoading: (loading) => {
                 if (params?.page === 1) {
@@ -290,34 +229,34 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
         );
         setEditMode('new');
         setItemData(tableWin, { id: UUID.v4(), _isNew: true, ...newDefault });
-
-        const action = schemaUI.action ? { ...schemaUI.action, edit: currentMenu?.permissions.mnEdit !== undefined } : { edit: true, new: true };
+        const tabMaster = winConfig?.window.Tabs[0];
+        const action = schemaUI.action ? { ...schemaUI.action, edit: !!tabMaster?.PERMISSION?.NEW } : { edit: true, new: true };
 
         router.navigate({
             pathname: `/(window)/newEditWin${typeWin === "(window)" ? '' : 'Master'}`,
             params: {
-                menuId: menuId, tableWin: tableWin, title: currentMenu?.win.title,
-                sAction: JSON.stringify(action), sPermissions: JSON.stringify(winConfig?.permissions ?? {})
+                windowId: windowId, tableWin: tableWin, title: _(tabMaster?.TAB_NAME),
+                sAction: JSON.stringify(action), sPermissions: JSON.stringify(tabMaster?.PERMISSION ?? {})
             }
         });
-    }, [currentMenu]);
+    }, [winConfig]);
 
     const onEdit = useCallback((item: IData) => {
         setEditMode('edit');
         setItemData(tableWin, item);
-
-        const action = schemaUI.action ? { ...schemaUI.action, edit: currentMenu?.permissions.mnEdit !== undefined } : { edit: true, new: true };
+        const tabMaster = winConfig?.window.Tabs[0];
+        const action = schemaUI.action ? { ...schemaUI.action, edit: !!tabMaster?.PERMISSION.EDIT } : { edit: true, new: true };
 
         const dataMaster = schemaUI.dataMaster ? Object.fromEntries(schemaUI.dataMaster.map(f => [f, item[f]])) : {};
         router.navigate({
             pathname: `/(window)/newEditWin${typeWin === "(window)" ? '' : 'Master'}`,
             params: {
-                menuId: menuId, tableWin: tableWin, id: item.id, title: currentMenu?.win.title,
+                windowId: windowId, tableWin: tableWin, id: item.id, title: _(tabMaster?.TAB_NAME),
                 sDataMaster: JSON.stringify(dataMaster), sAction: JSON.stringify(action),
-                sPermissions: JSON.stringify(winConfig?.permissions ?? {})
+                sPermissions: JSON.stringify(tabMaster?.PERMISSION ?? {})
             }
         });
-    }, [currentMenu]);
+    }, [winConfig]);
 
 
     const onSave = useCallback(() => {
@@ -334,53 +273,36 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
         if (!_checkSave()) return;
 
         if (typeWin === "(winMaster)" && tabs.length > 0) {
-            if (itemData[tabs[0].code].length === 0) {
-                showToast('Bạn chưa nhập chi tiết!', { type: "warning" });
-                return;
-            }
+            // if (itemData[tabs[0].code].length === 0) {
+            //     showToast('Bạn chưa nhập chi tiết!', { type: "warning" });
+            //     return;
+            // }
         }
-        if (editMode === "new") {
-            api.post({
-                link: `/api/app/data-object`,
-                data: itemData,
-                config: {
-                    headers: {
-                        'X-Menu': menuId
-                    }
-                },
-                callBack: (res => {
-                    setEditMode(null);
-                    showToast("Thêm mới thành công");
-                    router.back();
-                    setShouldRefresh(currentMenu?.win.table ?? null);
-                }),
-                callError: (msgError) => {
-                    console.log("msgError>>", msgError);
-                    showToast(msgError, { type: "error" });
-                },
-                setLoading: (loading) => loading ? show("Thêm mới...") : hide()
-            });
-        } else {
-            api.put({
-                link: `/api/app/data-object/${itemData.id}`,
-                data: itemData,
-                config: {
-                    headers: {
-                        'X-Menu': menuId
-                    }
-                },
-                callBack: (res => {
-                    setEditMode(null);
-                    showToast("Cập nhật thành công");
-                    router.back();
-                    setShouldRefresh(currentMenu?.win.table ?? null);
-                }),
-                setLoading: (loading) => loading ? show("Cập nhật...") : hide()
-            });
-        }
-    }, [currentMenu, dataItems, tabs]);
+        api.post({
+            link: `/api/System/Save`,
+            data: {
+                windowid: windowId,
+                editmode: editMode === "new" ? 1 : 2,
+                data: itemData
+            },
+            callBack: (res => {
+                setEditMode(null);
+                showToast("Thêm mới thành công");
+                router.back();
+                setShouldRefresh(winConfig?.window.Tabs[0].TAB_TABLE ?? null);
+            }),
+            callError: (msgError) => {
+                console.log("msgError>>", msgError);
+                showToast(msgError, { type: "error" });
+            },
+            setLoading: (loading) => loading ? show("Thêm mới...") : hide()
+        });
+
+    }, [winConfig, dataItems, tabs]);
+
     const onDelete = useCallback((id: string) => {
-        if (currentMenu?.permissions.mnDelete === undefined) {
+        const tabMaster = winConfig?.window.Tabs[0];
+        if (!!tabMaster?.PERMISSION.DELETE) {
             showPopup({ title: "Thông báo", message: "Bạn không có quyền xoá!" });
             return;
         }
@@ -389,22 +311,22 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
             iconType: "question",
             showCancel: true,
             onConfirm: () => {
-                api.delete({
-                    link: `/api/app/data-object/${id}`,
-                    config: {
-                        headers: {
-                            'X-Menu': menuId
-                        }
+                api.post({
+                    link: `/api/System/Save`,
+                    data: {
+                        windowid: windowId,
+                        editmode: 3,
+                        data: { id: id }
                     },
                     callBack: (res => {
                         showToast("Xoá thành công");
-                        setShouldRefresh(currentMenu?.win.table);
+                        setShouldRefresh(winConfig?.window.Tabs[0].TAB_TABLE ?? null);
                     }),
                     setLoading: (loading) => loading ? show("Xoá...") : hide()
                 });
             }
         });
-    }, [currentMenu]);
+    }, [winConfig]);
 
     const handleAction = {
         new: onNew,
@@ -416,7 +338,7 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
 
     const [currentTab, setCurrentTab] = useState<ITabWin>(tabs?.[0]);
     const schemaWinDetail = useMemo(() => {
-        return schemaWin[currentTab?.realCode || currentTab?.code] ?? schemaWinEmpty;
+        return schemaWin[currentTab?.TAB_TABLE] ?? schemaWinEmpty;
     }, [currentTab]);
 
     const numberActionDetail: number = useMemo(() => {
@@ -437,7 +359,7 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
     };
 
     const dataDetail = useMemo(() => {
-        return dataItems[tableWin]?.[currentTab?.code];
+        return dataItems[tableWin]?.[currentTab?.TAB_TABLE];
     }, [dataItems, currentTab]);
 
     const handleActionDetail = useMemo(() => {
@@ -455,7 +377,7 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
                 const isEdit = schemaWinDetail.action?.edit !== false;
                 if (!isEdit) return;
                 typeNewEdit.current = 'edit', currentIndex.current = index;
-                setItemDetail(dataItems[tableWin]?.[currentTab.code]?.[index] ?? null);
+                setItemDetail(dataItems[tableWin]?.[currentTab.TAB_TABLE]?.[index] ?? null);
                 setShowNewEdit(true);
             },
             change: (valueChange: IData) => {
@@ -466,9 +388,9 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
                 if (data) {
                     setIsChange(true);
                     if (typeNewEdit.current === 'new') {
-                        onAddDetail(tableWin, currentTab.code, data!);
+                        onAddDetail(tableWin, currentTab.TAB_TABLE, data!);
                     } else {
-                        onChangeItemDataDetail(currentTab.code, currentIndex.current, data!);
+                        onChangeItemDataDetail(currentTab.TAB_TABLE, currentIndex.current, data!);
                     }
                 }
                 setShowNewEdit(false);
@@ -481,7 +403,7 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
                     showCancel: true,
                     onConfirm: () => {
                         setIsChange(true);
-                        onRemoveDetail(tableWin, currentTab.code, itemDetail);
+                        onRemoveDetail(tableWin, currentTab.TAB_TABLE, itemDetail);
                     }
                 });
             }
@@ -494,7 +416,7 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
     const loadDataBegin = async () => {
         let source: any = schemaWin[tableWin]?.dataSource ?? {};
         tabs.forEach((tab) => {
-            const _source = schemaWin[tab.code]?.dataSource ?? {};
+            const _source = schemaWin[tab.TAB_TABLE]?.dataSource ?? {};
             source = { ...source, ..._source };
         });
         // const source: any = schema.dataSource ?? {};
@@ -548,12 +470,20 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
         }
     }, [shouldRefresh]);
     //
+    const [printSamples, setPrintSamples] = useState<any[]>([]);
     const getConfigWin = useCallback(async () => {
         show("...");
         await api.get({
-            link: `/api/app/window/config-by-menu-id/${menuId}`,
-            callBack: (res) => setWinConfig(extractWinConfig(res)),
+            link: `/api/System/GetAllByWindowNo?window_id=${windowId}`,
+            callBack: (res) => setWinConfig(extractWinConfig(res[0])),
         });
+        await api.post({
+            link: `/api/System/MauIn`,
+            data: {
+                WINDOW_ID: windowId
+            },
+            callBack: (res) => setPrintSamples(res ?? []),
+        })
         // lấy các dữ liệu reference liên quan
         await loadDataBegin();
         hide();
@@ -588,11 +518,11 @@ export const useWinPage = ({ menuId, tableWin, type = "page", pageSize = 20, idI
         handleAction,
         resetItem,
         resetSource,
-        tableWin: currentMenu?.win.table,
+        tableWin: winConfig?.window?.Tabs[0]?.TAB_TABLE,
         dataSource: dataSources[tableWin],
         showFilter,
-        permissions: winConfig?.permissions,
-        voucherTemplates: winConfig?.voucherTemplates,
+        permissions: winConfig?.window.Tabs[0]?.PERMISSION,
+        printSamples,
         tabMulti,
         setFilterRows,
         setTextSearch,

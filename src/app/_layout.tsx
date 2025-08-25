@@ -3,6 +3,7 @@ import { ExpiredDialog, useSessionExpired } from '@/components/dialog/expiredDia
 import { LoadingProvider } from '@/components/dialog/loadingProvider';
 import { PopupProvider, usePopup } from '@/components/dialog/popupProvider';
 import LayoutStack from '@/components/layoutStack';
+import { TranslationProvider } from '@/context/TranslationContext';
 import { useDataApp } from '@/hooks/zustand/useDataApp';
 import { theme } from '@/theme/theme';
 import '@/utils/globalFunctions';
@@ -20,22 +21,25 @@ enableScreens();
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <RootSiblingParent>
-        <PaperProvider theme={theme}>
-          <PopupProvider >
-            <LoadingProvider>
-              <PortalProvider>
-                <ExpiredDialogWrapper>
-                  <BackHandlerView />
-                  <StackApp />
-                </ExpiredDialogWrapper>
-              </PortalProvider>
-            </LoadingProvider>
-          </PopupProvider>
-        </PaperProvider>
-      </RootSiblingParent>
-    </GestureHandlerRootView>
+    <TranslationProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <RootSiblingParent>
+          <PaperProvider theme={theme}>
+            <PopupProvider >
+              <LoadingProvider>
+                <PortalProvider>
+                  <ExpiredDialogWrapper>
+                    <BackHandlerView />
+                    <StackApp />
+                  </ExpiredDialogWrapper>
+                </PortalProvider>
+              </LoadingProvider>
+            </PopupProvider>
+
+          </PaperProvider>
+        </RootSiblingParent>
+      </GestureHandlerRootView>
+    </TranslationProvider>
   );
 }
 const StackApp = () => {
@@ -48,6 +52,7 @@ const StackApp = () => {
       accounting: { headerShown: false },
       hkd: { headerShown: false },
       index: { headerShown: false },
+      menu: { headerShown: false },
       welcome: { headerShown: false }
     }} />
   )

@@ -1,4 +1,5 @@
 import { VcTabBar } from '@/components/vcTabBar';
+import { useTranslation } from '@/context/TranslationContext';
 import { useWinMulti } from '@/hooks/useWinMulti';
 import { VACOMTheme } from '@/theme/theme';
 import { MaterialIcons } from "@expo/vector-icons";
@@ -21,7 +22,7 @@ const TabMultiList = () => {
     const { idMaster, jsonTabs, sDataMaster, sAction, titleWin } = useLocalSearchParams();
     const dataMaster = sDataMaster ? JSON.parse(sDataMaster.toString()) : {};
     const actionNewEdit = JSON.parse(sAction?.toString());
-    console.log("vao day>>")
+    const { _ } = useTranslation();
     const insets = useSafeAreaInsets();
     const tabs: ITabWin[] = useMemo(() => {
         return JSON.parse(jsonTabs?.toString() || "[]");
@@ -92,14 +93,14 @@ const TabMultiList = () => {
             <View style={styles.header}>
                 <IconButton icon={() => <MaterialIcons name="keyboard-arrow-left" size={30} color={colors.secondary} />} onPress={() => router.back()} />
                 <View style={{ flex: 1, flexDirection: "row", gap: 10 }}>
-                    <Text numberOfLines={1} variant='titleLarge'>{titleWin?.toString() || `Chi tiết`}</Text><Text variant='bodySmall' style={{ color: colors.primary }}>{(data[currentTab.code] || []).length}</Text>
+                    <Text numberOfLines={1} variant='titleLarge'>{titleWin?.toString() || `Chi tiết`}</Text><Text variant='bodySmall' style={{ color: colors.primary }}>{(data[currentTab.TAB_TABLE] || []).length}</Text>
                 </View>
             </View>
             <VcTabBar style={{ borderRadius: 0, borderWidth: 0 }} value={currentTab?.id as any} data={tabs} onPress={(tab: any) => setCurrentTab(tab)} />
             <Divider />
             <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
                 <SwipeListView
-                    data={data[currentTab.code] || []}
+                    data={data[currentTab.TAB_TABLE] || []}
                     style={{ paddingTop: 5 }}
                     keyExtractor={(item: IData, index) => item.id + index.toString()}
                     renderItem={({ item, index }) => <ItemWinList item={item} schemaView={schemaUI.config.itemList}
@@ -137,7 +138,7 @@ const TabMultiList = () => {
                 paramKey={typeParam.current === 'filter' ? currentValue.current : undefined}
                 timeItem={typeParam.current === 'filter' ? currentValue.current?.timeItem : undefined} />}
 
-            {showNewEdit && <NewEditWinMulti title={currentTab.value} data={dataItem} schemaUi={schemaUI} dataSource={dataSource} onSave={handleAction.post} />}
+            {showNewEdit && <NewEditWinMulti title={_(currentTab.TAB_NAME)} data={dataItem} schemaUi={schemaUI} dataSource={dataSource} onSave={handleAction.post} />}
 
         </SafeAreaView>
     );

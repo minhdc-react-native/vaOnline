@@ -1,17 +1,19 @@
 import { StyleProp, StyleSheet, TextStyle, View } from "react-native";
-import ExpandableView from "./expandableView";
-import DashedLine from "./dashedLine";
 import { Text, TouchableRipple, useTheme } from "react-native-paper";
 import UUID from 'react-native-uuid';
+import DashedLine from "./dashedLine";
+import ExpandableView from "./expandableView";
 import { ICON_REGISTRY } from "./UIEngine/types";
 
 interface IProgsGroupButton {
     title: string;
     data: IMenuWin[];
     onPress: (item: IMenuWin) => void,
-    isExpanded?: boolean
+    icon?: React.ReactNode;
+    expanded?: boolean;
+    disable?: boolean
 }
-export const VcGroupButton = ({ title, data, onPress, isExpanded = true }: IProgsGroupButton) => {
+export const VcGroupButton = ({ title, data, onPress, icon, expanded = true, disable }: IProgsGroupButton) => {
     const { colors } = useTheme();
     const rowsMap: any = {};
     const keyMap: any = {};
@@ -26,7 +28,7 @@ export const VcGroupButton = ({ title, data, onPress, isExpanded = true }: IProg
     const sortedRows = Object.keys(rowsMap).sort((a, b) => Number(a) - Number(b));
 
     return (
-        <ExpandableView title={title} defaultExpanded={isExpanded}>
+        <ExpandableView title={title} defaultExpanded={expanded} icon={icon} disable={disable}>
             <View style={styles.container}>
                 {sortedRows.map(rowNum => {
                     // Sắp xếp các item trong row theo col
