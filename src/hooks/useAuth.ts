@@ -1,9 +1,9 @@
 import { IConfigDateMenuWin, VcData } from "@/constants/vcData";
 import { useTranslation } from "@/context/TranslationContext";
 import { api } from "@/utils/apiMethods";
-import { clearRemember, clearToken, getToken, saveOrgUnit, saveRemember, saveToken, saveYear } from "@/utils/vcStorage";
+import { clearRemember, clearToken, saveOrgUnit, saveRemember, saveToken, saveYear } from "@/utils/vcStorage";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useFeedback } from "./useFeedback";
 import { useDataApp } from "./zustand/useDataApp";
 
@@ -66,25 +66,20 @@ export const useAuth = () => {
     const [licenseInfo, setLicenseInfo] = useState<IData>();
     const { setLoading, showToast, showPopup } = useFeedback();
     const setYears = useDataApp((state) => state.setYears);
+    const setOrgUnit = useDataApp((state) => state.setOrgUnit);
     const setCurrentYear = useDataApp((state) => state.setCurrentYear);
     const setMenuIds = useDataApp((state) => state.setMenuIds);
+    const setParamSystem = useDataApp((state) => state.setParamSystem);
     const setDataMenuWin = useDataApp((state) => state.setDataMenuWin);
-    const { setTranslations } = useTranslation();
-
-    useEffect(() => {
-        const checkLogin = async () => {
-            const token = await getToken();
-            setLoggedIn(!!token);
-        };
-        checkLogin();
-    }, []);
+    const setLang = useDataApp((state) => state.setLang);
+    const { setTranslations, _ } = useTranslation();
 
     const logout = async () => {
         showPopup({
-            message: "Bạn có muốn thoát ứng dụng không?",
+            message: _('MUON_THOAT'),
             showCancel: true,
-            cancelText: "Không",
-            confirmText: "Có thoát",
+            cancelText: _('KHONG'),
+            confirmText: _('CO'),
             iconType: "question",
             onConfirm: async () => {
                 await clearToken();
@@ -109,16 +104,25 @@ export const useAuth = () => {
                     return;
                 }
                 await saveToken(res.token);
+
+                setOrgUnit(data.dvcs);
+
                 await saveOrgUnit(data.dvcs);
+
                 if (data.remember) {
                     await saveRemember(data);
                 } else {
                     await clearRemember();
                 }
+                await getRoundNumber();
                 setYears(res.nam);
                 saveYear(res.nam?.[0].NAM);
                 setCurrentYear(res.nam?.[0].NAM);
-                await getLang('vi');
+
+                setLang(data.lang ?? 'vi');
+
+                await getLangTitle(data.lang ?? 'vi');
+                setLoggedIn(true);
                 //
                 router.replace("/list-app");
             },
@@ -128,8 +132,26 @@ export const useAuth = () => {
             }
         });
     }
-
-    const getLang = async (lang: string) => {
+    const getRoundNumber = async () => {
+        await api.get({
+            link: `/api/System/GetConfigNumber`,
+            callBack: (res) => {
+                const item = res?.[0];
+                setParamSystem({
+                    rQuantity: item?.SL ?? 2,
+                    rPrice: item?.GIA ?? 2,
+                    rPriceNt: item?.GIA_NT ?? 2,
+                    rAmount: item?.TIEN ?? 2,
+                    rAmountNt: item?.TIEN_NT ?? 2,
+                    rPercentage: item?.PT ?? 2,
+                    rExchangeRate: item?.TY_GIA ?? 2,
+                    rRate: item?.TY_LE ?? 2,
+                    minAmountChange: 1000,
+                });
+            }
+        })
+    }
+    const getLangTitle = async (lang: string) => {
         await api.get({
             link: `/api/System/GetLanguagesByMa?lang=${lang}`,
             callBack: (res) => {
@@ -212,6 +234,7 @@ export const useAuth = () => {
         listDvcs,
         infoDvcs,
         licenseInfo,
+        setLoggedIn,
         getDvcsByUser,
         login,
         logout,

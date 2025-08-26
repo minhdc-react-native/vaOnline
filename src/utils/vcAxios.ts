@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { clearToken, getOrgUnit, getSubDomain, getToken, getYear } from './vcStorage';
+import { clearToken, getOrgUnit, getRemember, getSubDomain, getToken, getYear } from './vcStorage';
 
 const vcAxios = axios.create();
 
@@ -16,12 +16,13 @@ export const attachInterceptors = (showSessionExpiredDialog: () => void) => {
         } else {
             config.baseURL = 'https://demoketoan.vaonline.vn';
         }
+        const remember = await getRemember();
 
         if (token) {
-            config.headers.Authorization = `Bearer ${token};${dvcs ?? ''};${year ?? ''};vi`;
+            config.headers.Authorization = `Bearer ${token};${dvcs ?? ''};${year ?? ''};${remember?.lang ?? 'vi'}`;
         }
         // config.headers['X-Rquested-With'] = "XMLHttpRequest";
-        config.headers["Accept-language"] = "vi";
+        config.headers["Accept-language"] = remember?.lang ?? 'vi';
         // config.headers["X-Orgcode"] = await getOrgUnit();
         // config.headers["__tenant"] = await getTenant();
         return config;

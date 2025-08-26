@@ -1,5 +1,4 @@
-import { schemaWin, schemaWinEmpty } from "@/app/(window)/schema";
-import { DataConfigMenu } from "@/constants/vcData";
+import { schemaWin, schemaWinEmpty } from "@/schema";
 import { VACOMTheme } from "@/theme/theme";
 import { Helper } from "@/utils/Helper";
 import { EvilIcons, FontAwesome6 } from "@expo/vector-icons";
@@ -7,8 +6,7 @@ import BottomSheet, {
     BottomSheetBackdrop,
     BottomSheetFlatList
 } from "@gorhom/bottom-sheet";
-import { router } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Keyboard,
     ScrollView,
@@ -227,6 +225,9 @@ const VcSelectListMulti = ({
                         ItemSeparatorComponent={() => <Divider />}
                         keyboardShouldPersistTaps="always"
                         ListFooterComponent={() => <View style={{ height: 50 }} />}
+                        initialNumToRender={20}
+                        maxToRenderPerBatch={20}
+                        windowSize={10}
                     />
                 </BottomSheet>
             </Portal>
@@ -234,20 +235,23 @@ const VcSelectListMulti = ({
     );
 };
 
-const ItemView = ({
-    item,
-    onPress,
-    isSelect,
-    tableWin,
-    closeModal,
-    isNewEdit
-}: {
+
+type IProps = {
     item: IData;
     onPress: (item: IData) => void;
     isSelect?: boolean;
     tableWin?: ITableWin;
     closeModal: (cb: () => void) => void;
     isNewEdit: boolean;
+};
+
+const ItemViewComponent: React.FC<IProps> = ({
+    item,
+    onPress,
+    isSelect,
+    tableWin,
+    closeModal,
+    isNewEdit
 }) => {
     const { colors } = useTheme();
     const isShowEdit = tableWin !== undefined && isNewEdit;
@@ -282,12 +286,7 @@ const ItemView = ({
                         marginTop: 5
                     }}
                     onPress={() => {
-                        closeModal(() => {
-                            router.navigate({
-                                pathname: "/(window)/newEditModal",
-                                params: { menuId: DataConfigMenu[tableWin].id, tableWin: tableWin, id: item.id, title: DataConfigMenu[tableWin].title }
-                            });
-                        });
+                        closeModal(() => { });
                     }}
                 >
                     <IconButton
@@ -303,6 +302,7 @@ const ItemView = ({
         </Pressable>
     );
 };
+const ItemView = React.memo(ItemViewComponent);
 
 const HeaderView = ({
     setSearchText,
@@ -374,12 +374,7 @@ const HeaderView = ({
                     style={{ margin: 0 }}
                     iconColor="darkblue"
                     onPress={() => {
-                        closeModal(() => {
-                            router.navigate({
-                                pathname: "/(window)/newEditModal",
-                                params: { menuId: DataConfigMenu[tableWin].id, tableWin: tableWin, title: DataConfigMenu[tableWin].title }
-                            });
-                        });
+                        closeModal(() => { });
                     }}
                 />
             )}

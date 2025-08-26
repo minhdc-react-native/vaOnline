@@ -1,13 +1,14 @@
-import { schemaWin, schemaWinEmpty } from "@/app/(window)/schema";
-import { DataConfigMenu } from "@/constants/vcData";
+import { useTranslation } from "@/context/TranslationContext";
+import { schemaWin, schemaWinEmpty } from "@/schema";
 import { VACOMTheme } from "@/theme/theme";
 import { Helper } from "@/utils/Helper";
 import { EvilIcons, FontAwesome } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetFlatList } from "@gorhom/bottom-sheet";
-import { router } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Keyboard, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { ActivityIndicator, Divider, IconButton, Portal, Text, TextInput, useTheme } from "react-native-paper";
+import { useToast } from "./dialog/useToast";
+import { useEvalExpr } from "./UIEngine/hooks/useEvalExpr";
 import { SchemaUIEngine } from "./UIEngine/schemaUIEngine";
 interface IProgs {
     label?: string;
@@ -26,16 +27,17 @@ interface IProgs {
     loading?: boolean,
     tableWin?: ITableWin,
     isError?: boolean;
-    isNewEdit?: boolean
+    isNewEdit?: boolean;
+    checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 }
 const VcSelectList = ({ label, placeholder, data, value, onChange, fDisplay, typeDisplay = "value", disabled = false,
-    fId = "id", fValue = "value", clean, rightIcon, style, loading, tableWin, isError, isNewEdit = false }: IProgs) => {
+    fId = "id", fValue = "value", clean = true, rightIcon, style, loading, tableWin, isError, isNewEdit = false, checkSelected }: IProgs) => {
     const colors = useTheme<VACOMTheme>().colors;
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['50%', '70%', '90%'], []);
     const [searchText, setSearchText] = useState('');
     const [itemSelected, setItemSelected] = useState<IData | null>(data.find(item => item[fId] === value) || null);
-
+    const { _ } = useTranslation();
     const filteredList = useMemo(() => {
         if (!searchText) return data;
         const _searchText = Helper.rmTone(searchText).toLowerCase();
@@ -51,9 +53,10 @@ const VcSelectList = ({ label, placeholder, data, value, onChange, fDisplay, typ
         bottomSheetRef.current?.snapToIndex(2);
     }
     const getItemSelected = (item: IData | null) => {
+        bottomSheetRef.current?.close();
         onChange(item);
         setItemSelected(item);
-        closeModal(() => { });
+        // closeModal(() => { });
     }
     const closeModal = (callBack: () => void) => {
         setTimeout(() => {
@@ -85,7 +88,7 @@ const VcSelectList = ({ label, placeholder, data, value, onChange, fDisplay, typ
                     <Text variant="bodyLarge" numberOfLines={1} style={{ color: itemSelected ? "#000" : colors.backdrop, paddingLeft: 8 }}>{
                         itemSelected ? (fDisplay?.field ? (itemSelected[fDisplay.field] ?? '???') : (typeDisplay !== "both" ? (itemSelected[fDisplay?.fValue ||
                             fValue] ?? '???') : "".concat((itemSelected[fDisplay?.fId || fId] ?? '???'), " - ").concat((itemSelected[fDisplay?.fValue || fValue] ?? '???')))) :
-                            (placeholder || label || "Chọn...")
+                            (placeholder || label || `${_('CHON')}...`)
                     }</Text>
                 </View>}
                 {itemSelected && clean && !disabled ? (rightIcon || <Pressable
@@ -132,33 +135,55 @@ const VcSelectList = ({ label, placeholder, data, value, onChange, fDisplay, typ
                         keyExtractor={(item: IData) => item[fId].toString()}
                         // ListHeaderComponent={<HeaderView setSearchText={setSearchText} label={label || placeholder} table={table} closeModal={closeModal} isNewEdit={isNewEdit} />}
                         renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected}
-                            isSelect={item[fId] === itemSelected?.[fId]} typeDisplay={typeDisplay}
-                            fId={fId} fValue={fValue} tableWin={tableWin} closeModal={closeModal} isNewEdit={isNewEdit} fDisplay={fDisplay} />}
+                            isSelect={item[fId] === itemSelected?.[fId]}
+                            tableWin={tableWin} closeModal={closeModal} isNewEdit={isNewEdit} checkSelected={checkSelected} />}
                         ItemSeparatorComponent={() => <Divider />}
                         keyboardShouldPersistTaps="always"
                         ListFooterComponent={() => <View style={{ height: 50 }} />}
+                        initialNumToRender={20}
+                        maxToRenderPerBatch={20}
+                        windowSize={10}
                     />
                 </BottomSheet>
             </Portal>
         </>
     );
 }
-const ItemView = ({ item, onPress, isSelect, typeDisplay, fDisplay, fId, fValue, tableWin, closeModal, isNewEdit }: {
+
+type IProps = {
     item: IData;
     onPress: (item: IData) => void;
     isSelect?: boolean;
-    fDisplay?: { fId: string, fValue: string };
-    typeDisplay: 'value' | 'both';
-    fId: string;
-    fValue: string;
     tableWin?: ITableWin;
     closeModal: (callBack: () => void) => void;
-    isNewEdit: boolean
+    isNewEdit: boolean;
+    checkSelected?: { isError: string, message: string, requiredKeys: string[] };
+};
+
+const ItemViewComponent: React.FC<IProps> = ({
+    item,
+    onPress,
+    isSelect,
+    tableWin,
+    closeModal,
+    isNewEdit,
+    checkSelected,
 }) => {
     const { colors } = useTheme();
     const isShowEdit = tableWin !== undefined && isNewEdit;
+    const { showToast } = useToast();
+    const evalExpr = useEvalExpr(item);
     return (
-        <Pressable onPress={() => onPress(item)} style={{
+        <Pressable onPress={() => {
+            if (checkSelected) {
+                const isError = evalExpr(checkSelected.isError, checkSelected.requiredKeys);
+                if (isError) {
+                    showToast(checkSelected.message, { type: "warning" });
+                    return;
+                }
+            }
+            onPress(item);
+        }} style={{
             paddingHorizontal: 10, flexDirection: "row",
             alignItems: tableWin ? "flex-start" : "center", justifyContent: "space-between", backgroundColor: isSelect ? colors.elevation.level1 : "transparent"
         }}>
@@ -166,24 +191,22 @@ const ItemView = ({ item, onPress, isSelect, typeDisplay, fDisplay, fId, fValue,
                 <SchemaUIEngine schema={(schemaWin[tableWin ?? "Empty"] ?? schemaWinEmpty).config.itemList} data={item} />
             </View>
             {isShowEdit && <Pressable style={{ backgroundColor: colors.elevation.level1, borderRadius: 50, marginTop: 5 }} onPress={() => {
-                closeModal(() => {
-                    router.navigate({
-                        pathname: "/(window)/newEditModal",
-                        params: { menuId: DataConfigMenu[tableWin].id, tableWin: tableWin, id: item.id, title: DataConfigMenu[tableWin].title }
-                    });
-                });
+                closeModal(() => { });
             }}><IconButton icon={() => <EvilIcons name="pencil" size={24} color={colors.secondary} />} size={20} iconColor={"purple"} style={{ margin: 0 }} /></Pressable>}
         </Pressable>
     );
-}
+};
+const ItemView = React.memo(ItemViewComponent);
 
-const HeaderView = ({ setSearchText, label = "Chọn", tableWin, closeModal, isNewEdit }: {
+const HeaderView = ({ setSearchText, label, tableWin, closeModal, isNewEdit }: {
     setSearchText: (value: string) => void;
     label?: string;
     tableWin?: ITableWin;
     closeModal: (callBack: () => void) => void;
     isNewEdit: boolean
 }) => {
+    const { _ } = useTranslation();
+    label = label || _('CHON')
     const [valueSearch, setValueSerach] = useState("");
     const { colors } = useTheme();
     return (
@@ -192,7 +215,7 @@ const HeaderView = ({ setSearchText, label = "Chọn", tableWin, closeModal, isN
                 <Text variant="titleSmall" numberOfLines={1} style={{ alignSelf: "center", marginRight: 10 }}>{label}</Text>
             </View>
             <TextInput
-                placeholder="Tìm kiếm"
+                placeholder={_('SEARCH')}
                 mode="outlined"
                 left={<TextInput.Icon icon={() => <EvilIcons name="search" size={24} color={colors.secondary} />} />}
                 right={valueSearch ? <TextInput.Icon icon={"close"} color={colors.primary} onPress={() => {
@@ -210,12 +233,7 @@ const HeaderView = ({ setSearchText, label = "Chọn", tableWin, closeModal, isN
                 style={{ flex: 1, height: 40 }}
             />
             {tableWin && isNewEdit && <IconButton icon={"plus"} style={{ margin: 0 }} iconColor="darkblue" onPress={() => {
-                closeModal(() => {
-                    router.navigate({
-                        pathname: "/(window)/newEditModal",
-                        params: { menuId: DataConfigMenu[tableWin].id, tableWin: tableWin, title: DataConfigMenu[tableWin].title }
-                    });
-                });
+                closeModal(() => { });
             }} />}
         </View>
     );

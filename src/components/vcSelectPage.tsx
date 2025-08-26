@@ -1,19 +1,16 @@
-import { schemaWin, schemaWinEmpty } from "@/app/(window)/schema";
-import { DataConfigMenu } from "@/constants/vcData";
 import { useWinPage } from "@/hooks/useWinPage";
 import { useDataApp } from "@/hooks/zustand/useDataApp";
+import { schemaWin, schemaWinEmpty } from "@/schema";
 import { Helper } from "@/utils/Helper";
 import { EvilIcons, FontAwesome } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetFlatList } from "@gorhom/bottom-sheet";
-import { router } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Keyboard, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
 import { ActivityIndicator, Divider, IconButton, Portal, Text, TextInput, useTheme } from "react-native-paper";
 import { SchemaUIEngine } from "./UIEngine/schemaUIEngine";
 interface IProgs {
-    menuId: string;
-    tableWin: ITableWin,
+    itemMenuWin: IMenuWin,
     label?: string;
     placeholder?: string;
     value: string | number | null;
@@ -25,11 +22,11 @@ interface IProgs {
     style?: StyleProp<ViewStyle>;
     isLoading?: boolean,
     isError?: boolean,
-    defaultFilter?: IFilterRows[];
+    defaultFilter?: IFilter[];
     isNewEdit?: boolean;
     disabled?: boolean
 }
-const VcSelectPage = ({ menuId, tableWin, label, placeholder, value, display, onChange, fId = "id", clean, rightIcon, style, isLoading, isError, defaultFilter = [], isNewEdit = true, disabled }: IProgs) => {
+const VcSelectPage = ({ itemMenuWin, label, placeholder, value, display, onChange, fId = "id", clean, rightIcon, style, isLoading, isError, defaultFilter = [], isNewEdit = true, disabled }: IProgs) => {
 
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['50%', '70%', '90%'], []);
@@ -41,13 +38,12 @@ const VcSelectPage = ({ menuId, tableWin, label, placeholder, value, display, on
         data,
         loading,
         setTextSearch,
-        dispatch,
         handleLayout,
         getConfigWin,
         refreshData,
         handleLoadMore,
         handleRefresh
-    } = useWinPage({ menuId: menuId, tableWin: tableWin });
+    } = useWinPage({ itemMenuWin: itemMenuWin });
 
     useEffect(() => {
         getConfigWin();
@@ -60,7 +56,7 @@ const VcSelectPage = ({ menuId, tableWin, label, placeholder, value, display, on
     const shouldRefresh = useDataApp((state) => state.shouldRefresh);
     const setShouldRefresh = useDataApp((state) => state.setShouldRefresh);
     useEffect(() => {
-        if (shouldRefresh && shouldRefresh === tableWin) {
+        if (shouldRefresh && shouldRefresh === itemMenuWin.tableWin) {
             handleRefresh();
             setShouldRefresh(null);
         }
@@ -132,11 +128,11 @@ const VcSelectPage = ({ menuId, tableWin, label, placeholder, value, display, on
                     keyboardBlurBehavior="restore"
                     containerStyle={{ marginTop: 60 }}
                 >
-                    <HeaderView setSearchText={setTextSearch} label={label || placeholder} tableWin={tableWin} closeModal={closeModal} isNewEdit={isNewEdit} />
+                    <HeaderView setSearchText={setTextSearch} label={label || placeholder} tableWin={itemMenuWin.tableWin} closeModal={closeModal} isNewEdit={isNewEdit} />
                     <BottomSheetFlatList
                         data={data}
                         keyExtractor={(item: Record<string, any>) => item.id}
-                        renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected} isSelect={item[fId] === value} tableWin={tableWin} closeModal={closeModal} paramSystem={paramSystem} isNewEdit={isNewEdit} />}
+                        renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected} isSelect={item[fId] === value} tableWin={itemMenuWin.tableWin} closeModal={closeModal} paramSystem={paramSystem} isNewEdit={isNewEdit} />}
                         ItemSeparatorComponent={() => <Divider />}
                         keyboardShouldPersistTaps="always"
                         onEndReached={handleLoadMore}
@@ -175,12 +171,7 @@ const ItemView = ({ item, onPress, isSelect, tableWin, closeModal, dataSource, p
                 <SchemaUIEngine schema={(schemaWin[tableWin] ?? schemaWinEmpty).config.itemList} data={item} dataSource={dataSource} />
             </View>
             {isShowEdit && <Pressable style={{ backgroundColor: colors.elevation.level1, borderRadius: 50, marginTop: 5, marginRight: 10 }} onPress={() => {
-                closeModal(() => {
-                    router.navigate({
-                        pathname: "/(window)/newEditModal",
-                        params: { menuId: DataConfigMenu[tableWin].id, tableWin: tableWin, id: item.id, title: DataConfigMenu[tableWin].title }
-                    });
-                });
+                closeModal(() => { });
             }}><IconButton icon={() => <EvilIcons name="pencil" size={24} color={colors.secondary} />} size={20} iconColor={"purple"} style={{ margin: 0 }} /></Pressable>}
         </Pressable>
     );
@@ -220,12 +211,7 @@ const HeaderView = ({ setSearchText, label = "Chọn mã", tableWin, closeModal,
             />
             {tableWin && isNewEdit && <IconButton icon={"plus"} style={{ margin: 0 }} iconColor="darkblue" onPress={() => {
                 closeModal(() => {
-                    closeModal(() => {
-                        router.navigate({
-                            pathname: "/(window)/newEditModal",
-                            params: { menuId: DataConfigMenu[tableWin].id, tableWin: tableWin, title: DataConfigMenu[tableWin].title }
-                        });
-                    });
+                    closeModal(() => { });
                 });
             }} />}
         </View>

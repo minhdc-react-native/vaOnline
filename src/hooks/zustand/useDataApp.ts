@@ -13,8 +13,16 @@ interface IDataApp {
 
     years: IData[];
     setYears: (years: IData[]) => void;
+
+    lang: string;
+    setLang: (lang: string) => void;
+
+    orgUnit: string | null,
+    setOrgUnit: (currentYear: string) => void
+
     currentYear: string | null,
     setCurrentYear: (currentYear: string) => void
+
     reset: () => void;
 
     // menu
@@ -26,13 +34,16 @@ interface IDataApp {
 }
 
 const initialState: Omit<IDataApp,
-    'setParamSystem' | 'setShouldRefresh' | 'setBackHandlerQuestion' | 'setYears' | 'setCurrentYear' | 'reset' | 'setMenuIds' | 'setDataMenuWin'
+    'setParamSystem' | 'setShouldRefresh' | 'setBackHandlerQuestion' | 'setYears' |
+    'setLang' | 'setCurrentYear' | 'setOrgUnit' | 'reset' | 'setMenuIds' | 'setDataMenuWin'
 > = {
     paramSystem: null,
     shouldRefresh: null,
     backHandlerQuestion: null,
+    orgUnit: null,
     currentYear: null,
     years: [],
+    lang: 'vi',
     menuIds: [],
     dataMenuWin: {}
 };
@@ -44,9 +55,11 @@ export const useDataApp = create<IDataApp>()(
         setShouldRefresh: (shouldRefresh) => set({ shouldRefresh }),
         setBackHandlerQuestion: (backHandlerQuestion) => set({ backHandlerQuestion }),
         setYears: (years) => set({ years }),
+        setOrgUnit: (orgUnit) => set({ orgUnit }),
         setCurrentYear: (currentYear) => set({ currentYear }),
         reset: () => set(initialState),
         setMenuIds: (menuIds) => set({ menuIds }),
         setDataMenuWin: (dataMenuWin) => set({ dataMenuWin }),
+        setLang: (lang) => set({ lang })
     })
 );

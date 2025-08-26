@@ -8,6 +8,7 @@ export default function Dashboard() {
     const { colors } = useTheme();
     const { infoDvcs, getInfoDvcs } = useAuth();
     const currentYear = useDataApp((state) => state.currentYear);
+    const lang = useDataApp((state) => state.lang);
     useEffect(() => {
         const _getData = async () => {
             await getInfoDvcs();
@@ -19,7 +20,7 @@ export default function Dashboard() {
             <Card style={{ gap: 10, backgroundColor: colors.background, padding: 20 }}>
                 <Chip style={{ alignSelf: "flex-start" }}><Text>{currentYear}</Text></Chip>
                 <Text variant='titleMedium' style={{ color: colors.secondary }}>{`${infoDvcs?.DVCS_ID} - ${infoDvcs?.TEN_DVCS}`}</Text>
-                <Text variant='titleSmall'>{`Mã số thuế: ${infoDvcs?.MS_THUE}`}</Text>
+                <Text variant='titleSmall'>{`${lang === 'vi' ? 'Mã số thuế:' : 'TaxCode:'} ${infoDvcs?.MS_THUE}`}</Text>
             </Card>
         </View>
     );

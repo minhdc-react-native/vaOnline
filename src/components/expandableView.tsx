@@ -1,16 +1,16 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Animated,
-    View,
-    StyleSheet,
-    TouchableOpacity,
     LayoutAnimation,
     Platform,
-    UIManager,
-    ViewStyle,
     StyleProp,
+    StyleSheet,
     TextStyle,
+    TouchableOpacity,
+    UIManager,
+    View,
+    ViewStyle,
 } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 if (Platform.OS === 'android') {
@@ -30,7 +30,7 @@ interface ExpandableViewProps {
     styleHeader?: StyleProp<ViewStyle>,
     titleStyle?: StyleProp<TextStyle>,
     type?: 'top' | 'bottom',
-    disable?: boolean
+    disabled?: boolean
 }
 
 const ExpandableView: React.FC<ExpandableViewProps> = ({
@@ -45,7 +45,7 @@ const ExpandableView: React.FC<ExpandableViewProps> = ({
     styleHeader,
     titleStyle,
     type = "top",
-    disable = false
+    disabled = false
 }) => {
     const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
     const isControlled = expanded !== undefined;
@@ -78,9 +78,9 @@ const ExpandableView: React.FC<ExpandableViewProps> = ({
     return (
         <View style={[styles.container, style]}>
             {isExpanded && type === "bottom" && <View style={styles.content}>{children}</View>}
-            <TouchableOpacity onPress={toggleExpand} style={[styles.header, styleHeader]} disabled={disable}>
+            <TouchableOpacity onPress={toggleExpand} style={[styles.header, styleHeader]} disabled={disabled}>
                 {typeof title === "string" ? <Text style={[styles.title, titleStyle]}>{title}</Text> : title}
-                {!disable && <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
+                {!disabled && <Animated.View style={{ transform: [{ rotate: rotateInterpolate }] }}>
                     {icon || <MaterialCommunityIcons name="chevron-down" size={24} color="#333" />}
                 </Animated.View>}
             </TouchableOpacity>

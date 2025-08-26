@@ -1,19 +1,17 @@
-import { schemaItemSearch } from "@/app/(window)/schema";
+import { schemaItemSearch } from "@/schema";
 import { VACOMTheme } from "@/theme/theme";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
 import { EvilIcons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import debounce from "lodash.debounce";
-import { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Keyboard, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { ActivityIndicator, Divider, IconButton, Portal, Text, TextInput, useTheme } from "react-native-paper";
-import { useToast } from "./dialog/useToast";
 import { SchemaUIEngine } from "./UIEngine/schemaUIEngine";
 const urlBase: Record<ITableSearch, string> = { // gắn api cho đỡ nhầm...
-    Customer: "/api/app/data-object/search-suggest?name=Customers&isTenant=true&isOrg=false&fieldsW=code,name,tel&orderby=code&refid=652506d37e1c3a55b4476cdb&filterValue=#filterValue#",
-    CustomerPotential: "/api/app/data-object/search-suggest?name=CustomerPotentials&isTenant=true&isOrg=false&fieldsW=code,customerName,tel&orderby=code&refid=662b1210b87e5169e7725120&filterValue=#filterValue#",
-    Contract: "/api/app/data-object/search-suggest?name=Contracts&isTenant=true&isOrg=false&fieldsW=contractNumber,cusCode,customerName&orderby=contractNumber&refid=65e7d0fd7750d7c2f652ebfd&filterValue=#filterValue#"
+    DMMNGH: '/api/System/GetDataByReferencesId?id=0b22c919-a275-4d05-83bd-c34844d9ec67&filtervalue=#filterValue#',
+    DMMCN: '/api/System/GetDataByReferencesId?id=0600dd65-9cf4-4fd7-bf43-ff50a5578b42&filtervalue=#filterValue#'
 }
 interface IProgs {
     tableSearch: ITableSearch,
@@ -28,14 +26,13 @@ interface IProgs {
     disabled?: boolean,
     isLoading?: boolean,
 }
-const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange, clean, rightIcon, style, isLoading, disabled }: IProgs) => {
+const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange, clean = true, rightIcon, style, isLoading, disabled }: IProgs) => {
 
     const url = useMemo(() => {
         return urlBase[tableSearch];
     }, [tableSearch]);
 
     const { colors } = useTheme<VACOMTheme>();
-    const { showToast } = useToast();
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['50%', '70%', '90%'], []);
     const [data, setData] = useState<IData[]>([]);
@@ -48,7 +45,6 @@ const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange
     const onSearch = useCallback((value: string) => {
         if (Helper.isEmpty(value) || value.length < 3) {
             setData([]);
-            // showToast('Bạn phải tìm tối thiểu 3 ký tự!', { type: "info" });
         } else {
             const urlSearch = url.replace('#filterValue#', value);
             api.get({ link: urlSearch, callBack: (res) => setData(res), setLoading: setLoading })
@@ -68,8 +64,9 @@ const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange
         bottomSheetRef.current?.snapToIndex(2);
     }
     const getItemSelected = (item: Record<string, any> | null) => {
+        bottomSheetRef.current?.close();
         onChange(item);
-        closeModal(() => { });
+        // closeModal(() => { });
     }
     const closeModal = (callBack: () => void) => {
         setTimeout(() => {
@@ -140,18 +137,24 @@ const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange
                         renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected} isSelect={item[fField] === value} tableSearch={tableSearch} />}
                         ItemSeparatorComponent={() => <Divider />}
                         ListFooterComponent={() => <View style={{ height: 50 }} />}
+                        initialNumToRender={20}
+                        maxToRenderPerBatch={20}
+                        windowSize={10}
                     />}
                 </BottomSheet>
             </Portal>
         </>
     );
 }
-const ItemView = ({ item, onPress, isSelect, tableSearch }: {
+
+type IProps = {
     tableSearch: ITableSearch;
     item: Record<string, any>;
     onPress: (item: Record<string, any>) => void;
     isSelect?: boolean;
-}) => {
+};
+
+const ItemViewComponent: React.FC<IProps> = ({ item, onPress, isSelect, tableSearch }) => {
     const { colors } = useTheme();
     return (
         <Pressable onPress={() => onPress(item)} style={{
@@ -163,7 +166,8 @@ const ItemView = ({ item, onPress, isSelect, tableSearch }: {
             </View>
         </Pressable>
     );
-}
+};
+const ItemView = React.memo(ItemViewComponent);
 
 const HeaderView = ({ setSearchText, label = "Chọn mã" }: {
     setSearchText: (value: string) => void;

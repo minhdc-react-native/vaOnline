@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import set from 'lodash.set';
 import isEqual from 'lodash.isequal';
+import set from 'lodash.set';
+import { useEffect, useState } from 'react';
 
 export interface FormState<T = any> {
     state: T;

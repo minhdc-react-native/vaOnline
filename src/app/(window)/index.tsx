@@ -7,11 +7,11 @@ import { RefreshControl, View } from "react-native";
 import { ActivityIndicator, FAB } from "react-native-paper";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { SwipeListView } from "react-native-swipe-list-view";
+import { IHandleActionConfig } from "../../schema";
+import { layoutHandleAction } from "../../schema/layoutHandleAction";
 import { ItemWinList } from "./items/itemWinList";
 import { ItemWinListAction } from "./items/itemWinListAction";
 import ParamScreen from "./paramScreen";
-import { IHandleActionConfig } from "./schema";
-import { layoutHandleAction } from "./schema/layoutHandleAction";
 import { useActionMap } from "./useActionMap";
 interface IProgs {
     menuWin0?: IMenuWin;
@@ -19,6 +19,7 @@ interface IProgs {
 const WindowScreen = ({ menuWin0 }: IProgs) => {
     const { menuWin } = useLocalSearchParams();
     const itemMenuWin: IMenuWin = menuWin0 || JSON.parse(menuWin.toString());
+    const lang = useDataApp((state) => state.lang);
     const insets = useSafeAreaInsets();
     const {
         colors,
@@ -43,7 +44,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
         refreshData,
         handleLoadMore,
         handleRefresh
-    } = useWinPage({ windowId: itemMenuWin.id, tableWin: itemMenuWin.tableWin, typeWin: itemMenuWin.typeWin });
+    } = useWinPage({ itemMenuWin: itemMenuWin });
 
     const renderFooter = useCallback(() => {
         if (!loading.loadMore || loading.refresh) return <View style={{ height: 100 }} />
@@ -65,6 +66,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
 
     const shouldRefresh = useDataApp((state) => state.shouldRefresh);
     const setShouldRefresh = useDataApp((state) => state.setShouldRefresh);
+
     useEffect(() => {
         if (shouldRefresh && shouldRefresh === tableWin) {
             handleRefresh();
@@ -102,6 +104,9 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
         return {
             deleteItem: (param?: Record<string, any>) => {
                 handleAction.delete(param?.data?.id);
+            },
+            onBlur: (param?: Record<string, any>) => {
+                console.log('param>>', param);
             },
             ...actionMap,
         }
@@ -158,7 +163,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
 
     return (
         <ViewMap style={{ flex: 1 }}>
-            <VcHeader title={itemMenuWin.label} numRow={infoData.total} onSearch={setTextSearch}
+            <VcHeader title={lang === 'vi' ? itemMenuWin.label : itemMenuWin.labelE} numRow={infoData.total} onSearch={setTextSearch}
                 showSearch={showFilter.showSearch}
                 showFilter={showFilter.showFilter} onFilter={onFilter}
                 valuesTypeFilter={schemaUI.config.filterConfig?.valuesType}
@@ -190,13 +195,16 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
                 }
                 // ItemSeparatorComponent={() => <Divider style={{ marginHorizontal: 20 }} />}
                 ListFooterComponent={renderFooter}
+                initialNumToRender={20}
+                maxToRenderPerBatch={20}
+                windowSize={10}
             />
             {(schemaUI.action?.new !== false && !!permissions?.NEW) && <FAB
                 icon="plus"
                 style={{
-                    // width: 55,
-                    // height: 55,
-                    // borderRadius: 55,
+                    width: 55,
+                    height: 55,
+                    borderRadius: 55,
                     bottom: (!menuWin0 ? insets.bottom : 0) + 20,
                     right: 20,
                     position: 'absolute',

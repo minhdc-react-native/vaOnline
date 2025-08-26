@@ -31,7 +31,7 @@ export type ITextField = IFieldBase & {
     compute?: string;
     format?: {
         type: 'text' | 'link' | 'number' | 'date' | 'select' | 'selectMulti' | 'checkbox' | 'status' | 'tag' | 'rating',
-        roundNumber?: 'rQuantity' | 'rPrice' | 'rAmount' | 'rPercentage',
+        roundNumber?: IRoundNumber,
         formatDate?: 'dd/MM/yyyy HH:mm:ss' | 'yyyy-MM-dd HH:mm:ss',
         removeTime?: boolean,
         typeCheckBox?: "checkbox" | 'switch',
@@ -46,7 +46,7 @@ export type INumField = IFieldBase & {
     type: 'number';
     label?: string;
     style?: StyleProp<ViewStyle>;
-    format?: 'rQuantity' | 'rPrice' | 'rAmount' | 'rPercentage';
+    format?: IRoundNumber;
     compute?: string;
     fWord?: string;
     notOverride?: boolean;
@@ -64,7 +64,8 @@ export type ITimeField = IFieldBase & {
 export type IInputField = IFieldBase & {
     type: 'input';
     label?: string;
-    typeInput?: 'text' | 'multi' | 'password';
+    typeInput?: 'text' | 'multi' | 'password' | 'taxCode';
+    expression?: Record<string, string>;
     style?: StyleProp<ViewStyle>;
     showPassword?: boolean;
     setShowPassWord?: (show: boolean) => void;
@@ -134,7 +135,8 @@ export type ISelectListField = IFieldBase & {
     style?: StyleProp<ViewStyle>;
     loading?: boolean,
     tableWin: ITableWin;
-    isNewEdit?: boolean
+    isNewEdit?: boolean;
+    checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 };
 
 export type ISelectListMultiField = IFieldBase & {
@@ -153,8 +155,7 @@ export type ISelectListMultiField = IFieldBase & {
 
 export type ISelectListPageField = IFieldBase & {
     type: 'selectListPage';
-    menuId: string;
-    tableWin: ITableWin,
+    itemMenuWin: IMenuWin;
     fValue: string;
     fValueRef: string;
     label?: string;
@@ -164,7 +165,7 @@ export type ISelectListPageField = IFieldBase & {
     rightIcon?: React.ReactNode; // nếu có thì hiển thị icon bên phải
     style?: StyleProp<ViewStyle>;
     loading?: boolean,
-    defaultFilter?: IFilterRows[];
+    defaultFilter?: IFilter[];
     isNewEdit?: boolean
 };
 

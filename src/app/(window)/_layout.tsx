@@ -6,7 +6,6 @@ const LayoutWindow = () => {
             index: { headerShown: false },
             newEditWin: { headerShown: false },
             newEditWinMaster: { headerShown: false },
-            newEditModal: { headerShown: false },
             viewPdf: { headerShown: false },
             tabMultiList: { headerShown: false }
         }} />

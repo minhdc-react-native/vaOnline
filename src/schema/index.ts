@@ -1,6 +1,16 @@
 import { IRowsColsField } from "@/components/UIEngine/types";
 import { theme } from "@/theme/theme";
 import * as z from "zod";
+import { dmbp } from "./category/dmbp";
+import { dmdt } from "./category/dmdt";
+import { dmdt_ngh } from "./category/dmdt_ngh";
+import { dmdvt } from "./category/dmdvt";
+import { dmkho } from "./category/dmkho";
+import { dmnhdt } from "./category/dmnhdt";
+import { dmnhhv } from "./category/dmnhhv";
+import { dmob } from "./category/dmob";
+import { dmpx } from "./category/dmpx";
+import { dmtk } from "./category/dmtk";
 import { empty } from "./empty";
 import { year } from "./year";
 const colors = theme.colors;
@@ -20,7 +30,14 @@ export type IActionFilter = {
     isSelectTime?: { from: string, to: string, expression?: Record<string, string>, data?: any[] },
     zod?: z.ZodObject,
 };
-type IDataSource = Record<string, { data?: any[], api?: { url: string, tableWin?: ITableWin, type?: 'get' | 'post', data?: Record<string, any>, fields?: string[] } }>;
+
+// type IDataSource = Record<string, { data?: any[], api?: { url: string, tableWin?: ITableWin, type?: 'get' | 'post', data?: Record<string, any>, fields?: string[] } }>;
+
+export type IDataSource = Record<string, {
+    tableWin?: ITableWin,
+    url?: string, type?: 'get' | 'post', dataPost?: Record<string, any>, typeData?: 'normal' | 'tree', fieldCode?: string, fields?: string[],
+    data?: any[], fId?: string, fValue?: string, field?: string, getColor?: (item: IData) => string
+}>;
 
 export type IHandleActionConfig = {
     title?: string;
@@ -42,17 +59,25 @@ export interface ISchemaWin {
     filterConfig?: IActionFilter,
     tabs?: ITabWin[]
 }
+
 export interface ISchemaWinValue {
     config: ISchemaWin,
     action?: { new?: boolean, edit?: boolean, showEditMaster?: boolean },
-    dataSource?: Record<string, { tableWin?: ITableWin, url?: string, data?: any[], fId?: string, fValue?: string, field?: string, getColor?: (item: IData) => string }>,
-    fieldSearch?: string,
+    dataSource?: Record<string, {
+        tableWin?: ITableWin,
+        url?: string, type?: 'get' | 'post', dataPost?: Record<string, any>, typeData?: 'normal' | 'tree', fieldCode?: string,
+        data?: any[], fId?: string, fValue?: string, field?: string, getColor?: (item: IData) => string
+    }>,
+    fieldSearch?: string, isRmTone?: boolean, require?: boolean,
     defaultNew: Record<string, any>,
     dataMaster?: string[],
     zod: z.ZodObject
 }
+
 export const schemaWin: Partial<Record<ITableWin, ISchemaWinValue>> = {
-    Empty: empty, Year: year
+    Empty: empty, Year: year,
+    DMNHDT: dmnhdt, DMDT: dmdt, DMDT_NGH: dmdt_ngh, DMBP: dmbp, DMPX: dmpx, DMOB: dmob, DMTK: dmtk,
+    DMKHO: dmkho, DMNHHV: dmnhhv, DMDVT: dmdvt
 }
 
 export const schemaWinEmpty: ISchemaWinValue = {
@@ -79,18 +104,32 @@ export const schemaWinEmpty: ISchemaWinValue = {
 };
 
 export const schemaItemSearch: Record<ITableSearch, IRowsColsField> = {
-    Empty: {
+    DMMNGH: {
         type: "cols",
         fields: [
             {
                 type: "text",
-                bind: "code",
+                bind: "MA_NGH",
                 textStyle: { fontWeight: "bold", color: colors.secondary }
             },
             {
                 type: "text",
-                bind: "name"
+                bind: "TEN_NGH"
             }
         ]
-    }
+    },
+    DMMCN: {
+        type: "cols",
+        fields: [
+            {
+                type: "text",
+                bind: "MA_CN",
+                textStyle: { fontWeight: "bold", color: colors.secondary }
+            },
+            {
+                type: "text",
+                bind: "TEN_CN"
+            }
+        ]
+    },
 }

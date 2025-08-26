@@ -1,7 +1,8 @@
 // ✅ Gọn gàng hơn: trả về object có field rõ ràng
 
-import { useCallback } from 'react';
+import { api } from '@/utils/apiMethods';
 import get from 'lodash.get';
+import { useCallback } from 'react';
 import { FormState } from './useFormState';
 
 /**
@@ -19,10 +20,29 @@ export function useBoundField<T = any>(formState: FormState<T>, path: string, on
         formState.updateMany(updates);
     }, [formState]);
 
+    const onBlurTaxCode = useCallback((value: string, expression?: Record<string, string>) => {
+        api.get({
+            link: `/api/System/GetDataByReferencesId?id=608bf6bb-360d-44eb-b43f-76937684bd41&filtervalue=${value}`,
+            callBack: (res: any[]) => {
+                if (res && res.length > 0) {
+                    const item = res[0];
+                    if (expression && item) {
+                        let valueChange: any = {};
+                        Object.keys(expression).map(key => {
+                            valueChange[key] = item[expression ? expression[key] : key];
+                        });
+                        setValues(valueChange);
+                    }
+                }
+            }
+        })
+    }, []);
+
     return {
         value,
         setValue,
         setValues,
-        getValue: (p: string) => get(formState.state, p)
+        getValue: (p: string) => get(formState.state, p),
+        onBlurTaxCode
     };
 }

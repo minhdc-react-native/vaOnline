@@ -1,3 +1,4 @@
+import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { StyleProp, StyleSheet, TextStyle, View } from "react-native";
 import { Text, TouchableRipple, useTheme } from "react-native-paper";
 import UUID from 'react-native-uuid';
@@ -15,6 +16,7 @@ interface IProgsGroupButton {
 }
 export const VcGroupButton = ({ title, data, onPress, icon, expanded = true, disable }: IProgsGroupButton) => {
     const { colors } = useTheme();
+    const lang = useDataApp((state) => state.lang);
     const rowsMap: any = {};
     const keyMap: any = {};
     data.forEach(item => {
@@ -41,7 +43,7 @@ export const VcGroupButton = ({ title, data, onPress, icon, expanded = true, dis
                                 return (
                                     <ButtonSetting
                                         key={`${item.id}-${index}`}
-                                        title={item.label}
+                                        title={lang === 'vi' ? item.label : item.labelE}
                                         onPress={() => onPress(item)}
                                         left={IconComponent && <IconComponent
                                             name={item.icon?.name as any}

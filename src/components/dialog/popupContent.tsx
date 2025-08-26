@@ -1,16 +1,23 @@
+import { useTranslation } from '@/context/TranslationContext';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Animated,
-    BackHandler,
     Dimensions,
+    Pressable,
     StyleSheet,
     Text,
     TouchableWithoutFeedback,
     View,
 } from 'react-native';
-import { PanGestureHandler, Pressable, State } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { TextInput, useTheme } from 'react-native-paper';
+import Animated, {
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+    withTiming,
+} from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
@@ -41,8 +48,8 @@ export const PopupContent = ({
     backgroundColor = '#fff',
     textColor = '#000',
     iconType = 'none',
-    confirmText = 'Xác nhận',
-    cancelText = 'Hủy bỏ',
+    confirmText,
+    cancelText,
     showCancel = false,
     inputLabel = '',
     inputPlaceholder = '',
@@ -55,6 +62,7 @@ export const PopupContent = ({
     timeExit,
     color
 }: PopupContentProps) => {
+    const { _ } = useTranslation();
     const { colors } = useTheme();
     const getIconColor = {
         success: "#4CAF50",
@@ -65,37 +73,63 @@ export const PopupContent = ({
         none: colors.primary
     }
 
-    const translateY = useRef(new Animated.Value(0)).current;
-    const scaleAnim = useRef(new Animated.Value(0.8)).current;
-    const opacityAnim = useRef(new Animated.Value(0)).current;
-    const iconAnim = useRef(new Animated.Value(0)).current;
+    // Reanimated values
+    const translateY = useSharedValue(0);
+    const scale = useSharedValue(0.8);
+    const opacity = useSharedValue(0);
+    const iconScale = useSharedValue(0);
+
     const [inputText, setInputText] = useState(inputDefaultValue);
 
     useEffect(() => {
-        Animated.parallel([
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                useNativeDriver: true,
-            }),
-            Animated.timing(opacityAnim, {
-                toValue: 1,
-                duration: 200,
-                useNativeDriver: true,
-            }),
-            Animated.timing(iconAnim, {
-                toValue: 1,
-                duration: 500,
-                useNativeDriver: true,
-            }),
-        ]).start();
+        // animate in
+        scale.value = withSpring(1);
+        opacity.value = withTiming(1, { duration: 200 });
+        iconScale.value = withTiming(1, { duration: 500 });
 
-        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-            onClose?.();
-            return true;
+        if (timeExit) {
+            const timer = setTimeout(() => {
+                closeWithAnimation();
+            }, (timeExit + 2) * 1000);
+            return () => clearTimeout(timer);
+        }
+    }, []);
+
+    useEffect(() => {
+        setInputText(inputDefaultValue);
+    }, [inputDefaultValue]);
+
+    const closeWithAnimation = () => {
+        opacity.value = withTiming(0, { duration: 200 }, () => {
+            onClose && runOnJS(onClose)();
+        });
+    };
+
+    // Gesture Pan
+    const panGesture = Gesture.Pan()
+        .onUpdate((event) => {
+            translateY.value = event.translationY;
+        })
+        .onEnd((event) => {
+            if (event.translationY > 100) {
+                translateY.value = withTiming(height, { duration: 200 }, () => {
+                    onClose && runOnJS(onClose)();
+                });
+            } else {
+                translateY.value = withSpring(0);
+            }
         });
 
-        return () => backHandler.remove();
-    }, []);
+    // Animated styles
+    const popupStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: translateY.value }, { scale: scale.value }],
+        opacity: opacity.value,
+    }));
+
+    const iconStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: iconScale.value }],
+        marginBottom: 10,
+    }));
 
     const getIcon = () => {
         let iconName: "checkmark-circle" | "warning" | "close-circle" | "information-circle" | "help-circle" | null = null;
@@ -121,89 +155,17 @@ export const PopupContent = ({
         }
 
         return (
-            <Animated.View
-                style={{
-                    transform: [
-                        {
-                            scale: iconAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [0.5, 1],
-                            }),
-                        },
-                    ],
-                    marginBottom: 10,
-                }}
-            >
+            <Animated.View style={iconStyle}>
                 {iconName && <Ionicons name={iconName} size={100} color={iconColor} />}
             </Animated.View>
         );
     };
 
-    // Xử lý vuốt xuống
-    const onGestureEvent = Animated.event(
-        [{ nativeEvent: { translationY: translateY } }],
-        { useNativeDriver: true }
-    );
-    // nếu có timeExit
-    const onHandlerStateChange = (event: any) => {
-        if (event.nativeEvent.state === State.END) {
-            if (event.nativeEvent.translationY > 100) {
-                // Nếu vuốt xuống quá 100px, đóng popup
-                Animated.timing(translateY, {
-                    toValue: height,
-                    duration: 200,
-                    useNativeDriver: true,
-                }).start(() => {
-                    onClose?.();
-                });
-            } else {
-                // Nếu vuốt chưa đủ xa, reset lại vị trí ban đầu
-                Animated.spring(translateY, {
-                    toValue: 0,
-                    useNativeDriver: true,
-                }).start();
-            }
-        }
-    };
-    const closeWithAnimation = () => {
-        Animated.timing(opacityAnim, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-        }).start(() => {
-            onClose?.();
-        });
-    };
-    useEffect(() => {
-        setInputText(inputDefaultValue);
-    }, [inputDefaultValue]);
-
-    useEffect(() => {
-        if (timeExit) {
-            const autoExit: NodeJS.Timeout = setTimeout(() => {
-                closeWithAnimation();
-            }, (timeExit + 2) * 1000);
-            return () => clearTimeout(autoExit);
-        }
-    }, []);
-
     return (
         <TouchableWithoutFeedback onPress={closeWithAnimation}>
             <View style={styles.overlay}>
-                <PanGestureHandler
-                    onGestureEvent={onGestureEvent}
-                    onHandlerStateChange={onHandlerStateChange}
-                >
-                    <Animated.View
-                        style={[
-                            styles.popupContainer,
-                            {
-                                backgroundColor,
-                                transform: [{ translateY }, { scale: scaleAnim }],
-                                opacity: opacityAnim,
-                            },
-                        ]}
-                    >
+                <GestureDetector gesture={panGesture}>
+                    <Animated.View style={[styles.popupContainer, { backgroundColor }, popupStyle]}>
                         <View style={styles.dragIndicator} />
                         {typeof showView === 'function' ? showView() : showView ?? (
                             <>
@@ -222,6 +184,7 @@ export const PopupContent = ({
                                     <TextInput
                                         mode="outlined"
                                         label={inputLabel}
+                                        placeholder={inputPlaceholder}
                                         value={inputText}
                                         onChangeText={setInputText}
                                     />
@@ -231,29 +194,30 @@ export const PopupContent = ({
                                     {showCancel && <Pressable
                                         style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
                                         onPress={() => {
+                                            closeWithAnimation();
                                             onCanCel?.();
-                                            // onClose?.();
                                         }}
                                     >
-                                        <Text style={{ padding: 5, borderRadius: 6, borderWidth: 1, borderColor: color || getIconColor[iconType] }}>
-                                            {cancelText}
+                                        <Text style={{ padding: 5, borderRadius: 6, borderWidth: 1, borderColor: getIconColor[iconType] }}>
+                                            {cancelText || _('KHONG')}
                                         </Text>
                                     </Pressable>}
                                     <Pressable
                                         style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
                                         onPress={() => {
+                                            closeWithAnimation();
                                             onConfirm?.(inputText);
-                                            // onClose?.();
                                         }}>
-                                        <Text style={{ padding: 5, borderRadius: 6, backgroundColor: color || getIconColor[iconType], borderWidth: 0, color: colors.background }}>
-                                            {confirmText}
+                                        <Text style={{ padding: 5, borderRadius: 6, backgroundColor: getIconColor[iconType], borderWidth: 0, color: colors.background }}>
+                                            {confirmText || _('CO')}
                                         </Text>
                                     </Pressable>
 
                                 </View>
-                            </>)}
+                            </>
+                        )}
                     </Animated.View>
-                </PanGestureHandler>
+                </GestureDetector>
             </View>
         </TouchableWithoutFeedback>
     );
@@ -265,11 +229,10 @@ const styles = StyleSheet.create({
         width,
         height: height + 50,
         backgroundColor: 'rgba(0,0,0,0.5)',
-        // backgroundColor: 'transparent',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 3,
-        elevation: 3, // Android
+        elevation: 3,
     },
     popupContainer: {
         width: width * 0.8,
@@ -278,7 +241,6 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         borderRadius: 10,
         elevation: 5,
-        // alignItems: 'center', // Căn giữa nội dung
     },
     title: {
         fontSize: 18,

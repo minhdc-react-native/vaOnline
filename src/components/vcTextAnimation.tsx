@@ -1,9 +1,14 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { Animated as AnimatedReact, StyleProp, StyleSheet, TextStyle, View } from 'react-native';
+import { Animated as AnimatedReact, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import Animated, { useAnimatedStyle, useSharedValue, withDelay, withSpring } from 'react-native-reanimated';
-
-export const TextDrop = ({ text, heightDrop = 200 }: { text: string, heightDrop?: number }) => {
+interface IProgs {
+    text: string,
+    heightDrop?: number,
+    textStyle?: StyleProp<TextStyle>,
+    style?: StyleProp<ViewStyle>
+}
+export const TextDrop = ({ text, heightDrop = 200, textStyle, style }: IProgs) => {
     const { colors } = useTheme();
     const letters = useMemo(() => {
         return text.split("").map(char => ({
@@ -14,17 +19,17 @@ export const TextDrop = ({ text, heightDrop = 200 }: { text: string, heightDrop?
 
     return (
         <View
-            style={{
+            style={[{
                 flexDirection: 'row',
                 justifyContent: 'center',
                 alignItems: 'center',
-                backgroundColor: colors.elevation.level1,
-                paddingVertical: 5,
-                paddingHorizontal: 20,
+                backgroundColor: colors.background,
+                // paddingVertical: 5,
+                paddingHorizontal: 10,
                 borderRadius: 50,
                 borderWidth: 1,
                 borderColor: colors.elevation.level5
-            }}
+            }, style]}
         >
             {letters.map((item, index) => (
                 <AnimatedChar
@@ -33,17 +38,19 @@ export const TextDrop = ({ text, heightDrop = 200 }: { text: string, heightDrop?
                     color={item.color}
                     delay={index * 150}
                     heightDrop={heightDrop}
+                    textStyle={textStyle}
                 />
             ))}
         </View>
     );
 };
 
-const AnimatedChar = ({ char, color, delay, heightDrop }: {
+const AnimatedChar = ({ char, color, delay, heightDrop, textStyle }: {
     char: string;
     color: string;
     delay: number;
     heightDrop: number;
+    textStyle?: StyleProp<TextStyle>
 }) => {
     const translateY = useSharedValue(-1 * heightDrop);
 
@@ -65,10 +72,11 @@ const AnimatedChar = ({ char, color, delay, heightDrop }: {
         <Animated.View style={animatedStyle}>
             <Text
                 variant="displayMedium"
-                style={{
+                style={[{
                     fontWeight: 'bold',
                     color,
-                }}
+                    fontSize: 30,
+                }, textStyle]}
             >
                 {char}
             </Text>

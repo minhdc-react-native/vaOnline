@@ -8,7 +8,7 @@ import { Helper } from "@/utils/Helper";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { Button, customText, IconButton, useTheme } from "react-native-paper";
-import { IHandleActionConfig } from "./schema";
+import { IHandleActionConfig } from "../../schema";
 const Text = customText<'customVariant'>();
 const HEIGHT_WINDOW = Dimensions.get("window").height;
 interface IProgs {

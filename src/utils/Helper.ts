@@ -55,19 +55,7 @@ const filterTime = [
     { value: 'Quý 3', id: 'quarter_3' },
     { value: 'Quý 4', id: 'quarter_4' },
 ];
-interface POSDeviceInfo {
-    isPrintDevice: boolean;
-    modelName?: "iMin" | "P55";
-}
-interface IAddInfoOrder {
-    usename: string,
-    nameShop: string,
-    address: string,
-    tel: string,
-    rQuantity: number,
-    rPrice: number,
-    rAmount: number
-}
+
 export const Helper = {
     getMessageError: (error: any) => {
         let msgError: string;
@@ -296,5 +284,33 @@ export const Helper = {
         }
         // Các kiểu còn lại (boolean, function, symbol, bigint, v.v.)
         return false;
+    },
+    sortTreeFlat: (data: IData[], codeField?: string): IData[] => {
+        const grouped = new Map<string | null, IData[]>();
+        data.forEach(item => {
+            if (!grouped.has(item.parentId)) {
+                grouped.set(item.parentId, []);
+            }
+            grouped.get(item.parentId)!.push(item);
+        });
+
+        codeField && grouped.forEach((arr, key) => {
+            arr.sort((a, b) => {
+                const codeA = a[codeField] ?? "";
+                const codeB = b[codeField] ?? "";
+                return String(codeA).localeCompare(String(codeB));
+            });
+        });
+
+        const result: IData[] = [];
+        function traverse(parentId: string | null) {
+            const children = grouped.get(parentId) || [];
+            for (const child of children) {
+                result.push(child);
+                traverse(child.id.toString());
+            }
+        }
+        traverse(null);
+        return result;
     }
 };

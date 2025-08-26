@@ -1,9 +1,9 @@
-import { schemaWin, schemaWinEmpty } from "@/app/(window)/schema";
 import { useLoading } from "@/components/dialog/loadingProvider";
 import { usePopup } from "@/components/dialog/popupProvider";
 import { useToast } from "@/components/dialog/useToast";
 import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { useTranslation } from "@/context/TranslationContext";
+import { schemaWin, schemaWinEmpty } from "@/schema";
 import { VACOMTheme } from "@/theme/theme";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
@@ -16,17 +16,20 @@ import UUID from 'react-native-uuid';
 import { useDataItemWin } from "./useDataItem";
 import { useDataApp } from "./zustand/useDataApp";
 const backHandQuestion = { title: "Cảnh báo", message: "Dữ liệu đã thay đổi, bạn có muốn thoát không?" };
+const backHandQuestionE = { title: "Warning", message: "Data has changed, do you want to exit?" };
 
 interface IProgs {
-    windowId: string;
-    tableWin: ITableWin;
-    type?: 'page' | 'all',
+    // windowId: string;
+    // tableWin: ITableWin;
+    // typeWin?: '(window)' | '(winMaster)' | '(winTree)';
+    itemMenuWin: IMenuWin
     pageSize?: number,
-    idItem?: string;
     loadingBegin?: boolean;
-    typeWin?: '(window)' | '(winMaster)' | '(winTree)';
 }
-export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, idItem, loadingBegin = false, typeWin = "(window)" }: IProgs) => {
+export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }: IProgs) => {
+
+    const { id: windowId, tableWin, typeWin } = itemMenuWin;
+
     const { colors } = useTheme<VACOMTheme>();
     const [rowHeights, setRowHeights] = useState<Record<string, DimensionValue>>({});
     const handleLayout = (itemId: string, event: LayoutChangeEvent) => {
@@ -52,13 +55,26 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
 
     const dataItems = useDataItemWin((state) => state.dataItems);
     const setItemData = useDataItemWin((state) => state.setDataItem);
+
+
     const editMode = useDataItemWin((state) => state.editMode);
     const setEditMode = useDataItemWin((state) => state.setEditMode);
 
     const onChangeValue = useDataItemWin((state) => state.onChangeValue);
+
+    const dataTags = useDataItemWin((state) => state.dataTags);
+    const setDataTags = useDataItemWin((state) => state.setDataTags);
+    const [loadingDetail, setLoadingDetail] = useState<boolean>(true);
+    const dataItemDetail = useDataItemWin((state) => state.dataItemDetail);
+    const setDataItemDetail = useDataItemWin((state) => state.setDataItemDetail);
+
     const onChangeValueDetail = useDataItemWin((state) => state.onChangeValueDetail);
     const onAddDetail = useDataItemWin((state) => state.onAddDetail);
     const onRemoveDetail = useDataItemWin((state) => state.onRemoveDetail);
+
+    const orgUnit = useDataApp((state) => state.orgUnit);
+    const currentYear = useDataApp((state) => state.currentYear);
+    const isLangVi = !!(useDataApp((state) => state.lang) === "vi");
 
     const resetItem = useDataItemWin((state) => state.resetItem);
     const { _ } = useTranslation();
@@ -73,6 +89,7 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
     const schemaUI = useMemo(() => {
         return schemaWin[tableWin] ?? schemaWinEmpty;
     }, []);
+
     const getFilterRows = useCallback((values: Record<string, any>) => {
         return { filter: [], tlbparam: [] };
     }, []);
@@ -85,10 +102,6 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
         return schemaUI.config.itemAction.fields.length;
     }, []);
 
-    const tabs = useMemo(() => {
-        return schemaUI.config.tabs ?? []
-    }, []);
-
     const showFilter = useMemo(() => {
         return {
             showSearch: !!schemaUI.fieldSearch,
@@ -99,13 +112,24 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
     const extractWinConfig = (dataConfig: any): IWinConfig => {
         setParams({
             page: 1,
-            count: pageSize,
+            count: typeWin === "(winTree)" ? 99999 : pageSize,
             filter: defaultFilter.filter ?? [],
             start: 0,
             infoparam: null,
             tlbparam: defaultFilter.tlbparam ?? [],
             window_id: windowId
         });
+        const tabsWin: any[] = [...dataConfig.Tabs].slice(1);
+        const newTabs = tabsWin.map((tab) => ({
+            id: tab.TAB_ID,
+            value: tab.TAB_NAME,
+            TAB_ID: tab.TAB_ID,
+            TAB_NAME: tab.TAB_NAME,
+            FOREIGN_KEY: tab.FOREIGN_KEY,
+            TAB_TABLE: tab.TAB_TABLE,
+            PERMISSION: { NEW: !!tab.INSERT_STORE_PROCEDURE, EDIT: !!tab.UPDATE_STORE_PROCEDURE, DELETE: !!tab.DELETE_STORE_PROCEDURE }
+        }));
+        setDataTags(tableWin, newTabs);
         return {
             // references: data.references ?? {},
             window: {
@@ -114,6 +138,8 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
                 WINDOW_NAME: dataConfig.WINDOW_NAME ?? "",
                 Tabs: dataConfig.Tabs.map((tab: any): ITabWin => ({
                     id: tab.id ?? "",
+                    value: tab.TAB_NAME ?? "",
+                    TAB_ID: tab.TAB_ID ?? "",
                     TAB_TABLE: tab.TAB_TABLE ?? "",
                     FOREIGN_KEY: tab.FOREIGN_KEY ?? "",
                     TAB_NAME: tab.TAB_NAME ?? "",
@@ -126,19 +152,36 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
             }
         };
     }
+    const tabs = useMemo(() => {
+        return dataTags[tableWin] ?? [];
+    }, [tableWin, dataTags]);
+
+    const [currentTab, setCurrentTab] = useState<ITabWin>(tabs?.[0]);
+
     const tabMulti = useMemo(() => {
-        return (winConfig ? [...winConfig.window.Tabs].shift() : []);
+        return (winConfig ? [...winConfig.window.Tabs].slice(1) : []);
     }, [winConfig]);
 
     const setTextSearch = (textSearch: string) => {
-        if (schemaUI.fieldSearch) {
+
+        if (schemaUI.isRmTone) textSearch = Helper.rmTone(textSearch).replace(/\s+/g, "");
+
+        if (schemaUI.fieldSearch && !!textSearch) {
             setParams(prev => prev ? {
-                ...prev,
-                page: 1, start: 0,
-                filter: [...prev.filter, { columnName: schemaUI.fieldSearch as string, columnType: "string", value: textSearch }]
+                ...prev, page: 1, start: 0,
+                filter: (() => {
+                    const filters = [...prev.filter];
+                    const index = filters.findIndex(f => f.columnName === schemaUI.fieldSearch);
+                    if (index >= 0) {
+                        filters[index] = { ...filters[index], value: textSearch };
+                    } else {
+                        filters.push({ columnName: schemaUI.fieldSearch as string, columnType: "string", value: textSearch, });
+                    }
+                    return filters;
+                })(),
             } : undefined);
         } else {
-            setParams(prev => prev ? { ...prev, page: 1, start: 0, quickSearch: textSearch } : undefined);
+            setParams(prev => prev ? { ...prev, page: 1, start: 0, filter: defaultFilter.filter ?? [], tlbparam: defaultFilter.tlbparam ?? [] } : undefined);
         }
     };
 
@@ -147,10 +190,9 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
         setParams(prev => prev ? { ...prev, page: 1, start: 0, filter: filter.filter, tlbparam: filter.tlbparam } : undefined);
     };
 
-
     const getDataPage = useCallback(async () => {
         if (!winConfig?.window.Tabs[0].PERMISSION.NEW) {
-            showPopup({ title: "Thông báo", message: "Bạn không có quyền xem dữ liệu!" });
+            showPopup({ title: isLangVi ? "Thông báo" : "Notification", message: isLangVi ? "Bạn không có quyền xem dữ liệu!" : "You do not have permission to view the data!" });
             return;
         }
         if (params?.page === 1) {
@@ -168,8 +210,7 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
                 }
             },
             callBack: (res: { data: IData[], total_count: number }) => {
-                const isHaveId = res.data.length > 0 ? res.data[0].id !== undefined : true;
-                const dataPage = isHaveId ? res.data : res.data.map(_item => ({ ..._item, id: UUID.v4() }))
+                const dataPage = typeWin === "(winTree)" ? Helper.sortTreeFlat(res.data, itemMenuWin.codeField) : res.data
                 setInfoData(prev => ({
                     ...prev,
                     total: params?.page === 1 ? res.total_count : infoData.total,
@@ -185,7 +226,7 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
             },
             callError: (err) => {
                 console.error(err);
-                showToast("Lỗi lấy dữ liệu!", { type: "error" })
+                showToast(`${isLangVi ? 'Lỗi lấy dữ liệu!' : 'Error retrieving data!'}`, { type: "error" })
             }
         });
     }, [params, winConfig]);
@@ -218,8 +259,9 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
 
     const onNew = useCallback(() => {
         const arrReplace: Record<string, any> = {
-
+            '#NAM#': currentYear
         };
+
         const newDefault = Object.fromEntries(
             Object.entries(schemaUI.defaultNew).map(([key, value]) =>
                 typeof value === 'string' && arrReplace.hasOwnProperty(value)
@@ -227,16 +269,20 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
                     : [key, value]
             )
         );
+
+        const defaultValue = itemMenuWin.defaultValue ?? {};
+
         setEditMode('new');
-        setItemData(tableWin, { id: UUID.v4(), _isNew: true, ...newDefault });
+        setItemData(tableWin, { id: UUID.v4(), _isNew: true, DVCS_ID: orgUnit, ...newDefault, ...defaultValue });
+
         const tabMaster = winConfig?.window.Tabs[0];
-        const action = schemaUI.action ? { ...schemaUI.action, edit: !!tabMaster?.PERMISSION?.NEW } : { edit: true, new: true };
+        const action = schemaUI.action ? { ...schemaUI.action, edit: tabMaster?.PERMISSION.EDIT, new: tabMaster?.PERMISSION.NEW } : { edit: true, new: true };
 
         router.navigate({
-            pathname: `/(window)/newEditWin${typeWin === "(window)" ? '' : 'Master'}`,
+            pathname: `/(window)/newEditWin${typeWin !== "(winMaster)" ? '' : 'Master'}`,
             params: {
-                windowId: windowId, tableWin: tableWin, title: _(tabMaster?.TAB_NAME),
-                sAction: JSON.stringify(action), sPermissions: JSON.stringify(tabMaster?.PERMISSION ?? {})
+                sItemMenuWin: JSON.stringify(itemMenuWin), title: _(winConfig?.window?.WINDOW_NAME),
+                sAction: JSON.stringify(action)
             }
         });
     }, [winConfig]);
@@ -245,21 +291,20 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
         setEditMode('edit');
         setItemData(tableWin, item);
         const tabMaster = winConfig?.window.Tabs[0];
-        const action = schemaUI.action ? { ...schemaUI.action, edit: !!tabMaster?.PERMISSION.EDIT } : { edit: true, new: true };
+
+        const action = schemaUI.action ? { ...schemaUI.action, edit: tabMaster?.PERMISSION.EDIT, new: tabMaster?.PERMISSION.NEW } : { edit: true, new: true };
 
         const dataMaster = schemaUI.dataMaster ? Object.fromEntries(schemaUI.dataMaster.map(f => [f, item[f]])) : {};
         router.navigate({
-            pathname: `/(window)/newEditWin${typeWin === "(window)" ? '' : 'Master'}`,
+            pathname: `/(window)/newEditWin${typeWin !== "(winMaster)" ? '' : 'Master'}`,
             params: {
-                windowId: windowId, tableWin: tableWin, id: item.id, title: _(tabMaster?.TAB_NAME),
-                sDataMaster: JSON.stringify(dataMaster), sAction: JSON.stringify(action),
-                sPermissions: JSON.stringify(tabMaster?.PERMISSION ?? {})
+                sItemMenuWin: JSON.stringify(itemMenuWin), id: item.id, title: _(winConfig?.window?.WINDOW_NAME),
+                sDataMaster: JSON.stringify(dataMaster), sAction: JSON.stringify(action)
             }
         });
     }, [winConfig]);
 
-
-    const onSave = useCallback(() => {
+    const onSave = useCallback(async () => {
         const itemData = dataItems[tableWin]!;
         const _checkSave = () => {
             const isResult = validate();
@@ -272,57 +317,91 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
         };
         if (!_checkSave()) return;
 
+        const details: any[] = [];
         if (typeWin === "(winMaster)" && tabs.length > 0) {
-            // if (itemData[tabs[0].code].length === 0) {
-            //     showToast('Bạn chưa nhập chi tiết!', { type: "warning" });
-            //     return;
-            // }
+
+            for (const tab of tabs) {
+                const isRequire = schemaWin[tab.TAB_TABLE]?.require;
+                const dataDetail = dataItemDetail[tableWin] ? dataItemDetail[tableWin][tab.TAB_TABLE] : [];
+
+                if (isRequire && dataDetail.length === 0) {
+                    showToast(`${isLangVi ? 'Bạn chưa nhập chi tiết' : 'You have not entered details'} [${tab.TAB_NAME}]!`, { type: "warning" });
+                    return;
+                }
+                details.push({
+                    TAB_ID: tab.TAB_ID,
+                    TAB_TABLE: tab.TAB_TABLE,
+                    data: dataDetail
+                });
+            }
         }
-        api.post({
+        const domain = await getSubDomain();
+        const msgSuccessful = editMode === "new" ? (isLangVi ? "Thêm mới" : "New addition") : (isLangVi ? "Sửa" : "Edit");
+        await api.post({
             link: `/api/System/Save`,
             data: {
                 windowid: windowId,
                 editmode: editMode === "new" ? 1 : 2,
-                data: itemData
+                data: [{ ...itemData, details: details }]
+            },
+            config: {
+                headers: {
+                    'x-tenant-name': domain
+                }
             },
             callBack: (res => {
-                setEditMode(null);
-                showToast("Thêm mới thành công");
-                router.back();
-                setShouldRefresh(winConfig?.window.Tabs[0].TAB_TABLE ?? null);
+                if (res && res.error) {
+                    showToast(res.error, { type: "error" });
+                } else {
+                    setEditMode(null);
+                    showToast(isLangVi ? `${msgSuccessful} thành công!` : `${msgSuccessful} successful!`);
+                    router.back();
+                    setShouldRefresh(itemMenuWin.tableWin);
+                }
             }),
             callError: (msgError) => {
                 console.log("msgError>>", msgError);
                 showToast(msgError, { type: "error" });
             },
-            setLoading: (loading) => loading ? show("Thêm mới...") : hide()
+            setLoading: (loading) => loading ? show("...") : hide()
         });
 
-    }, [winConfig, dataItems, tabs]);
+    }, [itemMenuWin, dataItems, tabs]);
 
     const onDelete = useCallback((id: string) => {
         const tabMaster = winConfig?.window.Tabs[0];
-        if (!!tabMaster?.PERMISSION.DELETE) {
-            showPopup({ title: "Thông báo", message: "Bạn không có quyền xoá!" });
+        if (!tabMaster?.PERMISSION.DELETE) {
+            showPopup({ title: isLangVi ? "Thông báo" : "Notification", message: isLangVi ? "Bạn không có quyền xoá!" : "You do not have permission to delete!" });
             return;
         }
         showPopup({
-            message: "Bạn có muốn xoá dữ liệu",
+            message: isLangVi ? "Bạn có muốn xoá dữ liệu" : "Do you want to delete data?",
             iconType: "question",
             showCancel: true,
-            onConfirm: () => {
-                api.post({
+            onConfirm: async () => {
+                const domain = await getSubDomain();
+                await api.post({
                     link: `/api/System/Save`,
                     data: {
                         windowid: windowId,
                         editmode: 3,
-                        data: { id: id }
+                        data: [{ id: id }]
+                    },
+                    config: {
+                        headers: {
+                            'x-tenant-name': domain
+                        }
                     },
                     callBack: (res => {
-                        showToast("Xoá thành công");
-                        setShouldRefresh(winConfig?.window.Tabs[0].TAB_TABLE ?? null);
+                        if (res && res.error) {
+                            const msgError = res.error.split('|');
+                            showToast(`${msgError[0]} ${msgError[2] !== undefined ? msgError[2] : ''}`, { type: "error" });
+                        } else {
+                            showToast(isLangVi ? "Xoá thành công" : "Delete successful");
+                            setShouldRefresh(itemMenuWin.tableWin);
+                        }
                     }),
-                    setLoading: (loading) => loading ? show("Xoá...") : hide()
+                    setLoading: (loading) => loading ? show(isLangVi ? "Xoá..." : "Delete...") : hide()
                 });
             }
         });
@@ -335,10 +414,25 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
         delete: onDelete
     };
 
+    const loadDetail = async (id?: string) => {
+        const promises = tabs.map(async (tab) => {
+            if (id) {
+                await api.get({
+                    link: `/api/System/GetDataDetailsByTabTable?window_id=${itemMenuWin.id}&id=${id}&tab_table=${tab.TAB_TABLE}`,
+                    callBack: (res) => setDataItemDetail(tableWin, tab.TAB_TABLE, res)
+                })
+            } else {
+                setDataItemDetail(tableWin, tab.TAB_TABLE, []);
+            }
+        });
+        setLoadingDetail(true);
+        await Promise.all(promises);
+        setLoadingDetail(false);
+    };
 
-    const [currentTab, setCurrentTab] = useState<ITabWin>(tabs?.[0]);
+
     const schemaWinDetail = useMemo(() => {
-        return schemaWin[currentTab?.TAB_TABLE] ?? schemaWinEmpty;
+        return schemaWin[currentTab?.TAB_TABLE ?? "Empty"] ?? schemaWinEmpty;
     }, [currentTab]);
 
     const numberActionDetail: number = useMemo(() => {
@@ -359,8 +453,8 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
     };
 
     const dataDetail = useMemo(() => {
-        return dataItems[tableWin]?.[currentTab?.TAB_TABLE];
-    }, [dataItems, currentTab]);
+        return dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"];
+    }, [dataItemDetail, currentTab]);
 
     const handleActionDetail = useMemo(() => {
         return {
@@ -377,7 +471,7 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
                 const isEdit = schemaWinDetail.action?.edit !== false;
                 if (!isEdit) return;
                 typeNewEdit.current = 'edit', currentIndex.current = index;
-                setItemDetail(dataItems[tableWin]?.[currentTab.TAB_TABLE]?.[index] ?? null);
+                setItemDetail(dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"]?.[index] ?? null);
                 setShowNewEdit(true);
             },
             change: (valueChange: IData) => {
@@ -388,9 +482,9 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
                 if (data) {
                     setIsChange(true);
                     if (typeNewEdit.current === 'new') {
-                        onAddDetail(tableWin, currentTab.TAB_TABLE, data!);
+                        onAddDetail(tableWin, currentTab?.TAB_TABLE ?? "Empty", data!);
                     } else {
-                        onChangeItemDataDetail(currentTab.TAB_TABLE, currentIndex.current, data!);
+                        onChangeItemDataDetail(currentTab?.TAB_TABLE ?? "Empty", currentIndex.current, data!);
                     }
                 }
                 setShowNewEdit(false);
@@ -403,15 +497,15 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
                     showCancel: true,
                     onConfirm: () => {
                         setIsChange(true);
-                        onRemoveDetail(tableWin, currentTab.TAB_TABLE, itemDetail);
+                        onRemoveDetail(tableWin, currentTab?.TAB_TABLE ?? "Empty", itemDetail);
                     }
                 });
             }
         }
-    }, []);
+    }, [dataItemDetail]);
 
     // const [dataSource, setDataSource] = useState<Record<string, any[]>>({});
-    const [tableRefresh, setTableRefresh] = useState<Record<string, { url: string, key: string }>>({});
+    const [tableRefresh, setTableRefresh] = useState<Record<string, { url: string, type?: string, dataPost?: Record<string, any>, key: string }>>({});
 
     const loadDataBegin = async () => {
         let source: any = schemaWin[tableWin]?.dataSource ?? {};
@@ -426,27 +520,16 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
             }
             if (source[key]?.url) {
                 const url = source[key].url;
-                await api.get({
-                    link: url, callBack: (res => {
+                const apiGetPost = source[key].type === "post" ? api.post : api.get;
+                await apiGetPost({
+                    link: url, data: source[key].dataPost,
+                    callBack: (res => {
                         if (res) {
-                            const fields: string[] = source[key].fields || Object.keys(res[0]);
-                            const isColor = fields.indexOf("color") < 0 && typeof source[key].getColor === "function";
-                            const result = res.map((item: any) => {
-                                const obj = Object.fromEntries(
-                                    fields.map(f => [f, item[f]])
-                                );
-                                if (isColor) {
-                                    obj.color = source[key].getColor(item);
-                                }
-                                return obj;
-                            });
-
-                            setDataSource(tableWin, key, result);
-
+                            setSource(res, source, key);
                             if (source[key]?.tableWin) {
                                 setTableRefresh(prev => ({
                                     ...prev,
-                                    [source[key].tableWin]: { url: source[key].url, key: key }
+                                    [source[key].tableWin]: { url: source[key].url, type: source[key].type, dataPost: source[key].dataPost, key: key }
                                 }));
                             }
                         }
@@ -457,13 +540,34 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
         await Promise.all(promises);
     };
 
+    const setSource = useCallback((res: IData[], source: any, key: string) => {
+        if (source[key].typeData === "tree") res = Helper.sortTreeFlat(res, source[key].fieldCode);
+
+        const fields: string[] = source[key].fields || Object.keys(res[0]);
+        const isColor = fields.indexOf("color") < 0 && typeof source[key].getColor === "function";
+        const result = res.map((item: any) => {
+            const obj = Object.fromEntries(
+                fields.map(f => [f, item[f]])
+            );
+            if (isColor) {
+                obj.color = source[key].getColor(item);
+            }
+            return obj;
+        });
+
+        setDataSource(tableWin, key, result);
+    }, [tableWin]);
+
     useEffect(() => {
         if (shouldRefresh && tableRefresh[shouldRefresh]) {
             // refresh datasource...
-            api.get({
+            let source: any = schemaWin[tableWin]?.dataSource ?? {};
+            const apiRefresh = tableRefresh[shouldRefresh].type === "post" ? api.post : api.get;
+            apiRefresh({
                 link: tableRefresh[shouldRefresh].url,
+                data: tableRefresh[shouldRefresh].dataPost,
                 callBack: (res) => {
-                    setDataSource(tableWin, tableRefresh[shouldRefresh].key, res);
+                    setSource(res, source, tableRefresh[shouldRefresh].key);
                     setShouldRefresh(null);
                 }
             });
@@ -492,10 +596,10 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
     const onBack = () => {
         if (isChange) {
             showPopup({
-                title: backHandQuestion.title,
-                message: backHandQuestion.message,
+                title: isLangVi ? backHandQuestion.title : backHandQuestionE.title,
+                message: isLangVi ? backHandQuestion.message : backHandQuestionE.message,
                 showCancel: true,
-                confirmText: "Thoát",
+                confirmText: _('EXIT'),
                 onConfirm: () => {
                     router.back();
                 }
@@ -536,6 +640,8 @@ export const useWinPage = ({ windowId, tableWin, type = "page", pageSize = 20, i
         handleLoadMore,
         detail: {
             tabs,
+            loadingDetail,
+            loadDetail,
             numberActionDetail,
             dataDetail,
             currentTab,

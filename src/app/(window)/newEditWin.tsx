@@ -1,6 +1,7 @@
 import FormWrapper from "@/components/formWrapper";
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { VcHeaderWin } from "@/components/vcHeaderWin";
+import { useTranslation } from "@/context/TranslationContext";
 import { useWinPage } from "@/hooks/useWinPage";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
@@ -8,20 +9,19 @@ import { Button, Card } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const NewEditWin = () => {
-    const { windowId, tableWin, id, title, sDataMaster, sAction, sPermissions } = useLocalSearchParams();
+    const { sItemMenuWin, id, title, sDataMaster, sAction } = useLocalSearchParams();
     const titleWin = title?.toString();
     const actionNewEdit = JSON.parse(sAction?.toString());
-    const fixTableWin = tableWin?.toString() as ITableWin;
-    const permissions = JSON.parse(sPermissions?.toString());
     const navigation = useNavigation();
+    const itemMenuWin: IMenuWin = JSON.parse(sItemMenuWin.toString());
+    const { _ } = useTranslation();
     const {
         colors, schemaUI, resetItem,
         itemData, dataSource, onChangeItemData, handleAction, onBack, errors
     } = useWinPage({
-        windowId: windowId?.toString(),
-        tableWin: fixTableWin,
-        idItem: id?.toString()
+        itemMenuWin: itemMenuWin
     });
+
     const [edit, setEdit] = useState<boolean>(id === undefined);
 
     const onPressAction = () => {
@@ -33,13 +33,13 @@ const NewEditWin = () => {
     };
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', () => {
-            resetItem(fixTableWin); // xoá dữ liệu khi không dùng đến...
+            resetItem(itemMenuWin.tableWin); // xoá dữ liệu khi không dùng đến...
         });
         return unsubscribe;
     }, [navigation]);
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
-            <VcHeaderWin title={titleWin} edit={edit} onPressAction={onPressAction} onBack={onBack} isEdit={actionNewEdit.edit && permissions?.mnEdit !== undefined} />
+            <VcHeaderWin title={titleWin} edit={edit} onPressAction={onPressAction} onBack={onBack} isEdit={actionNewEdit.edit} />
             <FormWrapper style={{ padding: 10 }}>
                 {edit ? <SchemaUIEngine schema={schemaUI.config.itemEdit} data={itemData}
                     onChangeItemData={onChangeItemData} errors={errors} dataSource={dataSource} /> :
@@ -55,7 +55,7 @@ const NewEditWin = () => {
                                         sAction: JSON.stringify(actionNewEdit)
                                     }
                                 })}>
-                                {`Chi tiết [${schemaUI.config.tabs?.length}]`}
+                                {`${_('DETAILS')} [${schemaUI.config.tabs?.length}]`}
                             </Button>}
                     </Card>}
             </FormWrapper>

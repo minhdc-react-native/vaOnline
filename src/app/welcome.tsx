@@ -17,7 +17,7 @@ export default function WelcomeScreen() {
                     backgroundColor: colors.elevation.level2,
                     borderColor: colors.elevation.level5
                 }]}>Acounting</Text> */}
-                <TextZoomIn text='Ứng dụng quản lý kế toán dành cho doanh nghiệp, hộ, cá nhân kinh doanh tại Việt Nam' />
+                <TextZoomIn text='Ứng dụng quản lý kế toán Online' />
                 <LottieView
                     source={require('@/assets/animations/login.json')}
                     autoPlay

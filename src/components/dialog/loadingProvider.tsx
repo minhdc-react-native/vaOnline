@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
-import { Text, useTheme } from "react-native-paper";
+import { useTheme } from "react-native-paper";
 import PieLoader from "./pieLoader";
 
 const LoadingContext = createContext<{
@@ -31,7 +31,7 @@ export const LoadingProvider = ({ children }: { children: React.ReactNode }) => 
                     <View style={{ gap: 5, alignItems: "center" }}>
                         <PieLoader />
                         {/* <SquareLoader /> */}
-                        <Text style={{ color: "#fff" }}>{text}</Text>
+                        {/* <Text style={{ color: "#fff" }}>{text}</Text> */}
                     </View>
                 </View>
             )}

@@ -2,7 +2,9 @@ import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { IRowsColsField } from "@/components/UIEngine/types";
 import { theme } from "@/theme/theme";
 import { MaterialIcons } from "@expo/vector-icons";
+import React from "react";
 import { LayoutChangeEvent, StyleSheet, TouchableOpacity, View } from "react-native";
+
 interface IProps {
     schemaView: IRowsColsField,
     item: IData,
@@ -11,7 +13,8 @@ interface IProps {
     dataSource?: Record<string, any[]>,
     isHideIcon?: boolean
 }
-export const ItemWinList = ({ schemaView, item, onLayout, onPress, dataSource, isHideIcon }: IProps) => {
+
+const ItemViewComponent: React.FC<IProps> = ({ schemaView, item, onLayout, onPress, dataSource, isHideIcon }) => {
     return (
         <View
             onLayout={(e) => onLayout?.(item.id?.toString(), e)}
@@ -33,7 +36,9 @@ export const ItemWinList = ({ schemaView, item, onLayout, onPress, dataSource, i
             </TouchableOpacity>
         </View>
     )
-}
+};
+export const ItemWinList = React.memo(ItemViewComponent);
+
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',

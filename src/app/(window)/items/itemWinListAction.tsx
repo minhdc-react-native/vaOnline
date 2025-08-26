@@ -1,6 +1,6 @@
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { IRowsColsField } from "@/components/UIEngine/types";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DimensionValue, StyleSheet } from "react-native";
 
 interface IProps {
@@ -9,7 +9,7 @@ interface IProps {
     height?: DimensionValue | undefined,
     actionMap?: Record<string, (param?: any) => void>
 }
-export const ItemWinListAction = ({ schemaView, item, height, actionMap }: IProps) => {
+const ItemViewComponent: React.FC<IProps> = ({ schemaView, item, height, actionMap }) => {
     const isSetHeight = useRef(false);
     const [fixHeight, setFixHeight] = useState<DimensionValue | null>(null);
     useEffect(() => {
@@ -22,7 +22,9 @@ export const ItemWinListAction = ({ schemaView, item, height, actionMap }: IProp
         <SchemaUIEngine schema={schemaView} actionMap={actionMap} dataActionMap={item} data={item}
             style={[styles.container, { height: fixHeight ?? "auto", marginHorizontal: 10, marginVertical: 5, }]} />
     )
-}
+};
+export const ItemWinListAction = React.memo(ItemViewComponent);
+
 const styles = StyleSheet.create({
     container: {
         justifyContent: 'flex-end',

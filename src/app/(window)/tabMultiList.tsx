@@ -10,12 +10,12 @@ import { RefreshControl } from 'react-native-gesture-handler';
 import { Divider, FAB, IconButton, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SwipeListView } from 'react-native-swipe-list-view';
+import { IHandleActionConfig } from '../../schema';
+import { layoutHandleAction } from '../../schema/layoutHandleAction';
 import { ItemWinList } from './items/itemWinList';
 import { ItemWinListAction } from './items/itemWinListAction';
 import NewEditWinMulti from './newEditWinMulti';
 import ParamScreen from './paramScreen';
-import { IHandleActionConfig } from './schema';
-import { layoutHandleAction } from './schema/layoutHandleAction';
 import { useActionMap } from './useActionMap';
 
 const TabMultiList = () => {
@@ -118,6 +118,9 @@ const TabMultiList = () => {
                     }
                     disableRightSwipe
                     showsVerticalScrollIndicator={false}
+                    initialNumToRender={20}
+                    maxToRenderPerBatch={20}
+                    windowSize={10}
                 />
             </View>
             {(schemaUI.action?.new !== false) && <FAB

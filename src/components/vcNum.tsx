@@ -19,7 +19,7 @@ interface NumericInputProps {
     label?: string,
     value: number | null | undefined;
     onChange: (val: number | null) => void;
-    typeFormat?: "rQuantity" | "rPrice" | "rPercentage" | "rAmount";
+    typeFormat?: IRoundNumber;
     locale?: 'vi-VN' | 'en-US';
     mode?: 'default' | 'line',
     left?: React.ReactNode;

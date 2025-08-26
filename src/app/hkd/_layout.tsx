@@ -34,6 +34,8 @@ const HeaderRight = ({ name }: { name: string }) => {
                 <IconButton icon={'apps'} iconColor={colors.secondary} onPress={() => router.replace("/list-app")} />
             );
         default:
-            return null;
+            return (
+                <IconButton icon={'apps'} iconColor={colors.secondary} onPress={() => router.replace("/list-app")} />
+            );
     }
 }

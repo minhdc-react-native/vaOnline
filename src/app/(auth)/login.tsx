@@ -2,14 +2,34 @@
 import FormWrapper from '@/components/formWrapper';
 import { useZodValidation } from '@/components/UIEngine/hooks/useZodValidation';
 import { SchemaUIEngine } from '@/components/UIEngine/schemaUIEngine';
+import { IRowsColsField } from '@/components/UIEngine/types';
+import { TextDrop } from '@/components/vcTextAnimation';
 import { useAuth } from '@/hooks/useAuth';
 import { loginForm } from '@/schemaUI/loginForm';
 import { Helper } from '@/utils/Helper';
 import { getRemember, getSubDomain, saveSubDomain } from '@/utils/vcStorage';
 import { useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import { Card, Text, useTheme } from 'react-native-paper';
+import { Card, Text, ToggleButton, useTheme } from 'react-native-paper';
 const sloganVacom = require('@/assets/images/splash.png') // Logo
+const infoVacom: IRowsColsField = {
+    type: "rows",
+    style: { justifyContent: "center", alignItems: "center" },
+    fields: [
+        {
+            type: 'text',
+            label: 'info@vacom.com.vn',
+            textStyle: { fontWeight: "bold", color: 'gray' },
+            format: { type: "link", typeLink: "mailto" }
+        },
+        {
+            type: 'text',
+            label: '0931 133 233',
+            textStyle: { fontWeight: "bold", color: 'gray' },
+            format: { type: "link", typeLink: "tel" }
+        }
+    ]
+}
 export default function LoginScreen() {
     const { colors } = useTheme();
     const { view, zod, dataDefault } = loginForm;
@@ -17,6 +37,9 @@ export default function LoginScreen() {
     const { validate, errors, setErrors } = useZodValidation(data, zod);
     const { login, listDvcs, getDvcsByUser } = useAuth();
 
+    const onChangeLang = async (lang: 'vi' | 'en') => {
+        onChangeItemData({ lang: lang });
+    }
     const onChangeItemData = (valueChange: any) => {
         setData(prev => ({ ...prev, ...valueChange }));
     };
@@ -66,7 +89,7 @@ export default function LoginScreen() {
 
     useEffect(() => {
         const getStorage = async () => {
-            const _data = dataDefault ?? { captcha_token: '', remember: false };
+            const _data = dataDefault ?? { captcha_token: '', remember: false, lang: 'vi' };
             const remember = await getRemember();
             const domain = await getSubDomain();
             setData({ ..._data, ...remember, domain: domain || '' });
@@ -83,17 +106,38 @@ export default function LoginScreen() {
     }, [data])
     return (
         <FormWrapper style={{ flex: 1, justifyContent: 'flex-end', padding: 20 }}>
-            <View style={{ justifyContent: "center", alignItems: "center", marginBottom: 150 }}>
+            <View style={{ justifyContent: "center", alignItems: "center", marginBottom: 50 }}>
                 <Image source={sloganVacom} style={styles.logo} />
-                {/* <TextDrop text='Acounting' heightDrop={400} /> */}
+                <TextDrop text='Accounting' heightDrop={400} />
             </View>
+
             <Card style={{ padding: 20, backgroundColor: colors.background }} contentStyle={{ gap: 20 }}>
-                <Text variant='titleLarge' style={{ textAlign: "center" }}>Đăng nhập</Text>
+                <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+                    <Text variant='titleLarge' style={{ flex: 1, textAlign: "center" }}>{data.lang === 'vi' ? 'Đăng nhập' : 'Login'}</Text>
+                    <ToggleButton.Group
+                        onValueChange={onChangeLang}
+                        value={data.lang as any}>
+                        <ToggleButton icon="alpha-v" value="vi" iconColor={colors.primary}
+                            style={[data.lang === "vi" && {
+                                backgroundColor: colors.elevation.level1,
+                                borderColor: colors.elevation.level5,
+                                borderWidth: 5
+                            }]} />
+                        <ToggleButton icon="alpha-e" value="en" iconColor={'green'}
+                            style={[data.lang === "en" && {
+                                backgroundColor: colors.elevation.level1,
+                                borderColor: colors.elevation.level5,
+                                borderWidth: 5
+                            }]} />
+                    </ToggleButton.Group>
+                </View>
+
                 <SchemaUIEngine schema={view} data={data} errors={errors} onChangeItemData={onChangeItemData} actionMap={actionMap} dataSource={dataSource} />
             </Card>
+            <SchemaUIEngine schema={infoVacom} />
             <Text
                 variant='labelMedium'
-                style={{ textAlign: 'center', color: colors.backdrop, paddingVertical: 20 }}
+                style={{ textAlign: 'center', color: colors.backdrop, paddingBottom: 20 }}
             >
                 VACOM JSC. Copyright © 2025
             </Text>

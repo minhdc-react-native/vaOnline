@@ -8,7 +8,7 @@ import { VACOMTheme } from "@/theme/theme";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { Button, customText, IconButton, useTheme } from "react-native-paper";
-import { ISchemaWinValue } from "./schema";
+import { ISchemaWinValue } from "../../schema";
 const Text = customText<'customVariant'>();
 const HEIGHT_WINDOW = Dimensions.get("window").height;
 interface IProgs {

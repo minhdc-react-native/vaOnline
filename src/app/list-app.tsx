@@ -7,13 +7,14 @@ import { AntDesign } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Card, Divider, Icon, IconButton, Text, useTheme } from 'react-native-paper';
+import { Card, Icon, IconButton, Text, useTheme } from 'react-native-paper';
 
 export default function ListApp() {
     const { listApp, getListApp, infoDvcs, getInfoDvcs, getLicenseInfo, logout, onSelectApp } = useAuth();
     const years = useDataApp((state) => state.years);
     const currentYear = useDataApp((state) => state.currentYear);
     const setCurrentYear = useDataApp((state) => state.setCurrentYear);
+    const lang = useDataApp((state) => state.lang);
     const { colors } = useTheme();
     const onSelectYear = async (year: any) => {
         saveYear(year.NAM);
@@ -36,22 +37,25 @@ export default function ListApp() {
                 style={styles.container}
                 locations={[0, 0.3, 0.7, 1]}
             >
-                <View style={{ flexDirection: "row", paddingHorizontal: 20, alignItems: "center" }}>
-                    <VcSelectList style={{ flex: 1 }} tableWin='Year' label='Năm làm việc' value={currentYear ?? ''} fId='NAM' fValue='NAM' data={years} onChange={onSelectYear} />
-                    <IconButton style={{ flex: 1 }} icon={() => <AntDesign name="logout" size={24} color={colors.secondary} />} size={24} onPress={logout} />
-                </View>
-                <View style={{ padding: 20, gap: 5 }}>
-                    <Text variant='titleMedium' style={{ color: colors.secondary }}>{`${infoDvcs?.DVCS_ID} - ${infoDvcs?.TEN_DVCS}`}</Text>
-                    <Text variant='titleSmall'>{`Mã số thuế: ${infoDvcs?.MS_THUE}`}</Text>
-                </View>
-                <Divider style={{ marginBottom: 50 }} />
+                <Card style={{ marginHorizontal: 20, marginBottom: 50, paddingTop: 20, backgroundColor: colors.background }}>
+                    <View style={{ flexDirection: "row", paddingHorizontal: 20, alignItems: "center" }}>
+                        <VcSelectList clean={false} style={{ flex: 1 }} tableWin='Year' label={lang === 'vi' ? 'Năm làm việc' : 'Year of work'} value={currentYear ?? ''} fId='NAM' fValue='NAM' data={years} onChange={onSelectYear} />
+                        <View style={{ flex: 1, justifyContent: "center", alignItems: "flex-end" }} >
+                            <IconButton icon={() => <AntDesign name="logout" size={24} color={colors.secondary} />} size={24} onPress={logout} />
+                        </View>
+                    </View>
+                    <View style={{ paddingVertical: 10, paddingHorizontal: 20, gap: 5 }}>
+                        <Text variant='titleMedium' style={{ color: colors.secondary }}>{`${infoDvcs?.DVCS_ID} - ${infoDvcs?.TEN_DVCS}`}</Text>
+                        <Text variant='titleSmall'>{`${lang === 'vi' ? 'Mã số thuế:' : 'TaxCode:'} ${infoDvcs?.MS_THUE}`}</Text>
+                    </View>
+                </Card>
                 <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center', gap: 50, paddingHorizontal: 50, flexWrap: "wrap" }}>
                     {listApp.map((app) => (
                         <Pressable key={app.id} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, justifyContent: "center", alignItems: "center" }]} onPress={() => onSelectApp(app.id.toString())}>
                             <Card style={{ backgroundColor: app.BACKGROUND_COLOR, width: 100, height: 80, justifyContent: "center", alignItems: "center" }}>
                                 <Icon source={(VcData.iconApp as any)[app.id]} size={50} color={colors.background} />
                             </Card>
-                            <Text variant='titleMedium' style={{ textAlign: "center", flexShrink: 1 }}>{app.NAME}</Text>
+                            <Text variant='titleMedium' style={{ textAlign: "center", flexShrink: 1 }}>{app[lang === 'vi' ? 'NAME' : 'en_NAME']}</Text>
                         </Pressable>
                     ))}
                 </View>

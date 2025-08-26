@@ -6,13 +6,6 @@ import { useWindowDimensions, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { TabView } from 'react-native-tab-view';
 
-const allRoutes = [
-    { key: 'partner', title: 'Đối tượng', keyMenuWin: 'acCatalogPartner' },
-    { key: 'good', title: 'Hàng hoá', keyMenuWin: 'acCatalogGood' },
-    { key: 'balance', title: 'Số dư', keyMenuWin: 'acCatalogBalance' },
-    { key: 'bank', title: 'Ngân hàng', keyMenuWin: 'acCatalogBank' },
-    { key: 'other', title: 'Khác', keyMenuWin: 'acCatalogOther' },
-];
 const menuMain = 'catalog';
 
 export default function CatalogAccounting() {
@@ -20,6 +13,15 @@ export default function CatalogAccounting() {
     const layout = useWindowDimensions();
     const [index, setIndex] = useState(0);
     const dataMenuWin = useDataApp((state) => state.dataMenuWin);
+    const lang = useDataApp((state) => state.lang);
+
+    const allRoutes = [
+        { key: 'partner', title: lang === 'vi' ? 'Đối tượng' : 'Object', keyMenuWin: 'acCatalogPartner' },
+        { key: 'good', title: lang === 'vi' ? 'Hàng hoá' : 'Goods', keyMenuWin: 'acCatalogGood' },
+        { key: 'balance', title: lang === 'vi' ? 'Số dư' : 'Balance number', keyMenuWin: 'acCatalogBalance' },
+        { key: 'bank', title: lang === 'vi' ? 'Ngân hàng' : 'Bank', keyMenuWin: 'acCatalogBank' },
+        { key: 'other', title: lang === 'vi' ? 'Khác' : 'Other', keyMenuWin: 'acCatalogOther' },
+    ];
 
     const hasPermission = (keyMenuWin: IKeyMenuWin) => {
         return !!dataMenuWin[menuMain][keyMenuWin];

@@ -6,7 +6,7 @@ import { useMemo } from 'react';
 
 export default function MenuScreen({ menuMain, keyMenuWin }: { menuMain: string, keyMenuWin: IKeyMenuWin }) {
     const dataMenuWin = useDataApp((state) => state.dataMenuWin);
-
+    const lang = useDataApp((state) => state.lang);
     const dataMenu = useMemo(() => {
         return dataMenuWin[menuMain][keyMenuWin];
     }, [keyMenuWin]);
@@ -19,7 +19,7 @@ export default function MenuScreen({ menuMain, keyMenuWin }: { menuMain: string,
         <FormWrapper style={{ flex: 1, padding: 20 }}>
             {dataMenu && dataMenu.map((item, idx) => {
                 return (
-                    <VcGroupButton key={idx} title={item.title} data={item.data} icon={item.icon} disable={item.disable} onPress={onPress} />
+                    <VcGroupButton key={idx} title={lang === 'vi' ? item.title : item.titleE} data={item.data} icon={item.icon} disable={item.disable} onPress={onPress} />
                 )
             })}
         </FormWrapper>

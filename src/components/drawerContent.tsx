@@ -37,23 +37,23 @@ export function CustomDrawerContent({ drawerItems }: { drawerItems: DrawerItem[]
             locations={[0, 0.3, 0.7, 1]}
         >
             <View style={styles.avatar} >
-                <Pressable onPress={() => { }} style={{ borderWidth: 1, borderRadius: 50, borderColor: colors.background }}>
+                <Pressable onPress={() => { }} style={{ borderWidth: 2, borderRadius: 50, borderColor: colors.elevation.level5 }}>
                     <Avatar.Image style={{ backgroundColor: colors.backdrop }}
                         source={require("@/assets/images/empty-user.png")} size={50} />
                 </Pressable>
                 <Text numberOfLines={1} style={{ textAlign: "center", fontSize: 15, fontWeight: "bold", color: colors.secondary, marginBottom: 10 }}>{remember?.username}</Text>
-                <VcSelectList style={{ width: 120 }} tableWin='Year' value={currentYear ?? ''} fId='NAM' fValue='NAM' data={years} onChange={onSelectYear} />
+                <VcSelectList clean={false} style={{ width: 120 }} tableWin='Year' value={currentYear ?? ''} fId='NAM' fValue='NAM' data={years} onChange={onSelectYear} />
             </View>
             <View style={styles.content}>
                 {drawerItems.map((item) => (
                     <ItemDrawer key={item.path} item={item} pathname={pathname} />
                 ))}
             </View>
-
-            <IconButton
-                style={styles.logout}
-                icon={() => <AntDesign name="logout" size={24} color={colors.secondary}
-                />} onPress={logout} />
+            <View style={styles.logout}>
+                <IconButton
+                    icon={() => <AntDesign name="logout" size={24} color={colors.secondary}
+                    />} onPress={logout} />
+            </View>
         </LinearGradient>
     );
 }
@@ -64,6 +64,7 @@ interface IProgs {
 }
 const ItemDrawer = ({ item, pathname }: IProgs) => {
     const isSelected = pathname.startsWith(item.path);
+    const lang = useDataApp((state) => state.lang);
     const { colors } = useTheme();
     return (
         <TouchableOpacity
@@ -85,7 +86,9 @@ const ItemDrawer = ({ item, pathname }: IProgs) => {
                     style={{ marginRight: 16 }}
                 />
                 <Text style={{ fontSize: 16, color: isSelected ? colors.background : colors.secondary }}>
-                    {VcData.drawerTitle[item.label as keyof typeof VcData.drawerTitle]}
+                    {lang === 'vi' ?
+                        VcData.drawerTitle[item.label as keyof typeof VcData.drawerTitle] :
+                        VcData.drawerTitleE[item.label as keyof typeof VcData.drawerTitleE]}
                 </Text>
             </>
         </TouchableOpacity>
@@ -109,7 +112,7 @@ const styles = StyleSheet.create({
     },
     logout: {
         flex: 1,
-        alignSelf: "center",
+        justifyContent: "center",
         alignItems: "center",
         marginVertical: 20
     }

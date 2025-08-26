@@ -1,7 +1,7 @@
 import { Helper } from "@/utils/Helper";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Platform, Pressable, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from "react-native";
 import { Switch, Text, useTheme } from "react-native-paper";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { VariantProp } from "react-native-paper/lib/typescript/components/Typography/types";
 interface IProgs {
     label?: string;
@@ -57,7 +57,7 @@ const VcCheckBox = ({ label, value = false, onChange, textStyle, style, variant,
                     {!Helper.isEmpty(label) && align === "right" && <Text numberOfLines={1} variant={variant}
                         style={[
                             styles.rememberMeText,
-                            { flexShrink: 1 },
+                            { flex: 1, flexShrink: 1 },
                             textStyle
                         ]}
                     >
@@ -74,6 +74,7 @@ const styles = StyleSheet.create({
     rememberMeContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        gap: 10,
         justifyContent: "space-between"
     },
     rememberMeText: {

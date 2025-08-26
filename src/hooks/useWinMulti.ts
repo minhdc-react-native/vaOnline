@@ -1,6 +1,6 @@
-import { schemaWin, schemaWinEmpty } from "@/app/(window)/schema";
 import { usePopup } from "@/components/dialog/popupProvider";
 import { useEvalExpr } from "@/components/UIEngine/hooks/useEvalExpr";
+import { schemaWin, schemaWinEmpty } from "@/schema";
 import { api } from "@/utils/apiMethods";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DimensionValue, LayoutChangeEvent } from "react-native";

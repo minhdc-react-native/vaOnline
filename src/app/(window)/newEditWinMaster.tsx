@@ -1,3 +1,4 @@
+import LoadingScreen from "@/components/loadingScreen";
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { VcHeaderWin } from "@/components/vcHeaderWin";
 import { VcTabBar } from "@/components/vcTabBar";
@@ -22,9 +23,9 @@ interface IProgs {
     }
 }
 const NewEditWinMaster = ({ menu }: IProgs) => {
-    const { windowId, tableWin, id, title } = useLocalSearchParams();
+    const { sItemMenuWin, id, title } = useLocalSearchParams();
     const titleWin = menu?.title || title?.toString();
-    const fixTableWin = menu?.tableWin || tableWin?.toString() as ITableWin;
+    const itemMenuWin: IMenuWin = JSON.parse(sItemMenuWin.toString());
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
     const { _ } = useTranslation();
@@ -32,16 +33,14 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
         colors, schemaUI, resetItem, handleAction,
         itemData, dataSource, onChangeItemData, onBack, detail
     } = useWinPage({
-        windowId: menu?.windowId || windowId?.toString(),
-        tableWin: fixTableWin,
-        idItem: menu?.id || id?.toString(), typeWin: "(winMaster)"
+        itemMenuWin: itemMenuWin
     });
 
     const [showEditMaster, setShowEditMaster] = useState<boolean>(id === undefined && schemaUI.action?.showEditMaster !== false);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', () => {
-            resetItem(fixTableWin); // xoá dữ liệu khi không dùng đến...
+            resetItem(itemMenuWin.tableWin); // xoá dữ liệu khi không dùng đến...
         });
         return unsubscribe;
     }, [navigation]);
@@ -53,6 +52,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
             }
         }
     }, []);
+
     const onSaveMaster = useCallback((data?: IData) => {
         if (data) {
             onChangeItemData(data);
@@ -60,17 +60,20 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
         setShowEditMaster(false);
     }, []);
 
+    useEffect(() => {
+        detail.loadDetail(id?.toString());
+    }, []);
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
             <VcHeaderWin edit={true} title={titleWin} onBack={onBack} onPressAction={handleAction.save} />
             <Card mode="contained" style={{ backgroundColor: colors.background, paddingVertical: 10, paddingHorizontal: 20 }}>
                 <SchemaUIEngine schema={schemaUI.config.itemShow} data={itemData} dataSource={dataSource} onChangeItemData={onChangeItemData} />
-                {schemaUI.action?.showEditMaster !== false && <IconButton mode="contained-tonal" style={{ position: "absolute", bottom: 0, right: -10 }} icon={'pencil'} onPress={() => setShowEditMaster(true)} />}
+                {schemaUI.action?.showEditMaster !== false && <IconButton style={{ position: "absolute", bottom: -15, right: -10, backgroundColor: colors.backdrop }} icon={'pencil'} iconColor={colors.background} onPress={() => setShowEditMaster(true)} />}
             </Card>
-            <VcTabBar style={{ borderRadius: 0, borderWidth: 0 }} value={detail.currentTab.TAB_TABLE} data={detail.tabs} onPress={(tab: any) => detail.setCurrentTab(tab)} />
+            {detail.tabs.length > 0 && <VcTabBar style={{ borderRadius: 0, borderWidth: 0 }} value={detail.currentTab?.id ?? ''} data={detail.tabs} onPress={(tab: any) => detail.setCurrentTab(tab)} />}
             <Divider />
             <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
-                <SwipeListView
+                {detail.loadingDetail ? <LoadingScreen /> : <SwipeListView
                     data={detail.dataDetail ?? []}
                     style={{ paddingTop: 5 }}
                     keyExtractor={(item: IData, index) => (item.id ?? '') + index.toString()}
@@ -82,14 +85,17 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                     disableLeftSwipe={detail.numberActionDetail === 0}
                     disableRightSwipe
                     showsVerticalScrollIndicator={false}
-                />
+                    initialNumToRender={20}
+                    maxToRenderPerBatch={20}
+                    windowSize={10}
+                />}
             </View>
             {(detail.schemaWinDetail.action?.new !== false) && <FAB
                 icon="plus"
                 style={{
-                    // width: 55,
-                    // height: 55,
-                    // borderRadius: 55,
+                    width: 55,
+                    height: 55,
+                    borderRadius: 55,
                     bottom: insets.bottom + 20,
                     right: 20,
                     position: 'absolute',
@@ -97,7 +103,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                 onPress={detail.handleActionDetail.new}
                 variant='primary'
             />}
-            {detail.showNewEdit && <NewEditWinMulti title={_(detail.currentTab.TAB_NAME)}
+            {detail.showNewEdit && <NewEditWinMulti title={_(detail.currentTab?.TAB_NAME)}
                 data={detail.itemDetail} schemaUi={detail.schemaWinDetail}
                 dataSource={dataSource} onSave={detail.handleActionDetail.update} titleButton="Hoàn thành" />}
 

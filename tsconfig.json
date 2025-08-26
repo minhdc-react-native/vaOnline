@@ -22,6 +22,9 @@
       "hooks/*": [
         "src/hooks/*"
       ],
+      "schema/*": [
+        "src/schema/*"
+      ],
       "schemaUI/*": [
         "src/schemaUI/*"
       ],
