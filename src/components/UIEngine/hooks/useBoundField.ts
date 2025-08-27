@@ -13,12 +13,12 @@ export function useBoundField<T = any>(formState: FormState<T>, path: string, on
     const setValue = useCallback((v: any) => {
         onChangeItemData?.({ [path]: v });
         formState.update(path, v);
-    }, [formState, path]);
+    }, [formState, path, onChangeItemData]);
 
     const setValues = useCallback((updates: Record<string, any>) => {
         onChangeItemData?.(updates);
         formState.updateMany(updates);
-    }, [formState]);
+    }, [formState, onChangeItemData]);
 
     const onBlurTaxCode = useCallback((value: string, expression?: Record<string, string>) => {
         api.get({
@@ -36,13 +36,15 @@ export function useBoundField<T = any>(formState: FormState<T>, path: string, on
                 }
             }
         })
-    }, []);
+    }, [setValues]);
+
+    const getValue = useCallback((p: string) => get(formState.state, p), [formState]);
 
     return {
         value,
         setValue,
         setValues,
-        getValue: (p: string) => get(formState.state, p),
+        getValue,
         onBlurTaxCode
     };
 }

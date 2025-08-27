@@ -1,3 +1,4 @@
+import { buildZodSchema } from "@/components/UIEngine/buildZodSchema";
 import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { IRowsColsField } from "@/components/UIEngine/types";
@@ -50,7 +51,7 @@ export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeIte
         }
         setValue(changeValue);
     }
-    const { validate, errors, setErrors } = useZodValidation(paramKey0, zod);
+    const { validate, errors, setErrors } = useZodValidation(paramKey0, buildZodSchema(zod));
     const checkFilter = () => {
         const isResult = validate();
         if (!isResult) {

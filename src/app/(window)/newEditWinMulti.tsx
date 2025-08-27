@@ -1,17 +1,24 @@
 import { usePopup } from "@/components/dialog/popupProvider";
 import FormWrapper from "@/components/formWrapper";
 import LoadingScreen from "@/components/loadingScreen";
+import { buildZodSchema } from "@/components/UIEngine/buildZodSchema";
 import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { IRowsColsField } from "@/components/UIEngine/types";
+import { useTranslation } from "@/context/TranslationContext";
+import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { VACOMTheme } from "@/theme/theme";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { Button, customText, IconButton, useTheme } from "react-native-paper";
 import { ISchemaWinValue } from "../../schema";
 const Text = customText<'customVariant'>();
 const HEIGHT_WINDOW = Dimensions.get("window").height;
-interface IProgs {
+
+const backHandQuestion = { title: "Cảnh báo", message: "Dữ liệu đã thay đổi, bạn có muốn thoát không?" };
+const backHandQuestionE = { title: "Warning", message: "Data has changed, do you want to exit?" };
+
+interface IProps {
     title: string;
     titleButton?: string;
     schemaUi: ISchemaWinValue;
@@ -19,8 +26,8 @@ interface IProgs {
     data: IData | null;
     dataSource?: Record<string, any[]>;
 }
-// thêm vào cho hết warning
-export default function NewEditWinMulti({ title, titleButton, onSave, data, schemaUi, dataSource }: IProgs) {
+
+const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, schemaUi, dataSource }) => {
     const slideAnim = useRef(new Animated.Value(HEIGHT_WINDOW)).current;
     const { colors } = useTheme<VACOMTheme>();
     const { showPopup } = usePopup();
@@ -29,7 +36,7 @@ export default function NewEditWinMulti({ title, titleButton, onSave, data, sche
     const schemaEdit: IRowsColsField = schemaUi.config.itemEdit;
     const zod = schemaUi.zod;
 
-    const { validate, errors, setErrors } = useZodValidation(dataItem, zod);
+    const { validate, errors, setErrors } = useZodValidation(dataItem, buildZodSchema(zod));
     const checkFilter = () => {
         const isResult = validate();
         if (!isResult) {
@@ -43,10 +50,10 @@ export default function NewEditWinMulti({ title, titleButton, onSave, data, sche
         if (!confirm || checkFilter()) onSave(data);
     }
     const setValue = (change: Record<string, string>) => {
+        console.log("change>>", change);
         setDataItem(prev => prev ? ({ ...prev, ...change }) : null);
         if (!isChange) setIsChange(true);
     }
-
     const [containHeight, setContainHeight] = useState<number>(0);
 
     const setHeight = (height: number) => {
@@ -65,6 +72,8 @@ export default function NewEditWinMulti({ title, titleButton, onSave, data, sche
         }).start();
     }, []);
     const [isChange, setIsChange] = useState<boolean>(false);
+    const isLangVi = !!(useDataApp((state) => state.lang) === "vi");
+    const { _ } = useTranslation();
 
     const closePanel = (confirm: boolean, data?: IData) => {
         if (confirm && !checkFilter()) return;
@@ -77,12 +86,14 @@ export default function NewEditWinMulti({ title, titleButton, onSave, data, sche
         }
         if (!data && isChange) {
             showPopup({
-                message: "Đã có thay đổi, bạn có muốn thoát không?",
+                title: isLangVi ? backHandQuestion.title : backHandQuestionE.title,
+                message: isLangVi ? backHandQuestion.message : backHandQuestionE.message,
                 showCancel: true,
+                confirmText: _('EXIT'),
                 onConfirm: () => {
                     _closeView();
                 }
-            });
+            })
         } else {
             _closeView();
         }
@@ -104,8 +115,8 @@ export default function NewEditWinMulti({ title, titleButton, onSave, data, sche
                 <View style={styles.header}>
                     <View style={styles.titleRow}>
                         <IconButton icon="close" onPress={() => closePanel(false)} />
-                        <Text variant="titleMedium" numberOfLines={1} style={{ flex: 1 }}>{`${(dataItem.editmode === 1 || dataItem._isNew) ? 'Thêm mới ' : 'Sửa '} ${title}`}</Text>
-                        <Button onPress={() => closePanel(true, dataItem ?? undefined)}>{titleButton || 'Lưu lại'}</Button>
+                        <Text variant="titleMedium" numberOfLines={1} style={{ flex: 1 }}>{`${(dataItem.editmode === 1 || dataItem._isNew) ? `${_('THEM')} ` : `${_('EDIT')} `} ${title}`}</Text>
+                        <Button onPress={() => closePanel(true, dataItem ?? undefined)}>{titleButton || _('SAVE')}</Button>
                     </View>
                 </View>
                 <View style={[styles.content, { height: schemaEdit.height ?? "80%", backgroundColor: colors.vacom.backLayout }]}>
@@ -123,6 +134,7 @@ export default function NewEditWinMulti({ title, titleButton, onSave, data, sche
         </View>
     );
 };
+export const NewEditWinMulti = React.memo(ViewComponent);
 
 const styles = StyleSheet.create({
     backdrop: {

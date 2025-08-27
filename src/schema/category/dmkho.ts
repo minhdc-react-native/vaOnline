@@ -1,7 +1,4 @@
-import { VcReferences } from "@/constants/vcData";
-import { zRequiredString } from "@/schemaUI/zodHelpers";
 import { theme } from "@/theme/theme";
-import z from "zod";
 import { ISchemaWin, ISchemaWinValue } from "..";
 const colors = theme.colors;
 const dmkho0: ISchemaWin = {
@@ -91,7 +88,7 @@ const dmkho0: ISchemaWin = {
                     {
                         type: "selectList",
                         tableWin: "Empty",
-                        fDisplay: { fId: 'id', fValue: 'value', field: 'id' },
+                        fDisplay: { fValue: 'id' },
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_KHO",
                         bind: "TK_KHO",
@@ -116,14 +113,13 @@ const dmkho0: ISchemaWin = {
 
 export const dmkho: ISchemaWinValue = {
     dataSource: {
-        // KHO_ME: VcReferences.DMKHO,
-        TK_KHO: VcReferences.DMTK
+        TK_KHO: 'DMTK'
     },
     fieldSearch: 'TEN_KHO',
     config: dmkho0,
     defaultNew: {},
-    zod: z.object({
-        MA_KHO: zRequiredString('???'),
-        TEN_KHO: zRequiredString('???')
-    })
+    zod: {
+        MA_KHO: { type: 'string', msgError: '...' },
+        TEN_KHO: { type: 'string' },
+    }
 }

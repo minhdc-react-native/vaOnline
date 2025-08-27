@@ -87,3 +87,8 @@ export const getOrgUnit = async () => {
         return null;
     }
 };
+export const clearOrgUnit = async () => {
+    try {
+        await AsyncStorage.removeItem(ORG_UNIT);
+    } catch (error) { }
+};

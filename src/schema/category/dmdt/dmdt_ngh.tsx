@@ -1,7 +1,5 @@
-import { zRequiredString } from "@/schemaUI/zodHelpers";
+import { ISchemaWin, ISchemaWinValue } from "@/schema";
 import { theme } from "@/theme/theme";
-import z from "zod";
-import { ISchemaWin, ISchemaWinValue } from "..";
 const colors = theme.colors;
 const dmdt_ngh0: ISchemaWin = {
     itemAction: {
@@ -127,8 +125,8 @@ const dmdt_ngh0: ISchemaWin = {
 export const dmdt_ngh: ISchemaWinValue = {
     config: dmdt_ngh0,
     defaultNew: { DMDT_id: "{{id}}" }, require: false,
-    zod: z.object({
-        TAI_NGH: zRequiredString('???'),
-        SO_TK: zRequiredString('???'),
-    })
+    zod: {
+        TAI_NGH: { type: 'string', msgError: '...' },
+        SO_TK: { type: 'string' },
+    }
 }

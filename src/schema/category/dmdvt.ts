@@ -1,6 +1,4 @@
-import { zRequiredString } from "@/schemaUI/zodHelpers";
 import { theme } from "@/theme/theme";
-import z from "zod";
 import { ISchemaWin, ISchemaWinValue } from "..";
 const colors = theme.colors;
 const dmdvt0: ISchemaWin = {
@@ -70,7 +68,7 @@ export const dmdvt: ISchemaWinValue = {
     fieldSearch: 'DVT',
     config: dmdvt0,
     defaultNew: {},
-    zod: z.object({
-        DVT: zRequiredString('???')
-    })
+    zod: {
+        DVT: { type: 'string', msgError: '...' }
+    }
 }

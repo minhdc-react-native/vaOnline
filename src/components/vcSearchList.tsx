@@ -8,10 +8,13 @@ import debounce from "lodash.debounce";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Keyboard, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { ActivityIndicator, Divider, IconButton, Portal, Text, TextInput, useTheme } from "react-native-paper";
+import { useToast } from "./dialog/useToast";
+import { useEvalExpr } from "./UIEngine/hooks/useEvalExpr";
 import { SchemaUIEngine } from "./UIEngine/schemaUIEngine";
 const urlBase: Record<ITableSearch, string> = { // gắn api cho đỡ nhầm...
     DMMNGH: '/api/System/GetDataByReferencesId?id=0b22c919-a275-4d05-83bd-c34844d9ec67&filtervalue=#filterValue#',
-    DMMCN: '/api/System/GetDataByReferencesId?id=0600dd65-9cf4-4fd7-bf43-ff50a5578b42&filtervalue=#filterValue#'
+    DMMCN: '/api/System/GetDataByReferencesId?id=0600dd65-9cf4-4fd7-bf43-ff50a5578b42&filtervalue=#filterValue#',
+    DMTK: '/api/System/GetDataByReferencesId?id=0a93c38b-5f1f-422a-8039-a6cee1967af2&filtervalue=#filterValue#'
 }
 interface IProgs {
     tableSearch: ITableSearch,
@@ -25,8 +28,9 @@ interface IProgs {
     style?: StyleProp<ViewStyle>;
     disabled?: boolean,
     isLoading?: boolean,
+    checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 }
-const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange, clean = true, rightIcon, style, isLoading, disabled }: IProgs) => {
+const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange, clean = true, rightIcon, style, isLoading, disabled, checkSelected }: IProgs) => {
 
     const url = useMemo(() => {
         return urlBase[tableSearch];
@@ -134,7 +138,7 @@ const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange
                     /></View> : <BottomSheetFlatList
                         data={data}
                         keyExtractor={(item: Record<string, any>) => item.id}
-                        renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected} isSelect={item[fField] === value} tableSearch={tableSearch} />}
+                        renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected} isSelect={item[fField] === value} tableSearch={tableSearch} checkSelected={checkSelected} />}
                         ItemSeparatorComponent={() => <Divider />}
                         ListFooterComponent={() => <View style={{ height: 50 }} />}
                         initialNumToRender={20}
@@ -152,12 +156,24 @@ type IProps = {
     item: Record<string, any>;
     onPress: (item: Record<string, any>) => void;
     isSelect?: boolean;
+    checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 };
 
-const ItemViewComponent: React.FC<IProps> = ({ item, onPress, isSelect, tableSearch }) => {
+const ItemViewComponent: React.FC<IProps> = ({ item, onPress, isSelect, tableSearch, checkSelected }) => {
+    const { showToast } = useToast();
+    const evalExpr = useEvalExpr();
     const { colors } = useTheme();
     return (
-        <Pressable onPress={() => onPress(item)} style={{
+        <Pressable onPress={() => {
+            if (checkSelected) {
+                const isError = evalExpr(checkSelected.isError, item, checkSelected.requiredKeys);
+                if (isError) {
+                    showToast(checkSelected.message, { type: "warning" });
+                    return;
+                }
+            }
+            onPress(item);
+        }} style={{
             flexDirection: "row",
             alignItems: "flex-start", backgroundColor: isSelect ? colors.elevation.level1 : "transparent"
         }}>

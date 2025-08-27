@@ -1,7 +1,4 @@
-import { VcReferences } from "@/constants/vcData";
-import { zRequiredString } from "@/schemaUI/zodHelpers";
 import { theme } from "@/theme/theme";
-import z from "zod";
 import { ISchemaWin, ISchemaWinValue } from "..";
 const colors = theme.colors;
 const dmtk0: ISchemaWin = {
@@ -254,8 +251,8 @@ const dmtk0: ISchemaWin = {
 
 export const dmtk: ISchemaWinValue = {
     dataSource: {
-        KIEU_TK: VcReferences.KIEU_TK,
-        MA_KM: VcReferences.DMKM,
+        KIEU_TK: 'KIEU_TK',
+        MA_KM: 'DMKM',
     },
     fieldSearch: 'TEN_TK',
     config: dmtk0,
@@ -263,8 +260,8 @@ export const dmtk: ISchemaWinValue = {
         NAM: '#NAM#', KIEU_TK: 1,
         TK_CT: '', TK_DT: '', TK_HDG: '', TK_KM: '', TK_NB: '', TK_NT: '', TK_PX: '', TK_Z: ''
     },
-    zod: z.object({
-        TK: zRequiredString('???'),
-        TEN_TK: zRequiredString('???')
-    })
+    zod: {
+        TK: { type: 'string', msgError: '...' },
+        TEN_TK: { type: 'string' },
+    }
 }

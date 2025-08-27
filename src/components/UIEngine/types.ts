@@ -119,6 +119,7 @@ export type ISearchListField = IFieldBase & {
     rightIcon?: React.ReactNode; // nếu có thì hiển thị icon bên phải
     style?: StyleProp<ViewStyle>;
     loading?: boolean,
+    checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 };
 
 export type ISelectListField = IFieldBase & {
@@ -128,7 +129,7 @@ export type ISelectListField = IFieldBase & {
     typeDisplay?: 'value' | 'both';
     fId?: string;
     fValue?: string;
-    fDisplay?: { fId: string, fValue: string, field?: string };
+    fDisplay?: { fId?: string, fValue?: string, field?: string };
     expression?: Record<string, string>;
     clean?: boolean; // nếu true thì có nút xóa
     rightIcon?: React.ReactNode; // nếu có thì hiển thị icon bên phải
@@ -214,6 +215,16 @@ export type IButton = IFieldBase & {
     mode?: "text" | "outlined" | "elevated" | "contained" | "contained-tonal"
 }
 
+export type IRating = IFieldBase & {
+    type: "rating";
+    label: string;
+    style?: StyleProp<ViewStyle>;
+    labelStyle?: StyleProp<TextStyle>
+    max?: number;
+    size?: number;
+    colorActive?: string;
+    colorInactive?: string;
+}
 export type IField =
     | IRowsColsField
     | ITextField
@@ -234,6 +245,7 @@ export type IField =
     | ICheckBox
     | IOption
     | IButton
+    | IRating
 
 export type ISchemaUIProps = {
     schema: IRowsColsField;

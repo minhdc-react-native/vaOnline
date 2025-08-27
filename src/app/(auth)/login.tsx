@@ -97,6 +97,7 @@ export default function LoginScreen() {
         getStorage();
     }, [])
     const lastLoad = useRef({ domain: data.domain, username: data.username });
+
     useEffect(() => {
         if (!Helper.isEmpty(data.domain) && lastLoad.current.domain !== data.domain
             && !Helper.isEmpty(data.username) && lastLoad.current.username !== data.username) {

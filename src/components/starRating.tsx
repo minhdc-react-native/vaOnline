@@ -1,36 +1,55 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 type StarRatingProps = {
-    value: number | string; // ví dụ: 3 hoặc '3'
-    max?: number; // mặc định 5
-    size?: number; // kích thước icon
-    colorActive?: string; // màu sao sáng
-    colorInactive?: string; // màu sao mờ
-    isShowAll?: boolean
+    value: number | string;
+    max?: number;
+    size?: number;
+    colorActive?: string;
+    colorInactive?: string;
+    isShowAll?: boolean;
+    onChange?: (value: number) => void;
 };
 
 export const StarRating: React.FC<StarRatingProps> = ({
     value,
     max = 5,
     size = 20,
-    colorActive = '#FFD700', // vàng
-    colorInactive = '#CCCCCC', // xám
-    isShowAll = true
+    colorActive = '#FFD700',
+    colorInactive = '#CCCCCC',
+    isShowAll = true,
+    onChange,
 }) => {
     const fixValue = Number(value) || 0;
     const rating = Math.max(0, Math.min(fixValue, max));
+
     return (
         <View style={styles.container}>
-            {Array.from({ length: isShowAll ? max : fixValue }).map((_, index) => (
-                <MaterialCommunityIcons
-                    key={index}
-                    name="star"
-                    size={size}
-                    color={index < rating ? colorActive : colorInactive}
-                />
-            ))}
+            {Array.from({ length: isShowAll ? max : rating }).map((_, index) => {
+                const starValue = index + 1;
+                const isActive = starValue <= rating;
+                return (
+                    <Pressable
+                        key={index}
+                        onPress={() => {
+                            if (!onChange) return;
+                            // nếu bấm lại ngôi sao hiện tại -> reset về 0
+                            if (starValue === rating) {
+                                onChange(0);
+                            } else {
+                                onChange(starValue);
+                            }
+                        }}
+                    >
+                        <MaterialCommunityIcons
+                            name="star"
+                            size={size}
+                            color={isActive ? colorActive : colorInactive}
+                        />
+                    </Pressable>
+                );
+            })}
         </View>
     );
 };

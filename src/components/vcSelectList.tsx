@@ -16,7 +16,7 @@ interface IProgs {
     data: IData[];
     value: string | number;
     disabled?: boolean;
-    fDisplay?: { fId: string, fValue: string, field?: string };
+    fDisplay?: { fId?: string, fValue?: string, field?: string };
     onChange: (item: IData | null) => void;
     typeDisplay?: 'value' | 'both';
     fId?: string;
@@ -172,11 +172,11 @@ const ItemViewComponent: React.FC<IProps> = ({
     const { colors } = useTheme();
     const isShowEdit = tableWin !== undefined && isNewEdit;
     const { showToast } = useToast();
-    const evalExpr = useEvalExpr(item);
+    const evalExpr = useEvalExpr();
     return (
         <Pressable onPress={() => {
             if (checkSelected) {
-                const isError = evalExpr(checkSelected.isError, checkSelected.requiredKeys);
+                const isError = evalExpr(checkSelected.isError, item, checkSelected.requiredKeys);
                 if (isError) {
                     showToast(checkSelected.message, { type: "warning" });
                     return;

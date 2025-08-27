@@ -1,3 +1,4 @@
+import { ISchemaWinValue } from '@/schema';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
@@ -312,5 +313,21 @@ export const Helper = {
         }
         traverse(null);
         return result;
+    },
+    deepMerge: (target: any, source?: any): ISchemaWinValue => {
+        if (!source) return target;
+        for (const key of Object.keys(source)) {
+            if (
+                source[key] instanceof Object &&
+                key in target &&
+                target[key] instanceof Object &&
+                !Array.isArray(source[key])
+            ) {
+                Helper.deepMerge(target[key], source[key]);
+            } else {
+                target[key] = source[key];
+            }
+        }
+        return target;
     }
 };

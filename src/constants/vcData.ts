@@ -1,9 +1,8 @@
 import { IDataSource } from "@/schema";
-import { theme } from "@/theme/theme";
 import { DataMenuAccounting } from "./dataMenuAccounting";
 import { DataMenuAdmin } from "./dataMenuAdmin";
 import { DataMenuHkd } from "./dataMenuHkd";
-const colors = theme.colors;
+import { getColor, getColorHv } from "./getColor";
 export const VcData = {
     listApp: ['d72ee2a8-88ff-45b4-9c04-41f71d93e282', '3dfaf3c6-cff1-47c9-9a25-e3533a433eb7', '52105373-95f1-40f3-9899-9b77852b7209'], // kế toán, hộ kinh doanh, quản trị
     iconApp: {
@@ -60,28 +59,18 @@ export const VcData = {
         '52105373-95f1-40f3-9899-9b77852b7209': DataMenuAdmin
     },
 }
-const getColor = (item: IData): string => {
-    let color = colors.backdrop;
-    switch (item.id) {
-        case 1:
-            color = 'blue'
-            break;
-        case 2:
-            color = 'purple'
-            break;
-        case 3:
-            color = 'green'
-            break;
-    }
-    return color;
-}
+
 export const VcReferences: IDataSource = {
     DMNHDT: { url: `/api/System/GetDataByReferencesId?id=0749b993-1b71-47d4-833a-338082f4755b`, typeData: "tree", fieldCode: "id" },
-    DMNHV: { url: `/api/System/GetDataByReferencesId?id=379afc91-6f0d-4011-8bfc-f6f941f2288a`, typeData: "tree", fieldCode: "id" },
+    DMNHHV: { url: `/api/System/GetDataByReferencesId?id=379afc91-6f0d-4011-8bfc-f6f941f2288a`, typeData: "tree", fieldCode: "id" },
     DMKHO: { url: `/api/System/GetDataByReferencesId?id=189d7179-da87-40cc-a5b3-64f52cef8b86`, typeData: "tree", fieldCode: "id" },
     LOAI_DT: {
         url: `/api/System/GetDataByReferencesId?id=37f0ef8c-9a4a-4c2f-8a83-61a9a8600b6a`,
         getColor: getColor
+    },
+    LOAI_HV: {
+        url: `/api/System/GetDataByReferencesId?id=d926d69a-807e-43c7-a4d6-9b2af3bff39b`,
+        getColor: getColorHv
     },
     DMBP: { url: `/api/System/GetDataByReferencesId?id=08790464-f168-49e6-97ea-2cb670e2139d`, typeData: "tree", fieldCode: "id" },
     KIEU_TK: {
@@ -89,7 +78,9 @@ export const VcReferences: IDataSource = {
         getColor: getColor
     },
     DMKM: { url: `/api/System/GetDataByReferencesId?id=49e80ac4-2b07-47ef-8297-6efb2074fbdd` },
-    DMTK: { url: `/api/System/GetDataByReferencesId?id=0a93c38b-5f1f-422a-8039-a6cee1967af2` }
+    DMTK: { url: `/api/System/GetDataByReferencesId?id=0a93c38b-5f1f-422a-8039-a6cee1967af2` },
+    DMTTDB: { url: `/api/System/GetDataByReferencesId?id=ad61024c-69cc-4d3b-9d5e-e5685db5bdce` },
+    DMSX: { url: `/api/System/GetDataByReferencesId?id=4f4a3acd-c873-45aa-9d1b-098cea801f65` },
 }
 
 export interface IConfigDateMenuWin {

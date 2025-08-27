@@ -1,7 +1,4 @@
-import { VcReferences } from "@/constants/vcData";
-import { zRequiredString } from "@/schemaUI/zodHelpers";
 import { theme } from "@/theme/theme";
-import z from "zod";
 import { ISchemaWin, ISchemaWinValue } from "..";
 const colors = theme.colors;
 const dmbp0: ISchemaWin = {
@@ -89,13 +86,13 @@ const dmbp0: ISchemaWin = {
 
 export const dmbp: ISchemaWinValue = {
     dataSource: {
-        BP_ME: VcReferences.DMBP
+        BP_ME: 'DMBP'
     },
     fieldSearch: 'TEN_BP',
     config: dmbp0,
     defaultNew: {},
-    zod: z.object({
-        MA_BP: zRequiredString('???'),
-        TEN_BP: zRequiredString('???')
-    })
+    zod: {
+        MA_BP: { type: 'string', msgError: '...' },
+        TEN_BP: { type: 'string' },
+    }
 }

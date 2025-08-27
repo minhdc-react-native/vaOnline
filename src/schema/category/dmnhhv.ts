@@ -1,7 +1,4 @@
-import { VcReferences } from "@/constants/vcData";
-import { zRequiredString } from "@/schemaUI/zodHelpers";
 import { theme } from "@/theme/theme";
-import z from "zod";
 import { ISchemaWin, ISchemaWinValue } from "..";
 const colors = theme.colors;
 const dmnhhv0: ISchemaWin = {
@@ -89,13 +86,13 @@ const dmnhhv0: ISchemaWin = {
 
 export const dmnhhv: ISchemaWinValue = {
     dataSource: {
-        NH_HV_ME: VcReferences.DMNHV
+        NH_HV_ME: 'DMNHHV'
     },
     fieldSearch: 'TEN_NH_HV',
     config: dmnhhv0,
     defaultNew: {},
-    zod: z.object({
-        MA_NH_HV: zRequiredString('???'),
-        TEN_NH_HV: zRequiredString('???')
-    })
+    zod: {
+        MA_NH_HV: { type: 'string', msgError: '...' },
+        TEN_NH_HV: { type: 'string' },
+    }
 }

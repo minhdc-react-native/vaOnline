@@ -16,7 +16,7 @@ interface IProgs {
 export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = { new: true, edit: true } }: IProgs) => {
     const [data, setData] = useState<Partial<Record<ITableWin, IData[]>>>({});
     const [currentTab, setCurrentTab] = useState<ITabWin>(tabs?.[0]);
-    const evalExpr = useEvalExpr(dataMaster);
+    const evalExpr = useEvalExpr();
 
     const schemaUI = useMemo(() => {
         return schemaWin[currentTab.TAB_TABLE] ?? schemaWinEmpty;
@@ -67,7 +67,7 @@ export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = {
         return {
             newItem: () => {
                 const newDefault = Object.fromEntries(
-                    Object.entries(schemaUI.defaultNew).map(([key, value]) => [key, evalExpr(value)])
+                    Object.entries(schemaUI.defaultNew).map(([key, value]) => [key, evalExpr(value, dataMaster)])
                 );
                 setDataItem({
                     id: UUID.v4(),

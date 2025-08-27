@@ -12,7 +12,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { SwipeListView } from "react-native-swipe-list-view";
 import { ItemWinList } from "./items/itemWinList";
 import { ItemWinListAction } from "./items/itemWinListAction";
-import NewEditWinMulti from "./newEditWinMulti";
+import { NewEditWinMulti } from "./newEditWinMulti";
 interface IProgs {
     menu?: {
         windowId: string;

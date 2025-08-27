@@ -1,8 +1,5 @@
-import { VcReferences } from "@/constants/vcData";
-import { zRequiredString } from "@/schemaUI/zodHelpers";
+import { ISchemaWin, ISchemaWinValue } from "@/schema";
 import { theme } from "@/theme/theme";
-import z from "zod";
-import { ISchemaWin, ISchemaWinValue } from "..";
 const colors = theme.colors;
 const dmdt0: ISchemaWin = {
     itemAction: {
@@ -183,15 +180,15 @@ const dmdt0: ISchemaWin = {
 
 export const dmdt: ISchemaWinValue = {
     dataSource: {
-        MA_NH_DT: VcReferences.DMNHDT,
-        LOAI_DT: VcReferences.LOAI_DT,
+        MA_NH_DT: 'DMNHDT',
+        LOAI_DT: 'LOAI_DT',
     },
     config: dmdt0,
     fieldSearch: 'INFO_FILTER COLLATE SQL_Latin1_General_CP1_CI_AI', isRmTone: true,
     defaultNew: { LOAI_DT: 2 }, dataMaster: ['id'],
-    zod: z.object({
-        MA_NH_DT: zRequiredString('???'),
-        MA_DT: zRequiredString('???'),
-        TEN_DT: zRequiredString('???')
-    })
+    zod: {
+        MA_NH_DT: { type: 'string', msgError: '...' },
+        MA_DT: { type: 'string' },
+        TEN_DT: { type: 'string' },
+    }
 }

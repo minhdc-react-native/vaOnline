@@ -78,7 +78,7 @@ declare global {
         'DMNHDT' | 'DMDT' | 'DMDT_NGH' | 'DMBP' | 'DMPX' | 'DMOB' | 'DMTK' |
         'DMKHO' | 'DMNHHV' | 'DMHV' | 'DMHV_DVT' | 'DMHV_GIA' | 'DMDVT';
 
-    type ITableSearch = 'DMMNGH' | 'DMMCN';
+    type ITableSearch = 'DMMNGH' | 'DMMCN' | 'DMTK';
 
     type IKeyMenuWin = 'acCatalogBalance' | 'acCatalogBank' | 'acCatalogGood' | 'acCatalogOther' | 'acCatalogPartner'
 

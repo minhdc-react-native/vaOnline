@@ -1,6 +1,4 @@
-import { zRequiredString } from "@/schemaUI/zodHelpers";
 import { theme } from "@/theme/theme";
-import z from "zod";
 import { ISchemaWin, ISchemaWinValue } from "..";
 const colors = theme.colors;
 const dmpx0: ISchemaWin = {
@@ -84,8 +82,8 @@ export const dmpx: ISchemaWinValue = {
     fieldSearch: 'TEN_PX',
     config: dmpx0,
     defaultNew: {},
-    zod: z.object({
-        MA_PX: zRequiredString('???'),
-        TEN_PX: zRequiredString('???')
-    })
+    zod: {
+        MA_PX: { type: 'string', msgError: '...' },
+        TEN_PX: { type: 'string' },
+    }
 }

@@ -24,7 +24,7 @@ export function SchemaUIEngine({ schema, data = {}, style, actionMap, onChangeIt
 
     useComputedFields(schema.fields || [], formState, data, paramSystem, onChangeItemData);
 
-    const evalExpr = useEvalExpr(data);
+    const evalExpr = useEvalExpr();
     const handleAction = (name: string, param?: any) => {
         if (typeof actionMap?.[name] === 'function') {
             actionMap[name]({ param, data: dataActionMap });
@@ -33,7 +33,7 @@ export function SchemaUIEngine({ schema, data = {}, style, actionMap, onChangeIt
         }
     };
     const schemaFields = schema.fields.filter((child) => {
-        return child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true;
+        return child.visibleIf ? evalExpr(child.visibleIf, data, child.requiredKeys) : true;
     }) ?? [];
     return (
         <View style={[{ flexDirection: schema.type === "rows" ? "row" : "column", gap: 10 }, schema.style, schema.props?.style, style]}>
@@ -43,6 +43,7 @@ export function SchemaUIEngine({ schema, data = {}, style, actionMap, onChangeIt
                     field={field}
                     index={index}
                     formState={formState}
+                    data={data}
                     evalExpr={evalExpr}
                     handleAction={handleAction}
                     onChangeItemData={onChangeItemData}

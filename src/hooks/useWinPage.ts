@@ -1,13 +1,16 @@
 import { useLoading } from "@/components/dialog/loadingProvider";
 import { usePopup } from "@/components/dialog/popupProvider";
 import { useToast } from "@/components/dialog/useToast";
+import { buildZodSchema } from "@/components/UIEngine/buildZodSchema";
 import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
+import { VcReferences } from "@/constants/vcData";
 import { useTranslation } from "@/context/TranslationContext";
 import { schemaWin, schemaWinEmpty } from "@/schema";
 import { VACOMTheme } from "@/theme/theme";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
 import { getSubDomain } from "@/utils/vcStorage";
+import dayjs from 'dayjs';
 import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DimensionValue, LayoutChangeEvent } from "react-native";
@@ -79,6 +82,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     const resetItem = useDataItemWin((state) => state.resetItem);
     const { _ } = useTranslation();
 
+    const [layoutData, setLayoutData] = useState<Record<ITableWin, Record<string, any>>>();
+
     const [infoData, setInfoData] = useState({
         total: 0,
         hasMore: true,
@@ -87,27 +92,27 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     const [params, setParams] = useState<IParamWin>();
 
     const schemaUI = useMemo(() => {
-        return schemaWin[tableWin] ?? schemaWinEmpty;
-    }, []);
-
+        const defaultSchema = schemaWin[tableWin] ?? schemaWinEmpty;
+        return Helper.deepMerge(defaultSchema, layoutData?.[tableWin]);
+    }, [layoutData]);
     const getFilterRows = useCallback((values: Record<string, any>) => {
         return { filter: [], tlbparam: [] };
     }, []);
 
     const defaultFilter = useMemo(() => {
         return getFilterRows(schemaUI.config.filterConfig?.values ?? {});
-    }, []);
+    }, [schemaUI]);
 
     const numberAction: number = useMemo(() => {
         return schemaUI.config.itemAction.fields.length;
-    }, []);
+    }, [schemaUI]);
 
     const showFilter = useMemo(() => {
         return {
             showSearch: !!schemaUI.fieldSearch,
             showFilter: schemaUI.config.filterConfig ? true : false
         };
-    }, [winConfig]);
+    }, [schemaUI]);
 
     const extractWinConfig = (dataConfig: any): IWinConfig => {
         setParams({
@@ -122,7 +127,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         const tabsWin: any[] = [...dataConfig.Tabs].slice(1);
         const newTabs = tabsWin.map((tab) => ({
             id: tab.TAB_ID,
-            value: tab.TAB_NAME,
+            value: _(tab.TAB_NAME),
             TAB_ID: tab.TAB_ID,
             TAB_NAME: tab.TAB_NAME,
             FOREIGN_KEY: tab.FOREIGN_KEY,
@@ -244,7 +249,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         setParams(prev => prev ? { ...prev, page: prev.page + 1, start: (prev.page + 1) * pageSize } : undefined)
     }, [infoData, stateLoading.current.refresh]);
 
-    const { validate, errors, setErrors } = useZodValidation(dataItems[tableWin], schemaUI.zod);
+    const { validate, errors, setErrors } = useZodValidation(dataItems[tableWin], buildZodSchema(schemaUI.zod));
 
     const [isChange, setIsChange] = useState(false);
     const onChangeItemData = (valueChange: Record<string, any>) => {
@@ -259,7 +264,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
 
     const onNew = useCallback(() => {
         const arrReplace: Record<string, any> = {
-            '#NAM#': currentYear
+            '#NAM#': currentYear,
+            '#TODAY#': dayjs().format("YYYY-MM-DD HH:mm:ss")
         };
 
         const newDefault = Object.fromEntries(
@@ -432,8 +438,9 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
 
 
     const schemaWinDetail = useMemo(() => {
-        return schemaWin[currentTab?.TAB_TABLE ?? "Empty"] ?? schemaWinEmpty;
-    }, [currentTab]);
+        const defaultSchema = schemaWin[currentTab?.TAB_TABLE ?? "Empty"] ?? schemaWinEmpty;
+        return Helper.deepMerge(defaultSchema, layoutData?.[currentTab?.TAB_TABLE]);
+    }, [currentTab, layoutData]);
 
     const numberActionDetail: number = useMemo(() => {
         return schemaWinDetail.config.itemAction.fields.length;
@@ -515,21 +522,22 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         });
         // const source: any = schema.dataSource ?? {};
         const promises = Object.keys(source).map(async (key: any) => {
-            if (source[key]?.data) {
-                setDataSource(tableWin, key, source[key]?.data);
+            const configSource: any = VcReferences[source[key]];
+            if (configSource?.data) {
+                setDataSource(tableWin, key, configSource?.data);
             }
-            if (source[key]?.url) {
-                const url = source[key].url;
-                const apiGetPost = source[key].type === "post" ? api.post : api.get;
+            if (configSource?.url) {
+                const url = configSource.url;
+                const apiGetPost = configSource.type === "post" ? api.post : api.get;
                 await apiGetPost({
-                    link: url, data: source[key].dataPost,
+                    link: url, data: configSource.dataPost,
                     callBack: (res => {
                         if (res) {
                             setSource(res, source, key);
-                            if (source[key]?.tableWin) {
+                            if (configSource.tableWin) {
                                 setTableRefresh(prev => ({
                                     ...prev,
-                                    [source[key].tableWin]: { url: source[key].url, type: source[key].type, dataPost: source[key].dataPost, key: key }
+                                    [configSource.tableWin]: { url: configSource.url, type: configSource.type, dataPost: configSource.dataPost, key: key }
                                 }));
                             }
                         }
@@ -541,20 +549,19 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     };
 
     const setSource = useCallback((res: IData[], source: any, key: string) => {
-        if (source[key].typeData === "tree") res = Helper.sortTreeFlat(res, source[key].fieldCode);
-
-        const fields: string[] = source[key].fields || Object.keys(res[0]);
-        const isColor = fields.indexOf("color") < 0 && typeof source[key].getColor === "function";
+        const configSource: any = VcReferences[source[key]];
+        if (configSource.typeData === "tree") res = Helper.sortTreeFlat(res, configSource.fieldCode);
+        const fields: string[] = configSource.fields || Object.keys(res[0]);
+        const isColor = fields.indexOf("color") < 0 && typeof configSource.getColor === "function";
         const result = res.map((item: any) => {
             const obj = Object.fromEntries(
                 fields.map(f => [f, item[f]])
             );
             if (isColor) {
-                obj.color = source[key].getColor(item);
+                obj.color = configSource.getColor(item);
             }
             return obj;
         });
-
         setDataSource(tableWin, key, result);
     }, [tableWin]);
 
@@ -562,6 +569,10 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         if (shouldRefresh && tableRefresh[shouldRefresh]) {
             // refresh datasource...
             let source: any = schemaWin[tableWin]?.dataSource ?? {};
+            tabs.forEach((tab) => {
+                const _source = schemaWin[tab.TAB_TABLE]?.dataSource ?? {};
+                source = { ...source, ..._source };
+            });
             const apiRefresh = tableRefresh[shouldRefresh].type === "post" ? api.post : api.get;
             apiRefresh({
                 link: tableRefresh[shouldRefresh].url,
@@ -577,6 +588,22 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     const [printSamples, setPrintSamples] = useState<any[]>([]);
     const getConfigWin = useCallback(async () => {
         show("...");
+        // lấy cấu hình layout từ data
+        try {
+            const sql = encodeURIComponent(`SELECT LAYOUT_MOBILE FROM VC_WINDOW WHERE WINDOW_ID='${windowId}'`);
+            await api.get({
+                link: `/api/System/ExecuteQuery?sql=${sql}`,
+                callBack: (res) => {
+                    if (res && isNotEmpty(res[0])) {
+                        const layout = res[0].LAYOUT_MOBILE;
+                        const fn = new Function("colors", layout);
+                        const result = fn(colors);
+                        setLayoutData(result);
+                    }
+                }
+            });
+        } catch (error) { }
+
         await api.get({
             link: `/api/System/GetAllByWindowNo?window_id=${windowId}`,
             callBack: (res) => setWinConfig(extractWinConfig(res[0])),
@@ -587,7 +614,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 WINDOW_ID: windowId
             },
             callBack: (res) => setPrintSamples(res ?? []),
-        })
+        });
         // lấy các dữ liệu reference liên quan
         await loadDataBegin();
         hide();
