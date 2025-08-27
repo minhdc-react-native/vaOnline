@@ -50,7 +50,6 @@ const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, sch
         if (!confirm || checkFilter()) onSave(data);
     }
     const setValue = (change: Record<string, string>) => {
-        console.log("change>>", change);
         setDataItem(prev => prev ? ({ ...prev, ...change }) : null);
         if (!isChange) setIsChange(true);
     }

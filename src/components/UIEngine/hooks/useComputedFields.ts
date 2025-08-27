@@ -21,7 +21,7 @@ export function useComputedFields<T>(
     paramSystem: IParamSystem | null,
     onChangeItemData?: (change: Record<string, any>) => void
 ) {
-    const evalExpr = useEvalExpr();
+    const evalExpr = useEvalExpr(data);
 
     // Lấy danh sách field cần compute
     const fields = useMemo(() => flatten(fields0), [fields0]);
@@ -43,7 +43,7 @@ export function useComputedFields<T>(
             if (field.type === "number" && field.compute && field.bind) {
                 try {
                     const current = get(formState.state, field.bind);
-                    const computed = evalExpr(field.compute, data, field.requiredKeys ?? []);
+                    const computed = evalExpr(field.compute, field.requiredKeys ?? []);
                     const rounded = Helper.round(
                         computed,
                         paramSystem?.[field.format ?? "rAmount"] ?? 0

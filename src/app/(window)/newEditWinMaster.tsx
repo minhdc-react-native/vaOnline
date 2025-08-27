@@ -105,11 +105,11 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
             />}
             {detail.showNewEdit && <NewEditWinMulti title={_(detail.currentTab?.TAB_NAME)}
                 data={detail.itemDetail} schemaUi={detail.schemaWinDetail}
-                dataSource={dataSource} onSave={detail.handleActionDetail.update} titleButton="Hoàn thành" />}
+                dataSource={dataSource} onSave={detail.handleActionDetail.update} titleButton={_('COMPLETE')} />}
 
             {showEditMaster && <NewEditWinMulti title={titleWin}
                 data={itemData ?? null} schemaUi={schemaUI}
-                dataSource={dataSource} onSave={onSaveMaster} titleButton="Hoàn thành" />}
+                dataSource={dataSource} onSave={onSaveMaster} titleButton={_('COMPLETE')} />}
 
         </SafeAreaView>
     )

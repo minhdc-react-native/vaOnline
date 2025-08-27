@@ -161,12 +161,12 @@ type IProps = {
 
 const ItemViewComponent: React.FC<IProps> = ({ item, onPress, isSelect, tableSearch, checkSelected }) => {
     const { showToast } = useToast();
-    const evalExpr = useEvalExpr();
+    const evalExpr = useEvalExpr(item);
     const { colors } = useTheme();
     return (
         <Pressable onPress={() => {
             if (checkSelected) {
-                const isError = evalExpr(checkSelected.isError, item, checkSelected.requiredKeys);
+                const isError = evalExpr(checkSelected.isError, checkSelected.requiredKeys);
                 if (isError) {
                     showToast(checkSelected.message, { type: "warning" });
                     return;

@@ -1,13 +1,11 @@
 // =============================
 import { useTranslation } from '@/context/TranslationContext';
 import { VACOMTheme } from '@/theme/theme';
-import { Helper } from '@/utils/Helper';
-import React, { useState } from 'react';
-import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { Button, Card, Chip, Icon, SegmentedButtons, Text, TextInput, useTheme } from 'react-native-paper';
+import React, { useMemo } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Button, Card, SegmentedButtons, Text, useTheme } from 'react-native-paper';
 import DashedLine from '../dashedLine';
 import { useToast } from '../dialog/useToast';
-import ExpandableView from '../expandableView';
 import { StarRating } from '../starRating';
 import VcCheckBox from '../vcCheckbox';
 import { VcDatePicker } from '../vcDatePicker';
@@ -17,8 +15,10 @@ import VcSearchList from '../vcSearchList';
 import VcSelectList from '../vcSelectList';
 import VcSelectListMulti from '../vcSelectListMulti';
 import VcSelectPage from '../vcSelectPage';
-import { VcTextLink } from '../vcTextLink';
 import { VcTimePicker } from '../vcTimePicker';
+import { ExpandField } from './Fields/expandField';
+import { InputField } from './Fields/inputField';
+import { TextField } from './Fields/textField';
 import { useBoundField } from './hooks/useBoundField';
 import { FormState } from './hooks/useFormState';
 import { ICON_REGISTRY, IField } from './types';
@@ -27,8 +27,7 @@ interface FieldRendererProps {
     field: IField;
     index: number;
     formState: FormState;
-    data: Record<string, any>,
-    evalExpr: (expr: string, data: Record<string, any>, requiredKeys?: string[]) => any;
+    evalExpr: (expr: string, requiredKeys?: string[]) => any;
     handleAction: (expr: string, param?: any) => void;
     errors: Record<string, string>;
     dataSource: Record<string, any[]>;
@@ -41,7 +40,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     field,
     index,
     formState,
-    data,
     evalExpr,
     handleAction,
     errors,
@@ -52,17 +50,23 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 }) => {
     const key = `${field.bind || field.type}-${index}`;
     // Dùng placeholder value + setter
-    const { value, getValue, setValue, setValues, onBlurTaxCode } = useBoundField(formState, field.bind || '__none__', onChangeItemData);
+    const { value, getValue, setValue, setValues } = useBoundField(formState, field.bind || '__none__', onChangeItemData);
     const { colors } = useTheme<VACOMTheme>();
     const { showToast } = useToast();
-    const [showPassword, setShowPassWord] = useState(false);
     const { _ } = useTranslation();
-    const disabled = field.disabled ? (typeof field.disabled === "boolean" ? field.disabled : evalExpr(field.disabled, data, field.requiredKeys)) : false;
+
+    const disabled = useMemo(() => {
+        return field.disabled
+            ? typeof field.disabled === "boolean"
+                ? field.disabled
+                : evalExpr(field.disabled, field.requiredKeys)
+            : false;
+    }, [field.disabled, evalExpr, field.requiredKeys]);
 
     switch (field.type) {
         case 'rows':
             const fieldsRows = field.fields?.filter((child) => {
-                return child.visibleIf ? evalExpr(child.visibleIf, data, child.requiredKeys) : true;
+                return child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true;
             }) ?? [];
             return (
                 <View key={key} style={[{ flexDirection: "row", gap: 10 }, field.style]}>
@@ -72,7 +76,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                             field={child}
                             index={i}
                             formState={formState}
-                            data={data}
                             evalExpr={evalExpr}
                             handleAction={handleAction}
                             onChangeItemData={onChangeItemData}
@@ -86,7 +89,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             );
         case 'cols':
             const fieldsCols = field.fields?.filter((child) => {
-                return child.visibleIf ? evalExpr(child.visibleIf, data, child.requiredKeys) : true;
+                return child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true;
             }) ?? [];
             return (
                 <View key={key} style={[{ gap: 10 }, field.style]}>
@@ -96,7 +99,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                             field={child}
                             index={i}
                             formState={formState}
-                            data={data}
                             evalExpr={evalExpr}
                             handleAction={handleAction}
                             onChangeItemData={onChangeItemData}
@@ -110,7 +112,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             );
         case "card":
             const fieldsCard = field.fields?.filter((child) => {
-                return child.visibleIf ? evalExpr(child.visibleIf, data, child.requiredKeys) : true;
+                return child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true;
             }) ?? [];
             return (
                 <Card style={[{ padding: 20, backgroundColor: colors.background }, field.style]} contentStyle={{ gap: 10 }}>
@@ -120,7 +122,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                             field={child}
                             index={i}
                             formState={formState}
-                            data={data}
                             evalExpr={evalExpr}
                             handleAction={handleAction}
                             onChangeItemData={onChangeItemData}
@@ -133,163 +134,28 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                 </Card>
             );
         case 'expand':
-            const fieldsExpand = field.fields?.filter((child) => {
-                return child.visibleIf ? evalExpr(child.visibleIf, data, child.requiredKeys) : true;
-            }) ?? [];
-            const keyExpand = `${field.bind || field.type}-${index}`;
-            const _title: any = typeof field.title !== "string" ? <FieldRenderer
-                key={`${keyExpand}-title`}
-                field={field.title as IField}
+            return <ExpandField
+                field={field}
                 index={index}
                 formState={formState}
-                data={data}
                 evalExpr={evalExpr}
                 handleAction={handleAction}
-                onChangeItemData={onChangeItemData}
                 errors={errors}
+                onChangeItemData={onChangeItemData}
                 dataSource={dataSource}
                 dataSourceMap={dataSourceMap}
                 paramSystem={paramSystem}
-            /> : _(field.title);
-            const _icon: any = field.icon ? <FieldRenderer
-                key={`${keyExpand}-icon`}
-                field={field.icon as IField}
-                index={index}
-                formState={formState}
-                data={data}
-                evalExpr={evalExpr}
-                handleAction={handleAction}
-                onChangeItemData={onChangeItemData}
-                errors={errors}
-                dataSource={dataSource}
-                dataSourceMap={dataSourceMap}
-                paramSystem={paramSystem}
-            /> : undefined;
-            return (
-                <ExpandableView title={_title} icon={_icon} defaultExpanded={field.defaultExpanded}
-                    disabled={disabled}
-                    expanded={field.expanded} style={[{ borderColor: colors.elevation.level5 }, field.style]}
-                    containerStyle={[{ padding: 10 }, field.containerStyle]}
-                    styleHeader={[{ paddingVertical: 5, paddingHorizontal: 10, backgroundColor: colors.elevation.level1 }, field.styleHeader]} type={field.typeExpand}
-                    titleStyle={{ fontWeight: "normal" }}
-                >
-                    {fieldsExpand.map((child, i) => (
-                        <FieldRenderer
-                            key={i}
-                            field={child}
-                            index={i}
-                            formState={formState}
-                            data={data}
-                            evalExpr={evalExpr}
-                            handleAction={handleAction}
-                            onChangeItemData={onChangeItemData}
-                            errors={errors}
-                            dataSource={dataSource}
-                            dataSourceMap={dataSourceMap}
-                            paramSystem={paramSystem}
-                        />
-                    ))}
-                </ExpandableView>
-            );
-        case 'text':
-            const isBold = (formState.state?.BOLD === "C");
-            let valueText = value;
-            let labelText = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
-            switch (field.format?.type) {
-                case "selectMulti":
-                    const ids = value ? value.split(field.format?.separator ?? ",") : [];
-                    const dataMapMulti = dataSourceMap.get(field.keySource || field.bind!);
-                    return (<View style={[{ flexDirection: "row", flexWrap: "wrap", gap: 2 }, field.style]}>
-                        {ids.map((id: string) => {
-                            return (
-                                <Chip mode='outlined' key={`chip${id}`} style={{ borderColor: colors.elevation.level3 }}>
-                                    <Text variant='bodySmall'>{dataMapMulti?.get(id)?.[field.format?.fValue ?? "value"] || '???'}</Text>
-                                </Chip>
-                            );
-                        })}
-                    </View>)
-                case "status":
-                    const itemStatus: any = dataSourceMap.get(field.keySource || field.bind!)?.get(value) || { id: '?', value: "???", color: colors.secondary };
-                    return (<View style={[
-                        {
-                            flexDirection: "row", alignItems: "center", gap: 5, paddingVertical: 2, paddingHorizontal: 5, borderRadius: 5,
-                            backgroundColor: colors.elevation.level1, borderWidth: 0.5, borderColor: colors.elevation.level3, maxWidth: 150
-                        },
-                        field.style
-                    ]
-                    }>
-                        <View style={{ height: 10, width: 10, borderRadius: 10, backgroundColor: itemStatus.color }} />
-                        <Text numberOfLines={1} style={{ fontSize: 12, flexShrink: 1 }}>{itemStatus.value}</Text>
-                    </View>)
-                case "rating":
-                    if (!field.bind) {
-                        valueText = labelText;
-                        labelText = undefined;
-                    }
-                    return (
-                        <View style={[{ flexDirection: "row", gap: 5, alignItems: "center" }, field.style]}>
-                            {labelText && <Text style={[styles.label, field.labelStyle]}>{_(labelText)}</Text>}
-                            <StarRating value={valueText} max={field.format.maxRating} isShowAll={field.format.isShowAll} />
-                        </View>
-                    );
-                case "checkbox":
-                    const isCheck = (typeof value === "boolean" ? value : (value === "C"));
-                    const icon = field.format?.typeCheckBox === "checkbox" ? (isCheck ? "checkbox-marked-outline" : "checkbox-blank-outline") : (isCheck ? "toggle-switch" : "toggle-switch-off")
-                    return (
-                        <View style={[{ flexDirection: "row", gap: 5, alignItems: "center" }, field.style]}>
-                            {labelText && <Text style={[styles.label, field.labelStyle]}>{_(labelText)}</Text>}
-                            <Icon source={icon} size={20} color={isCheck ? colors.primary : colors.secondary} />
-                        </View>
-                    )
-                case "link":
-                    if (!field.bind) {
-                        valueText = labelText;
-                        labelText = undefined;
-                    }
-                    return (
-                        <View style={[field.style]}>
-                            {labelText && <Text style={[styles.label, field.labelStyle]}>{_(labelText)}</Text>}
-                            <VcTextLink text={valueText} numberOfLines={field.numberOfLines} style={field.textStyle} variant={field.variant} typeLink={field.format?.typeLink} />
-                        </View>
-                    );
-                default:
-                    let addStyle: StyleProp<ViewStyle> = null;
-                    if (!field.bind) {
-                        valueText = labelText;
-                        labelText = undefined;
-                    }
-                    if (field.format?.type === "number") {
-                        valueText = Helper.formatAmount(valueText, false, paramSystem?.[field.format.roundNumber ?? "rAmount"])
-                    } else if (field.format?.type === "date") {
-                        valueText = Helper.getFormattedDate(valueText, field.format.formatDate, field.format.removeTime ?? true)
-                    } else if (field.format?.type === "select" && !Helper.isEmpty(value)) {
-                        valueText = dataSourceMap.get(field.keySource || field.bind!)?.get(value)?.[field.format.fValue ?? "value"] || '???';
-                    } else if (field.format?.type === "tag" && !Helper.isEmpty(value)) {
-                        const itemTag = dataSourceMap.get(field.keySource || field.bind!)?.get(value);
-                        valueText = itemTag?.[field.format.fValue ?? "value"] || '???';
-                        addStyle = { paddingVertical: 2, paddingHorizontal: 5, borderWidth: 0.5, borderColor: colors.elevation.level5, backgroundColor: colors.elevation.level1, borderRadius: 10 };
-                    }
-                    return (
-                        <View style={[field.style]}>
-                            {labelText && <Text style={[styles.label, field.labelStyle]}>{_(labelText)}</Text>}
-                            <Text key={key} variant={field.variant} numberOfLines={field.numberOfLines}
-                                style={[addStyle as any, field.textStyle, field.format?.type === "number" && Number(valueText) < 0 && { color: colors.primary }, isBold && { fontWeight: "bold" }]} >{valueText}</Text>
-                        </View>
-                    );
-            }
-        case 'icon':
-            const IconComponent = ICON_REGISTRY[field.iconType];
-            // @ts-ignore: next-line
-            return <IconComponent key={key} name={field.name} size={field.size} color={field.color} />;
+                _={_}
+            />
         case 'actionList':
             const fieldsAction = field.fields?.filter((child) => {
-                return child.visibleIf ? evalExpr(child.visibleIf, data, child.requiredKeys) : true;
+                return child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true;
             }) ?? [];
             let checkAction: { isError: boolean, message: string } | undefined = undefined;
             if (field.checkAction) {
                 const isError = field.checkAction.isError;
                 const message = field.checkAction.message;
-                checkAction = { isError: evalExpr(isError, data, field.requiredKeys), message: evalExpr(message, data, field.requiredKeys) };
+                checkAction = { isError: evalExpr(isError, field.requiredKeys), message: evalExpr(message, field.requiredKeys) };
             }
             return (
                 <Pressable key={key}
@@ -307,7 +173,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                             field={child}
                             index={i}
                             formState={formState}
-                            data={data}
                             evalExpr={evalExpr}
                             handleAction={handleAction}
                             onChangeItemData={onChangeItemData}
@@ -319,101 +184,69 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                     ))}
                 </Pressable>
             );
+        case 'text':
+            return <TextField
+                field={field}
+                index={index}
+                formState={formState}
+                evalExpr={evalExpr}
+                dataSourceMap={dataSourceMap}
+                paramSystem={paramSystem}
+            />
+        case 'icon':
+            const IconComponent = ICON_REGISTRY[field.iconType];
+            // @ts-ignore: next-line
+            return <IconComponent key={key} name={field.name} size={field.size} color={field.color} />;
+
         case 'number':
-            const labelNumber = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
+            const labelNumber = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={field.style}>
                     <VcNum disabled={disabled} label={_(labelNumber)} key={key} value={value} onChange={setValue} />
-                    {field.bind && errors?.[field.bind] !== undefined && (
-                        <View style={[styles.tooltip, { borderColor: colors.vacom.borderColor, backgroundColor: "rgb(255, 218, 214)" }]}>
-                            <Text style={styles.tooltipText}>{errors?.[field.bind]}</Text>
-                        </View>
-                    )}
+                    <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'date':
-            const labelDate = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
+            const labelDate = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[field.style]}>
                     <VcDatePicker disabled={disabled} label={_(labelDate)} key={key} value={value} onChange={setValue} />
-                    {field.bind && errors?.[field.bind] !== undefined && (
-                        <View style={[styles.tooltip, { borderColor: colors.vacom.borderColor, backgroundColor: "rgb(255, 218, 214)" }]}>
-                            <Text style={styles.tooltipText}>{errors?.[field.bind]}</Text>
-                        </View>
-                    )}
+                    <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case "time":
-            const labelTime = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
+            const labelTime = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[field.style]}>
                     <VcTimePicker disabled={disabled} label={_(labelTime)} key={key} value={value} onChange={setValue} />
-                    {field.bind && errors?.[field.bind] !== undefined && (
-                        <View style={[styles.tooltip, { borderColor: colors.vacom.borderColor, backgroundColor: "rgb(255, 218, 214)" }]}>
-                            <Text style={styles.tooltipText}>{errors?.[field.bind]}</Text>
-                        </View>
-                    )}
+                    <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'input':
-            const labelInput = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
-            const isMulti = field.typeInput === "multi" ? true : false;
-            const isPassword = field.typeInput === "password" ? true : false;
-            const rightFix = isPassword ?
-                <TextInput.Icon icon={showPassword ? 'eye' : 'eye-off'}
-                    onPress={() => setShowPassWord?.(!showPassword)} color={"rgb(119, 86, 81)"} /> :
-                (field.texRight ? <TextInput.Affix text={`${field.texRight}`} textStyle={{ color: colors.secondary }} /> : undefined)
-            const leftIcon = field.leftIcon ? <TextInput.Icon icon={field.leftIcon.name} size={field.leftIcon.size} color={field.leftIcon.color ?? colors.secondary} /> : undefined;
             return (
-                <View key={`${key}view`} style={field.style}>
-                    <TextInput
-                        label={value ? _(labelInput) : <Text style={{ color: "rgba(59, 45, 43, 0.4)" }}>{_(labelInput)}</Text>}
-                        // label={label}
-                        mode="outlined"
-                        disabled={disabled}
-                        readOnly={disabled}
-                        onBlur={() => {
-                            handleAction('onBlur', field.bind);
-                            if (field.typeInput === "taxCode") {
-                                if (value && value.length >= 10) {
-                                    onBlurTaxCode(value, field.expression)
-                                }
-                            }
-                        }}
-                        secureTextEntry={isPassword && !showPassword}
-                        autoCapitalize={field.autoCapitalize}
-                        value={value}
-                        left={leftIcon}
-                        right={rightFix}
-                        multiline={isMulti}
-                        onChangeText={(value) => setValue(field.upperCase && value ? value.toUpperCase() : value)}
-                        outlineStyle={{ borderWidth: 0.5, margin: 0, backgroundColor: disabled ? colors.elevation.level1 : colors.background, borderColor: 'rgba(119, 86, 81,0.3)' }}
-                        style={[{ height: (field.height || (isMulti ? 100 : 40)), top: -1 }, field.upperCase && { textTransform: 'uppercase' }]}
-                    />
-                    {field.bind && errors?.[field.bind] !== undefined && (
-                        <View style={[styles.tooltip, { borderColor: colors.vacom.borderColor, backgroundColor: "rgb(255, 218, 214)" }]}>
-                            <Text style={styles.tooltipText}>{errors?.[field.bind]}</Text>
-                        </View>
-                    )}
-                </View>
+                <InputField
+                    field={field}
+                    index={index}
+                    formState={formState}
+                    evalExpr={evalExpr}
+                    handleAction={handleAction}
+                    errors={errors}
+                    onChangeItemData={onChangeItemData}
+                />
             );
         case 'select':
-            const labelSelect = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
+            const labelSelect = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[{ flexDirection: "row", alignItems: "center", gap: 5 }, field.style]}>
                     {labelSelect !== undefined && <Text style={[{ fontWeight: 'bold' }, field.labelStyle]}>{_(labelSelect)}</Text>}
                     <View style={{ flex: 1 }}>
                         <SegmentedButtons density="small" key={key} buttons={dataSource[field.keySource || field.bind!] ?? []} value={value} onValueChange={(value) => !disabled && setValue(value)} />
-                        {field.bind && errors?.[field.bind] !== undefined && (
-                            <View style={[styles.tooltip, { borderColor: colors.vacom.borderColor, backgroundColor: "rgb(255, 218, 214)" }]}>
-                                <Text style={styles.tooltipText}>{errors?.[field.bind]}</Text>
-                            </View>
-                        )}
+                        <ErrorTooltip field={field} errors={errors} />
                     </View>
                 </View>
             );
         case 'search':
-            const labelSearch = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
+            const labelSearch = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
                     <VcSearchList value={value} disabled={disabled} label={_(labelSearch)} clean={field.clean}
@@ -426,15 +259,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                             }
                             setValues(valueChange);
                         }} />
-                    {field.bind && errors?.[field.bind] !== undefined && (
-                        <View style={[styles.tooltip, { borderColor: colors.vacom.borderColor, backgroundColor: "rgb(255, 218, 214)" }]}>
-                            <Text style={styles.tooltipText}>{errors?.[field.bind]}</Text>
-                        </View>
-                    )}
+                    <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'selectList':
-            const labelList = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
+            const labelList = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
                     <VcSelectList disabled={disabled} data={dataSource[field.keySource || field.bind!] ?? []} label={_(labelList)} key={key} clean={field.clean}
@@ -449,30 +278,22 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
                             setValues(valueChange);
                         }} />
-                    {field.bind && errors?.[field.bind] !== undefined && (
-                        <View style={[styles.tooltip, { borderColor: colors.vacom.borderColor, backgroundColor: "rgb(255, 218, 214)", bottom: 0 }]}>
-                            <Text style={styles.tooltipText}>{errors?.[field.bind]}</Text>
-                        </View>
-                    )}
+                    <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'selectListMulti':
-            const labelListMulti = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
+            const labelListMulti = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[field.style]}>
                     <VcSelectListMulti data={dataSource[field.keySource || field.bind!] ?? []} label={_(labelListMulti)} key={key}
                         fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit}
                         fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={(values) => setValue(values)} disabled={disabled} />
-                    {field.bind && errors?.[field.bind] !== undefined && (
-                        <View style={[styles.tooltip, { borderColor: colors.vacom.borderColor, backgroundColor: "rgb(255, 218, 214)" }]}>
-                            <Text style={styles.tooltipText}>{errors?.[field.bind]}</Text>
-                        </View>
-                    )}
+                    <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'selectListPage':
             const display = getValue(field.fValue);
-            const labelListPage = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
+            const labelListPage = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={field.style}>
                     <VcSelectPage label={_(labelListPage)} key={key} clean={field.clean} disabled={disabled}
@@ -483,11 +304,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                                 [field.fValue]: (itemSelected as Record<string, any>)?.[field.fValueRef ?? "name"]
                             });
                         }} />
-                    {field.bind && errors?.[field.bind] !== undefined && (
-                        <View style={[styles.tooltip, { borderColor: colors.vacom.borderColor, backgroundColor: "rgb(255, 218, 214)" }]}>
-                            <Text style={styles.tooltipText}>{errors?.[field.bind]}</Text>
-                        </View>
-                    )}
+                    <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'line':
@@ -495,24 +312,24 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         case 'empty':
             return <View style={field.style} />
         case 'checkbox':
-            const labelCheckbox = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
+            const labelCheckbox = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return <View key={`${key}view`} style={field.style}>
                 <VcCheckBox disabled={disabled} textStyle={field.textStyle} align={field.align} label={_(labelCheckbox)} value={value}
                     onChange={(value) => field.actionName ? handleAction(field.actionName, value) : setValue(value)} type={field.typeView} />
             </View>
         case "option":
-            const labelOption = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
+            const labelOption = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return <View key={`${key}view`} style={field.style}>
                 <VcOptions disabled={disabled} textStyle={field.textStyle} label={_(labelOption)} value={value}
                     onChange={setValue} data={dataSource[field.keySource || field.bind!] ?? []} />
             </View>
         case 'button':
-            const labelButton = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
+            const labelButton = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return <View key={`${key}view`} style={field.style}>
                 <Button disabled={disabled} style={field.buttonStyle} mode={field.mode} onPress={() => handleAction(field.actionName)} >{_(labelButton)}</Button>
             </View>
         case 'rating':
-            const labelRating = field.label ? evalExpr(field.label, data, field.requiredKeys) : undefined;
+            const labelRating = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View style={[styles.rating, { backgroundColor: colors.background, borderColor: colors.vacom.borderColor }, field.style]}>
                     {labelRating && <Text style={[styles.label, { fontWeight: "bold" }, field.labelStyle]}>{_(labelRating)}</Text>}
@@ -522,6 +339,19 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         default:
             return null;
     }
+};
+interface IErrorTooltip {
+    field: IField;
+    errors: Record<string, string>;
+}
+const ErrorTooltip = ({ field, errors }: IErrorTooltip) => {
+    const { colors } = useTheme<VACOMTheme>()
+    if (!field.bind || errors?.[field.bind] === undefined) return null;
+    return (
+        <View style={[styles.tooltip, { borderColor: colors.vacom.borderColor, backgroundColor: "rgb(255, 218, 214)" }]}>
+            <Text style={styles.tooltipText}>{errors[field.bind]}</Text>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({

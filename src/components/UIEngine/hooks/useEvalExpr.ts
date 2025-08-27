@@ -2,13 +2,13 @@ import { useTranslation } from '@/context/TranslationContext';
 import { useDataApp } from '@/hooks/zustand/useDataApp';
 import { useCallback, useRef } from 'react';
 
-export function useEvalExpr() {
+export function useEvalExpr(data: Record<string, any>) {
     const fnCache = useRef(new Map<string, Function>());
     const lang = useDataApp((state) => state.lang);
     const { _ } = useTranslation();
 
     return useCallback(
-        (expr: string, data: Record<string, any>, requiredKeys?: string[]): any => {
+        (expr: string, requiredKeys?: string[]): any => {
             if (typeof expr !== 'string') return expr;
             if (!expr.includes('{{')) return expr;
 
@@ -31,6 +31,6 @@ export function useEvalExpr() {
                 return `⚠️ ${e.message}`;
             }
         },
-        [lang, _] // chỉ phụ thuộc vào ngôn ngữ & translate
+        [data, lang, _] // chỉ phụ thuộc vào ngôn ngữ & translate
     );
 }
