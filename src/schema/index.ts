@@ -6,6 +6,8 @@ import { dmdt } from "./category/dmdt/dmdt";
 import { dmdt_ngh } from "./category/dmdt/dmdt_ngh";
 import { dmdvt } from "./category/dmdvt";
 import { dmhv } from "./category/dmhv/dmhv";
+import { dmhv_dvt } from "./category/dmhv/dmhv_dvt";
+import { dmhv_gia } from "./category/dmhv/dmhv_gia";
 import { dmkho } from "./category/dmkho";
 import { dmnhdt } from "./category/dmnhdt";
 import { dmnhhv } from "./category/dmnhhv";
@@ -74,7 +76,7 @@ export interface ISchemaWinValue {
 export const schemaWin: Partial<Record<ITableWin, ISchemaWinValue>> = {
     Empty: empty, Year: year,
     DMNHDT: dmnhdt, DMDT: dmdt, DMDT_NGH: dmdt_ngh, DMBP: dmbp, DMPX: dmpx, DMOB: dmob, DMTK: dmtk,
-    DMKHO: dmkho, DMNHHV: dmnhhv, DMDVT: dmdvt, DMHV: dmhv
+    DMKHO: dmkho, DMNHHV: dmnhhv, DMDVT: dmdvt, DMHV: dmhv, DMHV_DVT: dmhv_dvt, DMHV_GIA: dmhv_gia
 }
 
 export const schemaWinEmpty: ISchemaWinValue = {
@@ -139,6 +141,16 @@ export const schemaItemSearch: Record<ITableSearch, IRowsColsField> = {
         ]
     },
     DMTTDB: {
+        type: "cols",
+        fields: [
+            {
+                type: "text",
+                requiredKeys: ["id", "value"],
+                label: "{{`${id} - ${value}`}}"
+            }
+        ]
+    },
+    DMDVT: {
         type: "cols",
         fields: [
             {

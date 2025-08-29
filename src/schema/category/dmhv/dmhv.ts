@@ -171,27 +171,27 @@ const dmhv0: ISchemaWin = {
                     }
                 ]
             },
-            {
-                type: "rows",
-                fields: [
-                    {
-                        type: "search",
-                        tableSearch: "DMTTDB",
-                        clean: false,
-                        fField: 'id',
-                        numCharSearch: 2,
-                        label: "MA_TTDB",
-                        bind: "MA_TTDB",
-                        style: { flex: 1 }
-                    },
-                    {
-                        type: "input",
-                        label: "BARCODE",
-                        bind: "BARCODE",
-                        style: { flex: 1 }
-                    }
-                ]
-            },
+            // {
+            //     type: "rows",
+            //     fields: [
+            //         {
+            //             type: "search",
+            //             tableSearch: "DMTTDB",
+            //             clean: false,
+            //             fField: 'id',
+            //             numCharSearch: 2,
+            //             label: "MA_TTDB",
+            //             bind: "MA_TTDB",
+            //             style: { flex: 1 }
+            //         },
+            //         {
+            //             type: "input",
+            //             label: "BARCODE",
+            //             bind: "BARCODE",
+            //             style: { flex: 1 }
+            //         }
+            //     ]
+            // },
             {
                 type: "rows",
                 fields: [
@@ -214,10 +214,10 @@ const dmhv0: ISchemaWin = {
                 type: "rows",
                 fields: [
                     {
-                        type: "search",
-                        tableSearch: "DMTK",
+                        type: "selectList",
                         clean: false,
-                        fField: 'id',
+                        tableWin: "Empty",
+                        fDisplay: { fValue: "id" },
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_HV",
                         bind: "TK_HV",
@@ -225,10 +225,10 @@ const dmhv0: ISchemaWin = {
                         style: { flex: 1 }
                     },
                     {
-                        type: "search",
-                        tableSearch: "DMTK",
+                        type: "selectList",
                         clean: false,
-                        fField: 'id',
+                        tableWin: "Empty",
+                        fDisplay: { fValue: "id" },
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_GV",
                         bind: "TK_GV",
@@ -241,10 +241,10 @@ const dmhv0: ISchemaWin = {
                 type: "rows",
                 fields: [
                     {
-                        type: "search",
-                        tableSearch: "DMTK",
+                        type: "selectList",
                         clean: false,
-                        fField: 'id',
+                        tableWin: "Empty",
+                        fDisplay: { fValue: "id" },
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_DTHU",
                         bind: "TK_DTHU",
@@ -252,10 +252,10 @@ const dmhv0: ISchemaWin = {
                         style: { flex: 1 }
                     },
                     {
-                        type: "search",
-                        tableSearch: "DMTK",
+                        type: "selectList",
                         clean: false,
-                        fField: 'id',
+                        tableWin: "Empty",
+                        fDisplay: { fValue: "id" },
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_HBBTL",
                         bind: "TK_HBBTL",
@@ -268,10 +268,10 @@ const dmhv0: ISchemaWin = {
                 type: "rows",
                 fields: [
                     {
-                        type: "search",
-                        tableSearch: "DMTK",
+                        type: "selectList",
                         clean: false,
-                        fField: 'id',
+                        tableWin: "Empty",
+                        fDisplay: { fValue: "id" },
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_CK",
                         bind: "TK_CK",
@@ -283,6 +283,16 @@ const dmhv0: ISchemaWin = {
                         tableWin: "Empty",
                         label: "MA_SX",
                         bind: "MA_SX",
+                        itemView: {
+                            type: "cols",
+                            fields: [
+                                {
+                                    type: 'text',
+                                    requiredKeys: ['MA_SX', 'TEN_SX'],
+                                    label: "{{`${MA_SX} - ${TEN_SX}`}}"
+                                }
+                            ]
+                        },
                         style: { flex: 1 }
                     },
                 ]
@@ -296,7 +306,8 @@ export const dmhv: ISchemaWinValue = {
         MA_NH_HV: 'DMNHHV',
         LOAI_HV: 'LOAI_HV',
         MA_TTDB: 'DMTTDB',
-        MA_SX: 'DMSX'
+        MA_SX: 'DMSX',
+        TK: 'DMTK'
     },
     config: dmhv0,
     fieldSearch: 'TEN_HV',

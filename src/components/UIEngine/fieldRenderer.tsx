@@ -96,6 +96,18 @@ const ViewComponent: React.FC<IProps> = ({
         setValues(valueChange);
     }, [field, setValues]);
 
+    const onPressButton = useCallback(() => {
+        if (field.type !== "button") return;
+        handleAction(field.actionName);
+    }, [field, handleAction]);
+
+    const onChangeWidthDisabled = useCallback(
+        (val: string) => {
+            if (!disabled) setValue(val);
+        },
+        [disabled, setValue]
+    );
+
     switch (field.type) {
         case 'rows':
             const fieldsRows = field.fields?.filter((child) => {
@@ -238,7 +250,7 @@ const ViewComponent: React.FC<IProps> = ({
                 <View key={`${key}view`} style={[{ flexDirection: "row", alignItems: "center", gap: 5 }, field.style]}>
                     {labelSelect !== undefined && <Text style={[{ fontWeight: 'bold' }, field.labelStyle]}>{_(labelSelect)}</Text>}
                     <View style={{ flex: 1 }}>
-                        <SegmentedButtons density="small" key={key} buttons={dataSource[field.keySource || field.bind!] ?? []} value={value} onValueChange={(value) => !disabled && setValue(value)} />
+                        <SegmentedButtons density="small" key={key} buttons={dataSource[field.keySource || field.bind!] ?? []} value={value} onValueChange={onChangeWidthDisabled} />
                         <ErrorTooltip field={field} errors={errors} />
                     </View>
                 </View>
@@ -268,7 +280,7 @@ const ViewComponent: React.FC<IProps> = ({
                 <View key={`${key}view`} style={[field.style]}>
                     <VcSelectListMulti data={dataSource[field.keySource || field.bind!] ?? []} label={_(labelListMulti)} key={key}
                         itemView={field.itemView} fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit}
-                        fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={(values) => setValue(values)} disabled={disabled} />
+                        fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={setValue} disabled={disabled} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
@@ -296,7 +308,7 @@ const ViewComponent: React.FC<IProps> = ({
             const labelCheckbox = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return <View key={`${key}view`} style={field.style}>
                 <VcCheckBox disabled={disabled} textStyle={field.textStyle} align={field.align} label={_(labelCheckbox)} value={value}
-                    onChange={(value) => field.actionName ? handleAction(field.actionName, value) : setValue(value)} type={field.typeView} />
+                    onChange={setValue} type={field.typeView} />
             </View>
         case "option":
             const labelOption = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
@@ -307,7 +319,7 @@ const ViewComponent: React.FC<IProps> = ({
         case 'button':
             const labelButton = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return <View key={`${key}view`} style={field.style}>
-                <Button disabled={disabled} style={field.buttonStyle} mode={field.mode} onPress={() => handleAction(field.actionName)} >{_(labelButton)}</Button>
+                <Button disabled={disabled} style={field.buttonStyle} mode={field.mode} onPress={onPressButton} >{_(labelButton)}</Button>
             </View>
         case 'rating':
             const labelRating = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;

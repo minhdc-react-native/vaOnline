@@ -16,7 +16,8 @@ const urlBase: Record<ITableSearch, string> = { // gắn api cho đỡ nhầm...
     DMMNGH: '/api/System/GetDataByReferencesId?id=0b22c919-a275-4d05-83bd-c34844d9ec67&filtervalue=#filterValue#',
     DMMCN: '/api/System/GetDataByReferencesId?id=0600dd65-9cf4-4fd7-bf43-ff50a5578b42&filtervalue=#filterValue#',
     DMTK: '/api/System/GetDataByReferencesId?id=0a93c38b-5f1f-422a-8039-a6cee1967af2&filtervalue=#filterValue#',
-    DMTTDB: '/api/System/GetDataByReferencesId?id=ad61024c-69cc-4d3b-9d5e-e5685db5bdce&filtervalue=#filterValue#'
+    DMTTDB: '/api/System/GetDataByReferencesId?id=ad61024c-69cc-4d3b-9d5e-e5685db5bdce&filtervalue=#filterValue#',
+    DMDVT: '/api/System/GetDataByReferencesId?id=2beb4691-3bc8-40aa-a5ba-6170fef7a7c4&filtervalue=#filterValue#'
 }
 interface IProgs {
     tableSearch: ITableSearch,
@@ -54,10 +55,10 @@ const ViewComponent: React.FC<IProgs> = ({ tableSearch, label, placeholder, valu
         if (Helper.isEmpty(value) || value.length < numCharSearch) {
             setData([]);
         } else {
-            const urlSearch = url.replace('#filterValue#', value);
+            const urlSearch = url.replace('#filterValue#', encodeURIComponent(value));
             api.get({ link: urlSearch, callBack: (res) => setData(res), setLoading: setLoading })
         }
-    }, [])
+    }, [numCharSearch, url])
 
     const debouncedSearch = useMemo(() => debounce(onDebounceSearch, 500), [onSearch])
 
