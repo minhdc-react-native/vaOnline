@@ -175,9 +175,11 @@ const dmhv0: ISchemaWin = {
                 type: "rows",
                 fields: [
                     {
-                        type: "selectList",
+                        type: "search",
+                        tableSearch: "DMTTDB",
                         clean: false,
-                        tableWin: "Empty",
+                        fField: 'id',
+                        numCharSearch: 2,
                         label: "MA_TTDB",
                         bind: "MA_TTDB",
                         style: { flex: 1 }
@@ -213,18 +215,19 @@ const dmhv0: ISchemaWin = {
                 fields: [
                     {
                         type: "search",
-                        clean: false,
                         tableSearch: "DMTK",
+                        clean: false,
                         fField: 'id',
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_HV",
                         bind: "TK_HV",
+                        keySource: "TK",
                         style: { flex: 1 }
                     },
                     {
                         type: "search",
-                        clean: false,
                         tableSearch: "DMTK",
+                        clean: false,
                         fField: 'id',
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_GV",
@@ -239,8 +242,8 @@ const dmhv0: ISchemaWin = {
                 fields: [
                     {
                         type: "search",
-                        clean: false,
                         tableSearch: "DMTK",
+                        clean: false,
                         fField: 'id',
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_DTHU",
@@ -250,8 +253,8 @@ const dmhv0: ISchemaWin = {
                     },
                     {
                         type: "search",
-                        clean: false,
                         tableSearch: "DMTK",
+                        clean: false,
                         fField: 'id',
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_HBBTL",
@@ -266,8 +269,8 @@ const dmhv0: ISchemaWin = {
                 fields: [
                     {
                         type: "search",
-                        clean: false,
                         tableSearch: "DMTK",
+                        clean: false,
                         fField: 'id',
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_CK",

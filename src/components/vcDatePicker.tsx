@@ -46,7 +46,7 @@ interface VcDatePickerProps {
   style?: StyleProp<ViewStyle>
 }
 
-export const VcDatePicker: React.FC<VcDatePickerProps> = ({
+const ViewComponent: React.FC<VcDatePickerProps> = ({
   label,
   value,
   disabled = false,
@@ -190,7 +190,7 @@ export const VcDatePicker: React.FC<VcDatePickerProps> = ({
     </>
   );
 };
-
+export const VcDatePicker = React.memo(ViewComponent);
 const styles = StyleSheet.create({
   button: {
     flexDirection: "row",

@@ -111,6 +111,7 @@ export type ISelectField = IFieldBase & {
 export type ISearchListField = IFieldBase & {
     type: 'search';
     tableSearch: ITableSearch;
+    itemView?: IRowsColsField,
     fField: string;
     expression?: Record<string, string>;
     label?: string;
@@ -120,6 +121,7 @@ export type ISearchListField = IFieldBase & {
     style?: StyleProp<ViewStyle>;
     loading?: boolean,
     checkSelected?: { isError: string, message: string, requiredKeys: string[] };
+    numCharSearch?: number,
 };
 
 export type ISelectListField = IFieldBase & {
@@ -136,6 +138,7 @@ export type ISelectListField = IFieldBase & {
     style?: StyleProp<ViewStyle>;
     loading?: boolean,
     tableWin: ITableWin;
+    itemView?: IRowsColsField,
     isNewEdit?: boolean;
     checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 };
@@ -151,6 +154,7 @@ export type ISelectListMultiField = IFieldBase & {
     style?: StyleProp<ViewStyle>;
     loading?: boolean,
     tableWin: ITableWin;
+    itemView?: IRowsColsField,
     isNewEdit?: boolean
 };
 

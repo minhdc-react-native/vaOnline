@@ -37,7 +37,7 @@ interface NumericInputProps {
     isError?: boolean
 }
 
-export default function VcNum({
+const ViewComponent: React.FC<NumericInputProps> = ({
     label,
     value,
     onChange,
@@ -55,12 +55,14 @@ export default function VcNum({
     disabled,
     minValue = 0,
     maxValue,
-    iconColors = { minus: "red", plus: "blue" },
+    iconColors,
     isError
-}: NumericInputProps) {
+}) => {
+    const defaultIconColors = useMemo(() => ({ minus: "red", plus: "blue" }), []);
+    iconColors = iconColors || defaultIconColors;
+
     const paramSystem = useDataApp((state) => state.paramSystem);
     const { showPopup } = usePopup();
-
     const decimalLimit = paramSystem?.[typeFormat] ?? 0;
     const inputRef = useRef<any>(null);
     const { colors } = useTheme<VACOMTheme>();
@@ -73,16 +75,14 @@ export default function VcNum({
         maximumFractionDigits: 5,
     }), [locale]);
 
-
-    const handleMinusPlus = (add: 1 | -1) => {
+    const handleMinusPlus = useCallback((add: 1 | -1) => {
         let newValue = (value ?? 0) + add;
         if ((minValue !== undefined && newValue < minValue) || (maxValue !== undefined && newValue > maxValue)) {
             showToast(messMinMaxValue, { type: "warning" });
             return;
         }
         onChange(newValue);
-    }
-
+    }, [value, minValue, maxValue, onChange, showToast, messMinMaxValue]);
     return (
         <>
             <View style={[{
@@ -133,7 +133,9 @@ export default function VcNum({
             </View>
         </>
     );
-}
+};
+export const VcNum = React.memo(ViewComponent);
+
 interface IProgs {
     value: number | null | undefined;
     onChange: (val: number | null) => void;

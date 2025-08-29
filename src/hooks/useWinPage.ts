@@ -277,9 +277,10 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         );
 
         const defaultValue = itemMenuWin.defaultValue ?? {};
+        const typeView = itemMenuWin.typeView ?? {};
 
         setEditMode('new');
-        setItemData(tableWin, { id: UUID.v4(), _isNew: true, DVCS_ID: orgUnit, ...newDefault, ...defaultValue });
+        setItemData(tableWin, { id: UUID.v4(), _isNew: true, DVCS_ID: orgUnit, ...newDefault, ...defaultValue, ...typeView });
 
         const tabMaster = winConfig?.window.Tabs[0];
         const action = schemaUI.action ? { ...schemaUI.action, edit: tabMaster?.PERMISSION.EDIT, new: tabMaster?.PERMISSION.NEW } : { edit: true, new: true };
@@ -295,7 +296,10 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
 
     const onEdit = useCallback((item: IData) => {
         setEditMode('edit');
-        setItemData(tableWin, item);
+
+        const typeView = itemMenuWin.typeView ?? {};
+        setItemData(tableWin, { ...item, ...typeView });
+
         const tabMaster = winConfig?.window.Tabs[0];
 
         const action = schemaUI.action ? { ...schemaUI.action, edit: tabMaster?.PERMISSION.EDIT, new: tabMaster?.PERMISSION.NEW } : { edit: true, new: true };
@@ -461,24 +465,29 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
 
     const dataDetail = useMemo(() => {
         return dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"];
-    }, [dataItemDetail, currentTab]);
+    }, [dataItemDetail, currentTab, tableWin]);
 
     const handleActionDetail = useMemo(() => {
         return {
             new: () => {
                 typeNewEdit.current = 'new';
+                const typeView = itemMenuWin.typeView ?? {};
                 setItemDetail({
                     id: UUID.v4(),
                     _isNew: true,
-                    ...schemaWinDetail.defaultNew
+                    ...schemaWinDetail.defaultNew,
+                    ...typeView
                 });
                 setShowNewEdit(true);
             },
             select: (index: number) => {
                 const isEdit = schemaWinDetail.action?.edit !== false;
                 if (!isEdit) return;
-                typeNewEdit.current = 'edit', currentIndex.current = index;
-                setItemDetail(dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"]?.[index] ?? null);
+                typeNewEdit.current = 'edit';
+                currentIndex.current = index;
+                const typeView = itemMenuWin.typeView ?? {};
+                const itemDetail = dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"]?.[index] ?? { id: UUID.v4() };
+                setItemDetail({ ...itemDetail, ...typeView });
                 setShowNewEdit(true);
             },
             change: (valueChange: IData) => {
@@ -509,7 +518,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 });
             }
         }
-    }, [dataItemDetail]);
+    }, [dataItemDetail, currentTab, itemMenuWin.typeView]);
 
     // const [dataSource, setDataSource] = useState<Record<string, any[]>>({});
     const [tableRefresh, setTableRefresh] = useState<Record<string, { url: string, type?: string, dataPost?: Record<string, any>, key: string }>>({});

@@ -1,15 +1,16 @@
 // =============================
 import { useTranslation } from '@/context/TranslationContext';
 import { VACOMTheme } from '@/theme/theme';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, Card, SegmentedButtons, Text, useTheme } from 'react-native-paper';
+import { useContextSelector } from 'use-context-selector';
 import DashedLine from '../dashedLine';
 import { useToast } from '../dialog/useToast';
 import { StarRating } from '../starRating';
 import VcCheckBox from '../vcCheckbox';
 import { VcDatePicker } from '../vcDatePicker';
-import VcNum from '../vcNum';
+import { VcNum } from '../vcNum';
 import { VcOptions } from '../vcOptions';
 import VcSearchList from '../vcSearchList';
 import VcSelectList from '../vcSelectList';
@@ -21,36 +22,44 @@ import { InputField } from './Fields/inputField';
 import { TextField } from './Fields/textField';
 import { useBoundField } from './hooks/useBoundField';
 import { FormState } from './hooks/useFormState';
+import { FormContext } from './schemaUIEngine';
 import { ICON_REGISTRY, IField } from './types';
 
-interface FieldRendererProps {
+export const dummyFormState: FormState<Record<string, any>> = {
+    state: { values: {} },
+    update: () => { },
+    updateMany: () => { },
+    reset: () => { },
+};
+
+interface IProps {
     field: IField;
     index: number;
-    formState: FormState;
-    evalExpr: (expr: string, requiredKeys?: string[]) => any;
-    handleAction: (expr: string, param?: any) => void;
-    errors: Record<string, string>;
-    dataSource: Record<string, any[]>;
-    dataSourceMap: Map<string, Map<string, any>>;
-    onChangeItemData?: (change: Record<string, any>) => void;
-    paramSystem: IParamSystem | null;
 }
 
-export const FieldRenderer: React.FC<FieldRendererProps> = ({
+const ViewComponent: React.FC<IProps> = ({
     field,
     index,
-    formState,
-    evalExpr,
-    handleAction,
-    errors,
-    onChangeItemData,
-    dataSource,
-    dataSourceMap,
-    paramSystem
 }) => {
     const key = `${field.bind || field.type}-${index}`;
     // Dùng placeholder value + setter
-    const { value, getValue, setValue, setValues } = useBoundField(formState, field.bind || '__none__', onChangeItemData);
+    const formState = useContextSelector(FormContext, (ctx) => ctx!.formState);
+    const onChangeItemData = useContextSelector(FormContext, (ctx) => ctx!.onChangeItemData);
+    const evalExpr = useContextSelector(FormContext, (ctx) => ctx!.evalExpr);
+    const handleAction = useContextSelector(FormContext, (ctx) => ctx!.handleAction);
+    const errors = useContextSelector(FormContext, (ctx) => ctx!.errors);
+    const dataSource = useContextSelector(FormContext, (ctx) => ctx!.dataSource);
+
+    const { value, getValue, setValue, setValues, onBlurTaxCode } = useBoundField(formState, field.bind || '__none__', onChangeItemData);
+
+    const handleBlur = useCallback(() => {
+        if (field.type !== "input") return;
+        handleAction("onBlur", field.bind);
+        if (field.typeInput === "taxCode" && value && value.length >= 10) {
+            onBlurTaxCode(value, field.expression);
+        }
+    }, [value, field, handleAction, onBlurTaxCode]);
+
     const { colors } = useTheme<VACOMTheme>();
     const { showToast } = useToast();
     const { _ } = useTranslation();
@@ -62,6 +71,30 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                 : evalExpr(field.disabled, field.requiredKeys)
             : false;
     }, [field.disabled, evalExpr, field.requiredKeys]);
+
+    const onSelectSearch = useCallback((item: Record<string, any> | null) => {
+        if (field.type !== "search") return;
+
+        let valueChange: any = { [field.bind!]: (item?.[field.fField] ?? "") };
+        if (field.expression && item) {
+            Object.keys(field.expression).map(key => {
+                valueChange[key] = item[field.expression ? field.expression[key] : key];
+            });
+        }
+        setValues(valueChange);
+    }, [field, setValues]);
+
+    const onSelectList = useCallback((item: IData | null) => {
+        if (field.type !== "selectList") return;
+
+        let valueChange: any = { [field.bind!]: item?.[field.fId ?? "id"] };
+        if (field.expression && item) {
+            Object.keys(field.expression).map(key => {
+                valueChange[key] = item[field.expression ? field.expression[key] : key];
+            });
+        }
+        setValues(valueChange);
+    }, [field, setValues]);
 
     switch (field.type) {
         case 'rows':
@@ -75,14 +108,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                             key={i}
                             field={child}
                             index={i}
-                            formState={formState}
-                            evalExpr={evalExpr}
-                            handleAction={handleAction}
-                            onChangeItemData={onChangeItemData}
-                            errors={errors}
-                            dataSource={dataSource}
-                            dataSourceMap={dataSourceMap}
-                            paramSystem={paramSystem}
                         />
                     ))}
                 </View>
@@ -98,14 +123,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                             key={i}
                             field={child}
                             index={i}
-                            formState={formState}
-                            evalExpr={evalExpr}
-                            handleAction={handleAction}
-                            onChangeItemData={onChangeItemData}
-                            errors={errors}
-                            dataSource={dataSource}
-                            dataSourceMap={dataSourceMap}
-                            paramSystem={paramSystem}
                         />
                     ))}
                 </View>
@@ -121,14 +138,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                             key={i}
                             field={child}
                             index={i}
-                            formState={formState}
-                            evalExpr={evalExpr}
-                            handleAction={handleAction}
-                            onChangeItemData={onChangeItemData}
-                            errors={errors}
-                            dataSource={dataSource}
-                            dataSourceMap={dataSourceMap}
-                            paramSystem={paramSystem}
                         />
                     ))}
                 </Card>
@@ -137,14 +146,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             return <ExpandField
                 field={field}
                 index={index}
-                formState={formState}
-                evalExpr={evalExpr}
-                handleAction={handleAction}
-                errors={errors}
-                onChangeItemData={onChangeItemData}
-                dataSource={dataSource}
-                dataSourceMap={dataSourceMap}
-                paramSystem={paramSystem}
                 _={_}
             />
         case 'actionList':
@@ -172,14 +173,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                             key={i}
                             field={child}
                             index={i}
-                            formState={formState}
-                            evalExpr={evalExpr}
-                            handleAction={handleAction}
-                            onChangeItemData={onChangeItemData}
-                            errors={errors}
-                            dataSource={dataSource}
-                            dataSourceMap={dataSourceMap}
-                            paramSystem={paramSystem}
                         />
                     ))}
                 </Pressable>
@@ -188,10 +181,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             return <TextField
                 field={field}
                 index={index}
-                formState={formState}
-                evalExpr={evalExpr}
-                dataSourceMap={dataSourceMap}
-                paramSystem={paramSystem}
             />
         case 'icon':
             const IconComponent = ICON_REGISTRY[field.iconType];
@@ -223,15 +212,24 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                 </View>
             );
         case 'input':
+            const labelInput = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <InputField
-                    field={field}
-                    index={index}
-                    formState={formState}
-                    evalExpr={evalExpr}
-                    handleAction={handleAction}
-                    errors={errors}
-                    onChangeItemData={onChangeItemData}
+                    value={value}
+                    label={labelInput}
+                    disabled={disabled}
+                    setValue={setValue}
+                    setValues={setValues}
+                    onBlurTaxCode={onBlurTaxCode}
+                    handleBlur={handleBlur}
+                    texRight={field.texRight}
+                    icon={field.leftIcon}
+                    typeInput={field.typeInput}
+                    style={field.style}
+                    upperCase={field.upperCase}
+                    autoCapitalize={field.autoCapitalize}
+                    height={field.height}
+                    msgError={field.bind ? errors?.[field.bind] : undefined}
                 />
             );
         case 'select':
@@ -249,16 +247,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             const labelSearch = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
-                    <VcSearchList value={value} disabled={disabled} label={_(labelSearch)} clean={field.clean}
-                        tableSearch={field.tableSearch} fField={field.fField} checkSelected={field.checkSelected} onChange={(item) => {
-                            let valueChange: any = { [field.bind!]: (item?.[field.fField] ?? "") };
-                            if (field.expression && item) {
-                                Object.keys(field.expression).map(key => {
-                                    valueChange[key] = item[field.expression ? field.expression[key] : key];
-                                });
-                            }
-                            setValues(valueChange);
-                        }} />
+                    <VcSearchList value={value} disabled={disabled} label={_(labelSearch)} clean={field.clean} itemView={field.itemView} numCharSearch={field.numCharSearch}
+                        tableSearch={field.tableSearch} fField={field.fField} checkSelected={field.checkSelected} onChange={onSelectSearch} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
@@ -268,16 +258,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
                     <VcSelectList disabled={disabled} data={dataSource[field.keySource || field.bind!] ?? []} label={_(labelList)} key={key} clean={field.clean}
                         fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit} checkSelected={field.checkSelected}
-                        fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={(itemSelected) => {
-                            let valueChange: any = { [field.bind!]: itemSelected?.[field.fId ?? "id"] };
-                            if (field.expression && itemSelected) {
-                                Object.keys(field.expression).map(key => {
-                                    valueChange[key] = itemSelected[field.expression ? field.expression[key] : key];
-                                });
-                            }
-
-                            setValues(valueChange);
-                        }} />
+                        itemView={field.itemView} fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={onSelectList} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
@@ -286,7 +267,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             return (
                 <View key={`${key}view`} style={[field.style]}>
                     <VcSelectListMulti data={dataSource[field.keySource || field.bind!] ?? []} label={_(labelListMulti)} key={key}
-                        fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit}
+                        itemView={field.itemView} fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit}
                         fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={(values) => setValue(values)} disabled={disabled} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
@@ -340,6 +321,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             return null;
     }
 };
+export const FieldRenderer = React.memo(ViewComponent);
+
 interface IErrorTooltip {
     field: IField;
     errors: Record<string, string>;

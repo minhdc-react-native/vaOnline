@@ -20,7 +20,7 @@ interface IProgs {
     disabled?: boolean;
     style?: StyleProp<ViewStyle>
 }
-export const VcTimePicker = ({ label, value, onChange, disabled, style, placeholder }: IProgs) => {
+const ViewComponent = ({ label, value, onChange, disabled, style, placeholder }: IProgs) => {
     const { colors } = useTheme<VACOMTheme>();
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedTime, setSelectedTime] = useState(value ?? "");
@@ -63,8 +63,7 @@ export const VcTimePicker = ({ label, value, onChange, disabled, style, placehol
         </>
     );
 }
-
-
+export const VcTimePicker = React.memo(ViewComponent);
 interface IPropsTime {
     visible: boolean;
     onClose: () => void;

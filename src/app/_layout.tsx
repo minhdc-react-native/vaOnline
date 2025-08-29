@@ -11,7 +11,7 @@ import { attachInterceptors } from '@/utils/vcAxios';
 import { PortalProvider } from '@gorhom/portal';
 import { useBackHandler } from '@react-native-community/hooks';
 import { router } from 'expo-router';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { BackHandler } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider } from 'react-native-paper';
@@ -35,7 +35,6 @@ export default function RootLayout() {
                 </PortalProvider>
               </LoadingProvider>
             </PopupProvider>
-
           </PaperProvider>
         </RootSiblingParent>
       </GestureHandlerRootView>

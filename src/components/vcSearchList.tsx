@@ -11,13 +11,16 @@ import { ActivityIndicator, Divider, IconButton, Portal, Text, TextInput, useThe
 import { useToast } from "./dialog/useToast";
 import { useEvalExpr } from "./UIEngine/hooks/useEvalExpr";
 import { SchemaUIEngine } from "./UIEngine/schemaUIEngine";
+import { IRowsColsField } from "./UIEngine/types";
 const urlBase: Record<ITableSearch, string> = { // gắn api cho đỡ nhầm...
     DMMNGH: '/api/System/GetDataByReferencesId?id=0b22c919-a275-4d05-83bd-c34844d9ec67&filtervalue=#filterValue#',
     DMMCN: '/api/System/GetDataByReferencesId?id=0600dd65-9cf4-4fd7-bf43-ff50a5578b42&filtervalue=#filterValue#',
-    DMTK: '/api/System/GetDataByReferencesId?id=0a93c38b-5f1f-422a-8039-a6cee1967af2&filtervalue=#filterValue#'
+    DMTK: '/api/System/GetDataByReferencesId?id=0a93c38b-5f1f-422a-8039-a6cee1967af2&filtervalue=#filterValue#',
+    DMTTDB: '/api/System/GetDataByReferencesId?id=ad61024c-69cc-4d3b-9d5e-e5685db5bdce&filtervalue=#filterValue#'
 }
 interface IProgs {
     tableSearch: ITableSearch,
+    itemView?: IRowsColsField,
     label?: string;
     placeholder?: string;
     value: string | number | null;
@@ -28,9 +31,10 @@ interface IProgs {
     style?: StyleProp<ViewStyle>;
     disabled?: boolean,
     isLoading?: boolean,
+    numCharSearch?: number,
     checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 }
-const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange, clean = true, rightIcon, style, isLoading, disabled, checkSelected }: IProgs) => {
+const ViewComponent: React.FC<IProgs> = ({ tableSearch, label, placeholder, value, fField, onChange, clean = true, rightIcon, style, isLoading, disabled, checkSelected, itemView, numCharSearch = 3 }: IProgs) => {
 
     const url = useMemo(() => {
         return urlBase[tableSearch];
@@ -47,7 +51,7 @@ const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange
         onSearch(value);
     }
     const onSearch = useCallback((value: string) => {
-        if (Helper.isEmpty(value) || value.length < 3) {
+        if (Helper.isEmpty(value) || value.length < numCharSearch) {
             setData([]);
         } else {
             const urlSearch = url.replace('#filterValue#', value);
@@ -138,7 +142,7 @@ const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange
                     /></View> : <BottomSheetFlatList
                         data={data}
                         keyExtractor={(item: Record<string, any>) => item.id}
-                        renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected} isSelect={item[fField] === value} tableSearch={tableSearch} checkSelected={checkSelected} />}
+                        renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected} isSelect={item[fField] === value} tableSearch={tableSearch} checkSelected={checkSelected} itemView={itemView} />}
                         ItemSeparatorComponent={() => <Divider />}
                         ListFooterComponent={() => <View style={{ height: 50 }} />}
                         initialNumToRender={20}
@@ -150,16 +154,18 @@ const VcSearchList = ({ tableSearch, label, placeholder, value, fField, onChange
         </>
     );
 }
+export const VcSearchList = React.memo(ViewComponent);
 
 type IProps = {
     tableSearch: ITableSearch;
+    itemView?: IRowsColsField,
     item: Record<string, any>;
     onPress: (item: Record<string, any>) => void;
     isSelect?: boolean;
     checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 };
 
-const ItemViewComponent: React.FC<IProps> = ({ item, onPress, isSelect, tableSearch, checkSelected }) => {
+const ItemViewComponent: React.FC<IProps> = ({ item, onPress, isSelect, tableSearch, checkSelected, itemView }) => {
     const { showToast } = useToast();
     const evalExpr = useEvalExpr(item);
     const { colors } = useTheme();
@@ -178,7 +184,7 @@ const ItemViewComponent: React.FC<IProps> = ({ item, onPress, isSelect, tableSea
             alignItems: "flex-start", backgroundColor: isSelect ? colors.elevation.level1 : "transparent"
         }}>
             <View style={{ paddingVertical: 10, paddingHorizontal: 20, flex: 1 }}>
-                <SchemaUIEngine schema={schemaItemSearch[tableSearch]} data={item} />
+                <SchemaUIEngine schema={itemView || schemaItemSearch[tableSearch]} data={item} />
             </View>
         </Pressable>
     );

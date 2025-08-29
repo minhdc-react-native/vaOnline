@@ -7,41 +7,35 @@ import { Helper } from "@/utils/Helper";
 import React from "react";
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { Chip, Icon, Text, useTheme } from "react-native-paper";
+import { useContextSelector } from "use-context-selector";
 import { useBoundField } from "../hooks/useBoundField";
-import { FormState } from "../hooks/useFormState";
+import { FormContext } from "../schemaUIEngine";
 
 interface IProps {
     field: ITextField;
     index: number;
-    formState: FormState;
-    evalExpr: (
-        expr: string,
-        requiredKeys?: string[]
-    ) => any;
-    dataSourceMap: Map<string, Map<string, any>>;
-    paramSystem: IParamSystem | null;
 }
 
 const TextFieldComponent: React.FC<IProps> = ({
     field,
     index,
-    formState,
-    evalExpr,
-    dataSourceMap,
-    paramSystem,
 }) => {
+    const formState = useContextSelector(FormContext, (ctx) => ctx!.formState);
+    const evalExpr = useContextSelector(FormContext, (ctx) => ctx!.evalExpr);
+    const dataSourceMap = useContextSelector(FormContext, (ctx) => ctx!.dataSourceMap);
+    const paramSystem = useContextSelector(FormContext, (ctx) => ctx!.paramSystem);
+
     const key = `${field.bind || field.type}-${index}`;
     const { value } = useBoundField(formState, field.bind || "__none__");
     const { colors } = useTheme<VACOMTheme>();
     const { _ } = useTranslation();
-
     const isBold = formState.state?.BOLD === "C";
-
     // Tính toán label + value gốc
     let valueText = value;
     let labelText = field.label
         ? evalExpr(field.label, field.requiredKeys)
         : undefined;
+
 
     // ====== Helper render ======
     const renderMultiSelect = () => {
@@ -216,15 +210,13 @@ const TextFieldComponent: React.FC<IProps> = ({
             case "select":
                 if (!Helper.isEmpty(value)) {
                     valueText =
-                        dataSourceMap
-                            .get(field.keySource || field.bind!)
+                        dataSourceMap.get(field.keySource || field.bind!)
                             ?.get(value)?.[field.format.fValue ?? "value"] || "???";
                 }
                 break;
             case "tag":
                 if (!Helper.isEmpty(value)) {
-                    const itemTag = dataSourceMap
-                        .get(field.keySource || field.bind!)
+                    const itemTag = dataSourceMap.get(field.keySource || field.bind!)
                         ?.get(value);
                     valueText = itemTag?.[field.format.fValue ?? "value"] || "???";
                     addStyle = {

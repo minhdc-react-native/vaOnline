@@ -27,6 +27,7 @@ import {
     useTheme
 } from "react-native-paper";
 import { SchemaUIEngine } from "./UIEngine/schemaUIEngine";
+import { IRowsColsField } from "./UIEngine/types";
 
 interface IProgs {
     label?: string;
@@ -41,6 +42,7 @@ interface IProgs {
     style?: StyleProp<ViewStyle>;
     loading?: boolean;
     tableWin?: ITableWin;
+    itemView?: IRowsColsField,
     isError?: boolean;
     isNewEdit?: boolean;
     separator?: string;
@@ -63,7 +65,8 @@ const VcSelectListMulti = ({
     isError,
     isNewEdit = true,
     separator = ",",
-    disabled
+    disabled,
+    itemView
 }: IProgs) => {
     const colors = useTheme<VACOMTheme>().colors;
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -218,6 +221,7 @@ const VcSelectListMulti = ({
                                 onPress={addItemSelected}
                                 isSelect={itemSelected.some((i) => i[fId] === item[fId])}
                                 tableWin={tableWin}
+                                itemView={itemView}
                                 closeModal={closeModal}
                                 isNewEdit={isNewEdit}
                             />
@@ -241,6 +245,7 @@ type IProps = {
     onPress: (item: IData) => void;
     isSelect?: boolean;
     tableWin?: ITableWin;
+    itemView?: IRowsColsField,
     closeModal: (cb: () => void) => void;
     isNewEdit: boolean;
 };
@@ -251,7 +256,8 @@ const ItemViewComponent: React.FC<IProps> = ({
     isSelect,
     tableWin,
     closeModal,
-    isNewEdit
+    isNewEdit,
+    itemView
 }) => {
     const { colors } = useTheme();
     const isShowEdit = tableWin !== undefined && isNewEdit;
@@ -274,7 +280,7 @@ const ItemViewComponent: React.FC<IProps> = ({
                 }}
             >
                 <SchemaUIEngine
-                    schema={(schemaWin[tableWin ?? "Empty"] ?? schemaWinEmpty).config.itemList}
+                    schema={itemView || (schemaWin[tableWin ?? "Empty"] ?? schemaWinEmpty).config.itemList}
                     data={item}
                 />
             </View>

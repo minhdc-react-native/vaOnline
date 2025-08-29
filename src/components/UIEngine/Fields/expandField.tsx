@@ -2,43 +2,29 @@ import ExpandableView from "@/components/expandableView";
 import { IExpand, IField } from "@/components/UIEngine/types";
 import React, { useMemo } from "react";
 import { useTheme } from "react-native-paper";
+import { useContextSelector } from "use-context-selector";
 import { FieldRenderer } from "../fieldRenderer";
-import { FormState } from "../hooks/useFormState";
+import { FormContext } from "../schemaUIEngine";
 
 interface IProps {
     field: IExpand;
     index: number;
-    formState: FormState;
-    evalExpr: (expr: string, requiredKeys?: string[]) => any;
-    handleAction: (expr: string, param?: any) => void;
-    errors: Record<string, string>;
-    dataSource: Record<string, any[]>;
-    dataSourceMap: Map<string, Map<string, any>>;
-    onChangeItemData?: (change: Record<string, any>) => void;
-    paramSystem: IParamSystem | null;
     _: (key?: string | undefined) => string
 }
 
 const InputFieldComponent: React.FC<IProps> = ({
     field,
     index,
-    formState,
-    evalExpr,
-    handleAction,
-    errors,
-    onChangeItemData,
-    dataSource,
-    dataSourceMap,
-    paramSystem,
     _
 }) => {
+    const evalExpr = useContextSelector(FormContext, (ctx) => ctx!.evalExpr);
     const { colors } = useTheme();
 
     const fieldsExpand = useMemo(() => {
         return field.fields?.filter((child) =>
             child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true
         ) ?? [];
-    }, [field.fields]);
+    }, [field.fields, evalExpr]);
 
     const disabled = useMemo(() => {
         return field.disabled
@@ -54,19 +40,11 @@ const InputFieldComponent: React.FC<IProps> = ({
                 <FieldRenderer
                     field={field.title as IField}
                     index={index}
-                    formState={formState}
-                    evalExpr={evalExpr}
-                    handleAction={handleAction}
-                    onChangeItemData={onChangeItemData}
-                    errors={errors}
-                    dataSource={dataSource}
-                    dataSourceMap={dataSourceMap}
-                    paramSystem={paramSystem}
                 />
             );
         }
         return _(field.title);
-    }, [field.title]);
+    }, [field.title, _, index]);
 
     const _icon = useMemo(() => {
         if (field.icon) {
@@ -74,18 +52,10 @@ const InputFieldComponent: React.FC<IProps> = ({
                 <FieldRenderer
                     field={field.icon as IField}
                     index={index}
-                    formState={formState}
-                    evalExpr={evalExpr}
-                    handleAction={handleAction}
-                    onChangeItemData={onChangeItemData}
-                    errors={errors}
-                    dataSource={dataSource}
-                    dataSourceMap={dataSourceMap}
-                    paramSystem={paramSystem}
                 />
             );
         }
-    }, [field.icon]);
+    }, [field.icon, index]);
     return (
         <ExpandableView
             title={_title}
@@ -104,14 +74,6 @@ const InputFieldComponent: React.FC<IProps> = ({
                     key={i}
                     field={child}
                     index={i}
-                    formState={formState}
-                    evalExpr={evalExpr}
-                    handleAction={handleAction}
-                    onChangeItemData={onChangeItemData}
-                    errors={errors}
-                    dataSource={dataSource}
-                    dataSourceMap={dataSourceMap}
-                    paramSystem={paramSystem}
                 />
             ))}
         </ExpandableView>

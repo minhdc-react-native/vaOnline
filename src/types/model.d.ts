@@ -35,7 +35,8 @@ declare global {
         col: number,
         typeWin: '(window)' | '(winMaster)' | '(winTree)',
         codeField?: string;
-        defaultValue?: Record<string, any>
+        defaultValue?: Record<string, any>;
+        typeView?: { _typeView: 1 | 2 | 3 } // 1: Kế toán, 2: Hkd, 3: System
     }
 
     interface ITabWin {
@@ -78,7 +79,7 @@ declare global {
         'DMNHDT' | 'DMDT' | 'DMDT_NGH' | 'DMBP' | 'DMPX' | 'DMOB' | 'DMTK' |
         'DMKHO' | 'DMNHHV' | 'DMHV' | 'DMHV_DVT' | 'DMHV_GIA' | 'DMDVT';
 
-    type ITableSearch = 'DMMNGH' | 'DMMCN' | 'DMTK';
+    type ITableSearch = 'DMMNGH' | 'DMMCN' | 'DMTK' | 'DMTTDB';
 
     type IKeyMenuWin = 'acCatalogBalance' | 'acCatalogBank' | 'acCatalogGood' | 'acCatalogOther' | 'acCatalogPartner'
 

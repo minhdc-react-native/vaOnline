@@ -138,4 +138,14 @@ export const schemaItemSearch: Record<ITableSearch, IRowsColsField> = {
             }
         ]
     },
+    DMTTDB: {
+        type: "cols",
+        fields: [
+            {
+                type: "text",
+                requiredKeys: ["id", "value"],
+                label: "{{`${id} - ${value}`}}"
+            }
+        ]
+    }
 }

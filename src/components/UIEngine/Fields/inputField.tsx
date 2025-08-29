@@ -1,57 +1,56 @@
-import { IInputField } from "@/components/UIEngine/types";
 import { useTranslation } from "@/context/TranslationContext";
 import { VACOMTheme } from "@/theme/theme";
 import React, { useCallback, useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { DimensionValue, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { Text, TextInput, useTheme } from "react-native-paper";
-import { useBoundField } from "../hooks/useBoundField";
-import { FormState } from "../hooks/useFormState";
 
 interface IProps {
-    field: IInputField;
-    index: number;
-    formState: FormState;
-    evalExpr: (expr: string, requiredKeys?: string[]) => any;
-    handleAction: (expr: string, param?: any) => void;
-    errors: Record<string, string>;
-    onChangeItemData?: (change: Record<string, any>) => void;
+    value: any;
+    label?: string;
+    disabled: boolean,
+    setValue: (value: any) => void;
+    setValues: (values: Record<string, any>) => void;
+    onBlurTaxCode: (value: string, expression?: Record<string, string>) => void;
+    handleBlur: () => void;
+    texRight?: string;
+    icon?: {
+        name: string;
+        size?: number;
+        color?: string;
+    };
+    typeInput?: "text" | "multi" | "password" | "taxCode";
+    style?: StyleProp<ViewStyle>;
+    upperCase?: boolean;
+    autoCapitalize?: "none" | "sentences" | "words" | "characters";
+    height?: DimensionValue;
+    msgError?: string;
 }
-
 const InputFieldComponent: React.FC<IProps> = ({
-    field,
-    formState,
-    evalExpr,
-    handleAction,
-    errors,
-    onChangeItemData,
+    value,
+    label,
+    disabled,
+    setValue, setValues, onBlurTaxCode,
+    texRight, icon,
+    typeInput,
+    handleBlur,
+    style,
+    upperCase,
+    autoCapitalize,
+    height,
+    msgError
 }) => {
-    const { value, setValue, onBlurTaxCode } = useBoundField(
-        formState,
-        field.bind || "__none__",
-        onChangeItemData
-    );
     const { colors } = useTheme<VACOMTheme>();
     const { _ } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
 
-    const disabled = useMemo(() => {
-        return field.disabled
-            ? typeof field.disabled === "boolean"
-                ? field.disabled
-                : evalExpr(field.disabled, field.requiredKeys)
-            : false;
-    }, [field.disabled, evalExpr, field.requiredKeys]);
-
-    const labelInput = useMemo(
-        () =>
-            field.label
-                ? evalExpr(field.label, field.requiredKeys)
-                : undefined,
-        [field.label, evalExpr, field.requiredKeys]
+    const handleChangeText = useCallback(
+        (val: string) => {
+            setValue(upperCase && val ? val.toUpperCase() : val);
+        },
+        [setValue, upperCase]
     );
-
-    const isMulti = field.typeInput === "multi";
-    const isPassword = field.typeInput === "password";
+    const isMulti = typeInput === "multi";
+    const isPassword = typeInput === "password";
 
     const togglePassword = useCallback(
         () => setShowPassword((prev) => !prev),
@@ -68,50 +67,36 @@ const InputFieldComponent: React.FC<IProps> = ({
                 />
             );
         }
-        if (field.texRight) {
+        if (texRight) {
             return (
                 <TextInput.Affix
-                    text={`${field.texRight}`}
+                    text={`${texRight}`}
                     textStyle={{ color: colors.secondary }}
                 />
             );
         }
         return undefined;
-    }, [isPassword, showPassword, togglePassword, field.texRight, colors.secondary]);
+    }, [isPassword, showPassword, togglePassword, texRight, colors.secondary]);
 
     const leftIcon = useMemo(() => {
-        return field.leftIcon ? (
+        return icon ? (
             <TextInput.Icon
-                icon={field.leftIcon.name}
-                size={field.leftIcon.size}
-                color={field.leftIcon.color ?? colors.secondary}
+                icon={icon.name}
+                size={icon.size}
+                color={icon.color ?? colors.secondary}
             />
         ) : undefined;
-    }, [field.leftIcon, colors.secondary]);
-
-    const handleBlur = useCallback(() => {
-        handleAction("onBlur", field.bind);
-        if (field.typeInput === "taxCode" && value && value.length >= 10) {
-            onBlurTaxCode(value, field.expression);
-        }
-    }, [handleAction, field.bind, field.typeInput, value, field.expression, onBlurTaxCode]);
-
-    const handleChangeText = useCallback(
-        (val: string) => {
-            setValue(field.upperCase && val ? val.toUpperCase() : val);
-        },
-        [setValue, field.upperCase]
-    );
+    }, [icon, colors.secondary]);
 
     return (
-        <View style={field.style}>
+        <View style={style}>
             <TextInput
                 label={
                     value ? (
-                        _(labelInput ?? "")
+                        _(label ?? "")
                     ) : (
                         <Text style={{ color: "rgba(59, 45, 43, 0.4)" }}>
-                            {_(labelInput ?? "")}
+                            {_(label ?? "")}
                         </Text>
                     )
                 }
@@ -120,7 +105,7 @@ const InputFieldComponent: React.FC<IProps> = ({
                 readOnly={disabled}
                 onBlur={handleBlur}
                 secureTextEntry={isPassword && !showPassword}
-                autoCapitalize={field.autoCapitalize}
+                autoCapitalize={autoCapitalize}
                 value={value}
                 left={leftIcon}
                 right={rightFix}
@@ -136,13 +121,13 @@ const InputFieldComponent: React.FC<IProps> = ({
                 }}
                 style={[
                     {
-                        height: field.height || (isMulti ? 100 : 40),
+                        height: height || (isMulti ? 100 : 40),
                         top: -1,
                     },
-                    field.upperCase && { textTransform: "uppercase" },
+                    upperCase && { textTransform: "uppercase" },
                 ]}
             />
-            {field.bind && errors?.[field.bind] !== undefined && (
+            {msgError !== undefined && (
                 <View
                     style={[
                         styles.tooltip,
@@ -152,12 +137,12 @@ const InputFieldComponent: React.FC<IProps> = ({
                         },
                     ]}
                 >
-                    <Text style={styles.tooltipText}>{errors?.[field.bind]}</Text>
+                    <Text style={styles.tooltipText}>{msgError}</Text>
                 </View>
             )}
         </View>
     );
-};
+}
 
 export const InputField = React.memo(InputFieldComponent);
 

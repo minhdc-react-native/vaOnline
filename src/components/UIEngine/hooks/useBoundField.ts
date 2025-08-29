@@ -1,24 +1,32 @@
-// ✅ Gọn gàng hơn: trả về object có field rõ ràng
-
 import { api } from '@/utils/apiMethods';
 import get from 'lodash.get';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { FormState } from './useFormState';
 
-/**
- * Hook liên kết với một field trong form state
- */
-export function useBoundField<T = any>(formState: FormState<T>, path: string, onChangeItemData?: (change: Record<string, any>) => void) {
-    const value = get(formState.state, path);
+export function useBoundField<T = any>(
+    formState: FormState<T>,
+    path: string,
+    onChangeItemData?: (change: Record<string, any>) => void
+) {
+    const updateRef = useRef(formState.update);
+    const updateManyRef = useRef(formState.updateMany);
+    const onChangeRef = useRef(onChangeItemData);
+
+    updateRef.current = formState.update;
+    updateManyRef.current = formState.updateMany;
+    onChangeRef.current = onChangeItemData;
+
     const setValue = useCallback((v: any) => {
-        onChangeItemData?.({ [path]: v });
-        formState.update(path, v);
-    }, [formState, path, onChangeItemData]);
+        onChangeRef.current?.({ [path]: v });
+        updateRef.current(path, v);
+    }, [path]);
 
     const setValues = useCallback((updates: Record<string, any>) => {
-        onChangeItemData?.(updates);
-        formState.updateMany(updates);
-    }, [formState, onChangeItemData]);
+        onChangeRef.current?.(updates);
+        updateManyRef.current(updates);
+    }, []);
+
+    const getValue = (p: string) => get(formState.state, p);
 
     const onBlurTaxCode = useCallback((value: string, expression?: Record<string, string>) => {
         api.get({
@@ -38,10 +46,8 @@ export function useBoundField<T = any>(formState: FormState<T>, path: string, on
         })
     }, [setValues]);
 
-    const getValue = useCallback((p: string) => get(formState.state, p), [formState]);
-
     return {
-        value,
+        value: get(formState.state, path),
         setValue,
         setValues,
         getValue,

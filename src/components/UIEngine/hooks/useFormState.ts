@@ -1,5 +1,5 @@
 import { produce } from "immer";
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export interface FormState<T = any> {
     state: T;
@@ -11,7 +11,7 @@ export interface FormState<T = any> {
 export function useFormState<T>(initial: T): FormState<T> {
     const [state, setState] = useState<T>(initial);
 
-    const update = (path: string, value: any) => {
+    const update = useCallback((path: string, value: any) => {
         setState(prev =>
             produce(prev, draft => {
                 const keys = path.split(".");
@@ -22,9 +22,9 @@ export function useFormState<T>(initial: T): FormState<T> {
                 obj[keys[keys.length - 1]] = value;
             })
         );
-    };
+    }, []);
 
-    const updateMany = (updates: Record<string, any>) => {
+    const updateMany = useCallback((updates: Record<string, any>) => {
         setState(prev =>
             produce(prev, draft => {
                 for (const path in updates) {
@@ -37,13 +37,22 @@ export function useFormState<T>(initial: T): FormState<T> {
                 }
             })
         );
-    };
+    }, []);
 
-    const reset = (next?: T) => setState(next ?? initial);
-
-    useEffect(() => {
-        reset(initial);
+    const reset = useCallback((next?: T) => {
+        setState(next ?? initial);
     }, [initial]);
 
-    return { state, update, updateMany, reset };
+    // reset khi initial thay đổi
+    useEffect(() => {
+        setState(initial);
+    }, [initial]);
+
+    // đảm bảo chỉ tạo object mới khi state thay đổi
+    return useMemo(() => ({
+        state,
+        update,
+        updateMany,
+        reset
+    }), [state, update, updateMany, reset]);
 }

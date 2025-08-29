@@ -11,7 +11,7 @@ export const DataMenuHkd: Record<string, Partial<Record<IKeyMenuWin, IConfigDate
                 title: 'Hàng hoá', titleE: 'Goods',
                 data: [
                     { id: 'WIN00333', typeWin: "(winTree)", tableWin: "DMNHHV", label: 'Nhóm hàng hóa', labelE: 'Group of goods', codeField: 'MA_NH_HV', icon: icon, row: 1, col: 1 },
-                    { id: 'WIN00017', typeWin: "(winMaster)", tableWin: "DMHV", label: 'Hàng hóa - vật tư', labelE: 'Goods - supplies', icon: icon, row: 2, col: 1 },
+                    { id: 'WIN00017', typeWin: "(winMaster)", tableWin: "DMHV", label: 'Hàng hóa - vật tư', labelE: 'Goods - supplies', icon: icon, row: 2, col: 1, typeView: { _typeView: 2 } },
                     { id: 'WIN00336', typeWin: "(window)", tableWin: "DMDVT", label: 'Đơn vị tính', labelE: 'Unit', icon: icon, row: 3, col: 1 },
                     { id: 'WIN00335', typeWin: "(winTree)", tableWin: "DMKHO", label: 'Danh mục kho hàng', labelE: 'Warehouse category', codeField: 'MA_KHO', icon: icon, row: 4, col: 1 },
                 ]

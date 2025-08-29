@@ -10,7 +10,8 @@ import { ActivityIndicator, Divider, IconButton, Portal, Text, TextInput, useThe
 import { useToast } from "./dialog/useToast";
 import { useEvalExpr } from "./UIEngine/hooks/useEvalExpr";
 import { SchemaUIEngine } from "./UIEngine/schemaUIEngine";
-interface IProgs {
+import { IRowsColsField } from "./UIEngine/types";
+type IListProps = {
     label?: string;
     placeholder?: string;
     data: IData[];
@@ -26,12 +27,16 @@ interface IProgs {
     style?: StyleProp<ViewStyle>;
     loading?: boolean,
     tableWin?: ITableWin,
+    itemView?: IRowsColsField,
     isError?: boolean;
     isNewEdit?: boolean;
     checkSelected?: { isError: string, message: string, requiredKeys: string[] };
-}
-const VcSelectList = ({ label, placeholder, data, value, onChange, fDisplay, typeDisplay = "value", disabled = false,
-    fId = "id", fValue = "value", clean = true, rightIcon, style, loading, tableWin, isError, isNewEdit = false, checkSelected }: IProgs) => {
+};
+
+const ViewComponent: React.FC<IListProps> = ({
+    label, placeholder, data, value, onChange, fDisplay, typeDisplay = "value", disabled = false,
+    fId = "id", fValue = "value", clean = true, rightIcon, style, loading, tableWin, isError, isNewEdit = false, checkSelected, itemView
+}) => {
     const colors = useTheme<VACOMTheme>().colors;
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['50%', '70%', '90%'], []);
@@ -135,7 +140,7 @@ const VcSelectList = ({ label, placeholder, data, value, onChange, fDisplay, typ
                         keyExtractor={(item: IData) => item[fId].toString()}
                         // ListHeaderComponent={<HeaderView setSearchText={setSearchText} label={label || placeholder} table={table} closeModal={closeModal} isNewEdit={isNewEdit} />}
                         renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected}
-                            isSelect={item[fId] === itemSelected?.[fId]}
+                            isSelect={item[fId] === itemSelected?.[fId]} itemView={itemView}
                             tableWin={tableWin} closeModal={closeModal} isNewEdit={isNewEdit} checkSelected={checkSelected} />}
                         ItemSeparatorComponent={() => <Divider />}
                         keyboardShouldPersistTaps="always"
@@ -148,13 +153,15 @@ const VcSelectList = ({ label, placeholder, data, value, onChange, fDisplay, typ
             </Portal>
         </>
     );
-}
+};
+export const VcSelectList = React.memo(ViewComponent);
 
 type IProps = {
     item: IData;
     onPress: (item: IData) => void;
     isSelect?: boolean;
     tableWin?: ITableWin;
+    itemView?: IRowsColsField,
     closeModal: (callBack: () => void) => void;
     isNewEdit: boolean;
     checkSelected?: { isError: string, message: string, requiredKeys: string[] };
@@ -165,6 +172,7 @@ const ItemViewComponent: React.FC<IProps> = ({
     onPress,
     isSelect,
     tableWin,
+    itemView,
     closeModal,
     isNewEdit,
     checkSelected,
@@ -188,7 +196,7 @@ const ItemViewComponent: React.FC<IProps> = ({
             alignItems: tableWin ? "flex-start" : "center", justifyContent: "space-between", backgroundColor: isSelect ? colors.elevation.level1 : "transparent"
         }}>
             <View style={{ paddingVertical: 10, paddingLeft: 10, paddingHorizontal: isShowEdit ? 0 : 10 }}>
-                <SchemaUIEngine schema={(schemaWin[tableWin ?? "Empty"] ?? schemaWinEmpty).config.itemList} data={item} />
+                <SchemaUIEngine schema={itemView || (schemaWin[tableWin ?? "Empty"] ?? schemaWinEmpty).config.itemList} data={item} />
             </View>
             {isShowEdit && <Pressable style={{ backgroundColor: colors.elevation.level1, borderRadius: 50, marginTop: 5 }} onPress={() => {
                 closeModal(() => { });
