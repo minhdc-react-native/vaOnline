@@ -101,7 +101,7 @@ export const schemaWinEmpty: ISchemaWinValue = {
     defaultNew: {}
 };
 
-export const schemaItemSearch: Record<ITableSearch, IRowsColsField> = {
+export const schemaItemSearch: Partial<Record<ITableSearch, IRowsColsField>> = {
     DMMNGH: {
         type: "cols",
         fields: [
@@ -127,36 +127,6 @@ export const schemaItemSearch: Record<ITableSearch, IRowsColsField> = {
             {
                 type: "text",
                 bind: "TEN_CN"
-            }
-        ]
-    },
-    DMTK: {
-        type: "cols",
-        fields: [
-            {
-                type: "text",
-                requiredKeys: ["id", "value"],
-                label: "{{`${id} - ${value}`}}"
-            }
-        ]
-    },
-    DMTTDB: {
-        type: "cols",
-        fields: [
-            {
-                type: "text",
-                requiredKeys: ["id", "value"],
-                label: "{{`${id} - ${value}`}}"
-            }
-        ]
-    },
-    DMDVT: {
-        type: "cols",
-        fields: [
-            {
-                type: "text",
-                requiredKeys: ["id", "value"],
-                label: "{{`${id} - ${value}`}}"
             }
         ]
     }

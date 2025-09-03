@@ -16,8 +16,8 @@ interface IDataItemWin {
     onAddDetail: (tableWin: ITableWin, tableWinDetail: ITableWin, newItem: IData) => void;
     onRemoveDetail: (tableWin: ITableWin, tableWinDetail: ITableWin, item: IData) => void;
     resetItem: (tableWin: ITableWin) => void;
-    resetSource: (tableWin: ITableWin) => void;
     resetAll: () => void;
+    resetTableWin: (tableWin: ITableWin) => void;
 }
 
 export const useDataItemWin = create<IDataItemWin>((set) => ({
@@ -111,15 +111,24 @@ export const useDataItemWin = create<IDataItemWin>((set) => ({
                 },
             }
         }),
+    resetTableWin: (tableWin) =>
+        set((state) => {
+            const { [tableWin]: _, ...restItems } = state.dataItems;
+            const { [tableWin]: __, ...restSources } = state.dataSources;
+            const { [tableWin]: ___, ...restTags } = state.dataTags;
+            const { [tableWin]: ____, ...restDetails } = state.dataItemDetail;
+
+            return {
+                dataItems: restItems,
+                dataSources: restSources,
+                dataTags: restTags,
+                dataItemDetail: restDetails,
+            };
+        }),
     resetItem: (tableWin) =>
         set((state) => {
             const { [tableWin]: _, ...rest } = state.dataItems;
             return { dataItems: rest };
-        }),
-    resetSource: (tableWin) =>
-        set((state) => {
-            const { [tableWin]: _, ...rest } = state.dataSources;
-            return { dataSources: rest };
         }),
     resetAll: () => set({ dataItems: {}, dataSources: {}, dataItemDetail: {} }),
 }));

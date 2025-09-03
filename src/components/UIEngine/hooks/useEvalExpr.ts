@@ -7,15 +7,15 @@ export function useEvalExpr(data: Record<string, any>) {
     const lang = useDataApp((state) => state.lang);
     const { _ } = useTranslation();
     const dataRef = useRef(data);
+    // luôn nhận giá trị mới
+    dataRef.current = data;
     return useCallback(
         (expr: string, requiredKeys?: string[]): any => {
             if (typeof expr !== 'string') return expr;
             if (!expr.includes('{{')) return expr;
-
             try {
                 const raw = expr.replace(/^{{\s*|\s*}}$/g, '');
                 let fn = fnCache.current.get(raw);
-
                 const keys = requiredKeys ?? Object.keys(dataRef.current);
                 const argNames = [...keys, "lang", "_"];
                 const argValues = [...keys.map((key) => dataRef.current[key]), lang, _];

@@ -52,7 +52,8 @@ const StackApp = () => {
       hkd: { headerShown: false },
       index: { headerShown: false },
       menu: { headerShown: false },
-      welcome: { headerShown: false }
+      welcome: { headerShown: false },
+      viewPdf: { headerShown: false }
     }} />
   )
 }

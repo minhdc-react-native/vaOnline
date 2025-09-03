@@ -9,8 +9,6 @@ interface IProps {
     label?: string;
     disabled: boolean,
     setValue: (value: any) => void;
-    setValues: (values: Record<string, any>) => void;
-    onBlurTaxCode: (value: string, expression?: Record<string, string>) => void;
     handleBlur: () => void;
     texRight?: string;
     icon?: {
@@ -29,7 +27,7 @@ const InputFieldComponent: React.FC<IProps> = ({
     value,
     label,
     disabled,
-    setValue, setValues, onBlurTaxCode,
+    setValue,
     texRight, icon,
     typeInput,
     handleBlur,
@@ -42,6 +40,7 @@ const InputFieldComponent: React.FC<IProps> = ({
     const { colors } = useTheme<VACOMTheme>();
     const { _ } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
+    const [scannerVisible, setScannerVisible] = useState(false);
 
     const handleChangeText = useCallback(
         (val: string) => {

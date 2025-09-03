@@ -8,6 +8,19 @@ import { useEvalExpr } from './hooks/useEvalExpr';
 import { FormState, useFormState } from './hooks/useFormState';
 import { ISchemaUIProps } from './types';
 
+export const collectRequiredKeys = (fields: any[]): string[] => {
+    let keys: string[] = [];
+    fields.forEach((f) => {
+        if (f.requiredKeys) {
+            keys.push(...f.requiredKeys);
+        }
+        if (f.fields) {
+            keys.push(...collectRequiredKeys(f.fields));
+        }
+    });
+    return keys;
+};
+
 const EMPTY_OBJECT = {};
 
 interface IFormContext {
@@ -37,7 +50,6 @@ export function SchemaUIEngine({
     const paramSystem = useDataApp((state) => state.paramSystem);
     const formState = useFormState(data);
 
-
     // map nhanh id → object
     const dataSourceMap = useMemo(() => {
         const map0 = new Map<string, Map<string, any>>();
@@ -50,11 +62,9 @@ export function SchemaUIEngine({
         return map0;
     }, [dataSource]);
 
+
     // computed fields (ẩn/hiện, default values, …)
     useComputedFields(schema.fields || [], formState, data, paramSystem, onChangeItemData);
-
-    // eval expression
-    const evalExpr = useEvalExpr(data);
 
     const handleAction = useCallback(
         (name: string, param?: any) => {
@@ -67,12 +77,28 @@ export function SchemaUIEngine({
         [actionMap, dataActionMap]
     );
 
+    const requiredKeys = useMemo(() => {
+        return collectRequiredKeys(schema.fields ?? []);
+    }, [schema.fields]);
+
+    // Tạo object chỉ chứa các key cần theo dõi
+    const watchRequiredValues = useMemo(() => {
+        let obj: Record<string, any> = {};
+        requiredKeys.forEach(k => {
+            obj[k] = data[k];  // lấy giá trị hiện tại trong data
+        });
+        return obj;
+    }, [JSON.stringify(requiredKeys.map(k => data[k]))]);
+
+    // eval expression
+    const evalExpr = useEvalExpr(watchRequiredValues);
+
     // lọc field theo visibleIf
     const schemaFields = useMemo(() => {
-        return (schema.fields ?? []).filter((child) =>
-            child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true
-        );
-    }, [schema.fields, evalExpr]);
+        return (schema.fields ?? []).filter((child) => {
+            return child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true
+        });
+    }, [schema.fields, evalExpr, watchRequiredValues]);
 
     // context value, chỉ thay đổi khi input deps đổi
     const ctxValue = useMemo<IFormContext>(
@@ -108,9 +134,11 @@ export function SchemaUIEngine({
                     style,
                 ]}
             >
-                {schemaFields.map((field, index) => (
-                    <FieldRenderer key={index} field={field} index={index} />
-                ))}
+                {schemaFields.map((field, index) => {
+                    return (
+                        <FieldRenderer key={index} field={field} index={index} />
+                    )
+                })}
             </View>
         </FormContext.Provider>
     );

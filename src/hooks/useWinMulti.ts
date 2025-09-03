@@ -16,6 +16,7 @@ interface IProgs {
 export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = { new: true, edit: true } }: IProgs) => {
     const [data, setData] = useState<Partial<Record<ITableWin, IData[]>>>({});
     const [currentTab, setCurrentTab] = useState<ITabWin>(tabs?.[0]);
+
     const evalExpr = useEvalExpr(dataMaster);
 
     const schemaUI = useMemo(() => {

@@ -18,6 +18,7 @@ import VcSelectListMulti from '../vcSelectListMulti';
 import VcSelectPage from '../vcSelectPage';
 import { VcTimePicker } from '../vcTimePicker';
 import { ExpandField } from './Fields/expandField';
+import { InputBarcode } from './Fields/inputBarcode';
 import { InputField } from './Fields/inputField';
 import { TextField } from './Fields/textField';
 import { useBoundField } from './hooks/useBoundField';
@@ -107,9 +108,9 @@ const ViewComponent: React.FC<IProps> = ({
         },
         [disabled, setValue]
     );
-
     switch (field.type) {
         case 'rows':
+
             const fieldsRows = field.fields?.filter((child) => {
                 return child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true;
             }) ?? [];
@@ -231,8 +232,6 @@ const ViewComponent: React.FC<IProps> = ({
                     label={labelInput}
                     disabled={disabled}
                     setValue={setValue}
-                    setValues={setValues}
-                    onBlurTaxCode={onBlurTaxCode}
                     handleBlur={handleBlur}
                     texRight={field.texRight}
                     icon={field.leftIcon}
@@ -241,6 +240,19 @@ const ViewComponent: React.FC<IProps> = ({
                     upperCase={field.upperCase}
                     autoCapitalize={field.autoCapitalize}
                     height={field.height}
+                    msgError={field.bind ? errors?.[field.bind] : undefined}
+                />
+            );
+        case 'inputBarcode':
+            const labelInputBarcode = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
+            return (
+                <InputBarcode
+                    value={value}
+                    label={labelInputBarcode}
+                    disabled={disabled}
+                    setValue={setValue}
+                    handleBlur={handleBlur}
+                    style={field.style}
                     msgError={field.bind ? errors?.[field.bind] : undefined}
                 />
             );

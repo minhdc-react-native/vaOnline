@@ -54,7 +54,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     const [data, setData] = useState<IData[]>([]);
     const dataSources = useDataItemWin((state) => state.dataSources);
     const setDataSource = useDataItemWin((state) => state.setDataSource);
-    const resetSource = useDataItemWin((state) => state.resetSource);
+    const resetTableWin = useDataItemWin((state) => state.resetTableWin);
 
     const dataItems = useDataItemWin((state) => state.dataItems);
     const setItemData = useDataItemWin((state) => state.setDataItem);
@@ -124,7 +124,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             tlbparam: defaultFilter.tlbparam ?? [],
             window_id: windowId
         });
-        const tabsWin: any[] = [...dataConfig.Tabs].slice(1);
+        const tabsWin: any[] = [...dataConfig.Tabs].filter((tab: any) => tab.HIDE_EDIT !== 'C').slice(1);
         const newTabs = tabsWin.map((tab) => ({
             id: tab.TAB_ID,
             value: _(tab.TAB_NAME),
@@ -141,19 +141,20 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 WINDOW_ID: windowId,
                 MA_CT: dataConfig.MA_CT ?? "",
                 WINDOW_NAME: dataConfig.WINDOW_NAME ?? "",
-                Tabs: dataConfig.Tabs.map((tab: any): ITabWin => ({
-                    id: tab.id ?? "",
-                    value: tab.TAB_NAME ?? "",
-                    TAB_ID: tab.TAB_ID ?? "",
-                    TAB_TABLE: tab.TAB_TABLE ?? "",
-                    FOREIGN_KEY: tab.FOREIGN_KEY ?? "",
-                    TAB_NAME: tab.TAB_NAME ?? "",
-                    PERMISSION: {
-                        NEW: !Helper.isEmpty(tab.INSERT_STORE_PROCEDURE),
-                        EDIT: !Helper.isEmpty(tab.UPDATE_STORE_PROCEDURE),
-                        DELETE: !Helper.isEmpty(tab.DELETE_STORE_PROCEDURE)
-                    }
-                }))
+                Tabs: dataConfig.Tabs.filter((tab: any) => tab.HIDE_EDIT !== 'C')
+                    .map((tab: any): ITabWin => ({
+                        id: tab.id ?? "",
+                        value: tab.TAB_NAME ?? "",
+                        TAB_ID: tab.TAB_ID ?? "",
+                        TAB_TABLE: tab.TAB_TABLE ?? "",
+                        FOREIGN_KEY: tab.FOREIGN_KEY ?? "",
+                        TAB_NAME: tab.TAB_NAME ?? "",
+                        PERMISSION: {
+                            NEW: !Helper.isEmpty(tab.INSERT_STORE_PROCEDURE),
+                            EDIT: !Helper.isEmpty(tab.UPDATE_STORE_PROCEDURE),
+                            DELETE: !Helper.isEmpty(tab.DELETE_STORE_PROCEDURE)
+                        }
+                    }))
             }
         };
     }
@@ -164,7 +165,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     const [currentTab, setCurrentTab] = useState<ITabWin>(tabs?.[0]);
 
     const tabMulti = useMemo(() => {
-        return (winConfig ? [...winConfig.window.Tabs].slice(1) : []);
+        return (winConfig ? [...winConfig.window.Tabs.filter((tab: any) => tab.HIDE_EDIT !== 'C')].slice(1) : []);
     }, [winConfig]);
 
     const setTextSearch = (textSearch: string) => {
@@ -467,58 +468,66 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         return dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"];
     }, [dataItemDetail, currentTab, tableWin]);
 
-    const handleActionDetail = useMemo(() => {
-        return {
-            new: () => {
-                typeNewEdit.current = 'new';
-                const typeView = itemMenuWin.typeView ?? {};
-                setItemDetail({
-                    id: UUID.v4(),
-                    _isNew: true,
-                    ...schemaWinDetail.defaultNew,
-                    ...typeView
-                });
-                setShowNewEdit(true);
-            },
-            select: (index: number) => {
-                const isEdit = schemaWinDetail.action?.edit !== false;
-                if (!isEdit) return;
-                typeNewEdit.current = 'edit';
-                currentIndex.current = index;
-                const typeView = itemMenuWin.typeView ?? {};
-                const itemDetail = dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"]?.[index] ?? { id: UUID.v4() };
-                setItemDetail({ ...itemDetail, ...typeView });
-                setShowNewEdit(true);
-            },
-            change: (valueChange: IData) => {
-                setIsChange(true);
-                setItemDetail(prev => prev ? { ...prev, ...valueChange } : null);
-            },
-            update: (data?: IData) => {
-                if (data) {
-                    setIsChange(true);
-                    if (typeNewEdit.current === 'new') {
-                        onAddDetail(tableWin, currentTab?.TAB_TABLE ?? "Empty", data!);
-                    } else {
-                        onChangeItemDataDetail(currentTab?.TAB_TABLE ?? "Empty", currentIndex.current, data!);
-                    }
-                }
-                setShowNewEdit(false);
-                setItemDetail(null);
-            },
-            delete: (itemDetail: IData) => {
-                showPopup({
-                    message: "Bạn có muốn xoá dữ liệu",
-                    iconType: "question",
-                    showCancel: true,
-                    onConfirm: () => {
-                        setIsChange(true);
-                        onRemoveDetail(tableWin, currentTab?.TAB_TABLE ?? "Empty", itemDetail);
-                    }
-                });
+    const onNewDetail = useCallback(() => {
+        typeNewEdit.current = 'new';
+        const typeView = itemMenuWin.typeView ?? {};
+        setItemDetail({
+            id: UUID.v4(),
+            _isNew: true,
+            ...schemaWinDetail.defaultNew,
+            ...typeView
+        });
+        setShowNewEdit(true);
+    }, [itemMenuWin.typeView, schemaWinDetail.defaultNew]);
+
+    const onSelectDetail = useCallback((index: number) => {
+        const isEdit = schemaWinDetail.action?.edit !== false;
+        if (!isEdit) return;
+        typeNewEdit.current = 'edit';
+        currentIndex.current = index;
+        const typeView = itemMenuWin.typeView ?? {};
+        const itemDetail = dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"]?.[index] ?? { id: UUID.v4() };
+        setItemDetail({ ...itemDetail, ...typeView });
+        setShowNewEdit(true);
+    }, [currentTab?.TAB_TABLE, dataItemDetail, itemMenuWin.typeView, schemaWinDetail.action?.edit, tableWin]);
+
+    const onChangeDetail = useCallback((valueChange: IData) => {
+        setIsChange(true);
+        setItemDetail(prev => prev ? { ...prev, ...valueChange } : null);
+    }, []);
+
+    const onUpdateDetail = useCallback((data?: IData) => {
+        if (data) {
+            setIsChange(true);
+            if (typeNewEdit.current === 'new') {
+                onAddDetail(tableWin, currentTab?.TAB_TABLE ?? "Empty", data!);
+            } else {
+                onChangeItemDataDetail(currentTab?.TAB_TABLE ?? "Empty", currentIndex.current, data!);
             }
         }
-    }, [dataItemDetail, currentTab, itemMenuWin.typeView]);
+        setShowNewEdit(false);
+        setItemDetail(null);
+    }, [currentTab?.TAB_TABLE, onAddDetail, onChangeItemDataDetail, tableWin]);
+
+    const onDeleteDetail = useCallback((itemDetail: IData) => {
+        showPopup({
+            message: "Bạn có muốn xoá dữ liệu",
+            iconType: "question",
+            showCancel: true,
+            onConfirm: () => {
+                setIsChange(true);
+                onRemoveDetail(tableWin, currentTab?.TAB_TABLE ?? "Empty", itemDetail);
+            }
+        });
+    }, [currentTab?.TAB_TABLE, onRemoveDetail, showPopup, tableWin]);
+
+    const handleActionDetail = {
+        new: onNewDetail,
+        select: onSelectDetail,
+        change: onChangeDetail,
+        update: onUpdateDetail,
+        delete: onDeleteDetail
+    }
 
     // const [dataSource, setDataSource] = useState<Record<string, any[]>>({});
     const [tableRefresh, setTableRefresh] = useState<Record<string, { url: string, type?: string, dataPost?: Record<string, any>, key: string }>>({});
@@ -644,6 +653,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             router.back();
         }
     }
+
     return {
         colors,
         params,
@@ -657,7 +667,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         infoData,
         handleAction,
         resetItem,
-        resetSource,
+        resetTableWin,
         tableWin: winConfig?.window?.Tabs[0]?.TAB_TABLE,
         dataSource: dataSources[tableWin],
         showFilter,

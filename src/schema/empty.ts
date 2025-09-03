@@ -1,6 +1,4 @@
-import { zRequiredString } from "@/schemaUI/zodHelpers";
 import { theme } from "@/theme/theme";
-import * as z from "zod";
 import { ISchemaWin, ISchemaWinValue } from ".";
 const colors = theme.colors;
 const empty0: ISchemaWin = {
@@ -44,8 +42,8 @@ const empty0: ISchemaWin = {
 export const empty: ISchemaWinValue = {
     config: empty0,
     defaultNew: {},
-    zod: z.object({
-        code: zRequiredString('Nhập mã'),
-        name: zRequiredString('Nhập tên')
-    })
+    zod: {
+        code: { type: "string", msgError: "Nhập mã" },
+        name: { type: "string", msgError: "Nhập tên" },
+    }
 }

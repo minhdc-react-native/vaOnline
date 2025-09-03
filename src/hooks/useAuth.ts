@@ -72,6 +72,7 @@ export const useAuth = () => {
     const setParamSystem = useDataApp((state) => state.setParamSystem);
     const setDataMenuWin = useDataApp((state) => state.setDataMenuWin);
     const setLang = useDataApp((state) => state.setLang);
+    const setListVoucher2 = useDataApp((state) => state.setListVoucher2);
     const { setTranslations, _ } = useTranslation();
 
     const logout = async () => {
@@ -120,6 +121,8 @@ export const useAuth = () => {
                 setCurrentYear(res.nam?.[0].NAM);
 
                 setLang(data.lang ?? 'vi');
+
+                await getListVoucher2();
 
                 await getLangTitle(data.lang ?? 'vi');
                 setLoggedIn(true);
@@ -193,6 +196,19 @@ export const useAuth = () => {
                     return;
                 }
                 setListApp(res.data.filter((item: any) => VcData.listApp.includes(item.id)));
+            },
+            // setLoading: setLoading
+        });
+    }
+
+    const getListVoucher2 = async () => {
+        const sql = encodeURIComponent("SELECT LIST_CT FROM TYPE_CT WHERE TYPE_CT= '000'");
+        await api.get({
+            link: `/api/System/ExecuteQuery?sql=${sql}`,
+            callBack: (res: any[]) => {
+                if (res && res.length > 0) {
+                    setListVoucher2(res[0].LIST_CT);
+                }
             },
             // setLoading: setLoading
         });

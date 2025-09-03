@@ -17,6 +17,9 @@ interface IDataApp {
     lang: string;
     setLang: (lang: string) => void;
 
+    listVoucher2: string;
+    setListVoucher2: (listVoucher2: string) => void;
+
     orgUnit: string | null,
     setOrgUnit: (currentYear: string) => void
 
@@ -35,7 +38,7 @@ interface IDataApp {
 
 const initialState: Omit<IDataApp,
     'setParamSystem' | 'setShouldRefresh' | 'setBackHandlerQuestion' | 'setYears' |
-    'setLang' | 'setCurrentYear' | 'setOrgUnit' | 'reset' | 'setMenuIds' | 'setDataMenuWin'
+    'setLang' | 'setListVoucher2' | 'setCurrentYear' | 'setOrgUnit' | 'reset' | 'setMenuIds' | 'setDataMenuWin'
 > = {
     paramSystem: null,
     shouldRefresh: null,
@@ -44,6 +47,7 @@ const initialState: Omit<IDataApp,
     currentYear: null,
     years: [],
     lang: 'vi',
+    listVoucher2: '',
     menuIds: [],
     dataMenuWin: {}
 };
@@ -60,6 +64,7 @@ export const useDataApp = create<IDataApp>()(
         reset: () => set(initialState),
         setMenuIds: (menuIds) => set({ menuIds }),
         setDataMenuWin: (dataMenuWin) => set({ dataMenuWin }),
-        setLang: (lang) => set({ lang })
+        setLang: (lang) => set({ lang }),
+        setListVoucher2: (listVoucher2) => set({ listVoucher2 })
     })
 );

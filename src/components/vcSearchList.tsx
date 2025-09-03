@@ -10,8 +10,20 @@ import { Keyboard, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "rea
 import { ActivityIndicator, Divider, IconButton, Portal, Text, TextInput, useTheme } from "react-native-paper";
 import { useToast } from "./dialog/useToast";
 import { useEvalExpr } from "./UIEngine/hooks/useEvalExpr";
-import { SchemaUIEngine } from "./UIEngine/schemaUIEngine";
+import { collectRequiredKeys, SchemaUIEngine } from "./UIEngine/schemaUIEngine";
 import { IRowsColsField } from "./UIEngine/types";
+
+const EmptyView: IRowsColsField = {
+    type: "cols",
+    fields: [
+        {
+            type: "text",
+            requiredKeys: ["id", "value"],
+            label: "{{`${id} - ${value}`}}"
+        }
+    ]
+};
+
 const urlBase: Record<ITableSearch, string> = { // gắn api cho đỡ nhầm...
     DMMNGH: '/api/System/GetDataByReferencesId?id=0b22c919-a275-4d05-83bd-c34844d9ec67&filtervalue=#filterValue#',
     DMMCN: '/api/System/GetDataByReferencesId?id=0600dd65-9cf4-4fd7-bf43-ff50a5578b42&filtervalue=#filterValue#',
@@ -168,7 +180,23 @@ type IProps = {
 
 const ItemViewComponent: React.FC<IProps> = ({ item, onPress, isSelect, tableSearch, checkSelected, itemView }) => {
     const { showToast } = useToast();
-    const evalExpr = useEvalExpr(item);
+
+    const viewSchema = itemView || schemaItemSearch[tableSearch] || EmptyView;
+
+    const requiredKeys = useMemo(() => {
+        return collectRequiredKeys(viewSchema.fields ?? []);
+    }, [viewSchema.fields]);
+
+    // Tạo object chỉ chứa các key cần theo dõi
+    const watchRequiredValues = useMemo(() => {
+        let obj: Record<string, any> = {};
+        requiredKeys.forEach(k => {
+            obj[k] = item[k];  // lấy giá trị hiện tại trong data
+        });
+        return obj;
+    }, [JSON.stringify(requiredKeys.map(k => item[k]))]);
+    // eval expression
+    const evalExpr = useEvalExpr(watchRequiredValues);
     const { colors } = useTheme();
     return (
         <Pressable onPress={() => {
@@ -185,7 +213,7 @@ const ItemViewComponent: React.FC<IProps> = ({ item, onPress, isSelect, tableSea
             alignItems: "flex-start", backgroundColor: isSelect ? colors.elevation.level1 : "transparent"
         }}>
             <View style={{ paddingVertical: 10, paddingHorizontal: 20, flex: 1 }}>
-                <SchemaUIEngine schema={itemView || schemaItemSearch[tableSearch]} data={item} />
+                <SchemaUIEngine schema={viewSchema} data={item} />
             </View>
         </Pressable>
     );

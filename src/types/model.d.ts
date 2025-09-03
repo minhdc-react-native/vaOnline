@@ -77,11 +77,13 @@ declare global {
 
     type ITableWin = 'Empty' | 'Year' |
         'DMNHDT' | 'DMDT' | 'DMDT_NGH' | 'DMBP' | 'DMPX' | 'DMOB' | 'DMTK' |
-        'DMKHO' | 'DMNHHV' | 'DMHV' | 'DMHV_DVT' | 'DMHV_GIA' | 'DMDVT';
+        'DMKHO' | 'DMNHHV' | 'DMHV' | 'DMHV_DVT' | 'DMHV_GIA' | 'DMDVT' |
+        'DPHV' | 'CTHV' | 'PSTHUE' | 'PSCF' | 'PBDT';
 
     type ITableSearch = 'DMMNGH' | 'DMMCN' | 'DMTK' | 'DMTTDB' | 'DMDVT';
 
-    type IKeyMenuWin = 'acCatalogBalance' | 'acCatalogBank' | 'acCatalogGood' | 'acCatalogOther' | 'acCatalogPartner'
+    type IKeyMenuWin = 'acCatalogBalance' | 'acCatalogBank' | 'acCatalogGood' | 'acCatalogOther' | 'acCatalogPartner' |
+        'banHangPhaiThu'
 
     var isNotEmpty: (value: any) => boolean;
 }

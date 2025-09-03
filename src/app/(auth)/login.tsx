@@ -3,7 +3,6 @@ import FormWrapper from '@/components/formWrapper';
 import { useZodValidation } from '@/components/UIEngine/hooks/useZodValidation';
 import { SchemaUIEngine } from '@/components/UIEngine/schemaUIEngine';
 import { IRowsColsField } from '@/components/UIEngine/types';
-import { TextDrop } from '@/components/vcTextAnimation';
 import { useAuth } from '@/hooks/useAuth';
 import { loginForm } from '@/schemaUI/loginForm';
 import { Helper } from '@/utils/Helper';
@@ -109,7 +108,7 @@ export default function LoginScreen() {
         <FormWrapper style={{ flex: 1, justifyContent: 'flex-end', padding: 20 }}>
             <View style={{ justifyContent: "center", alignItems: "center", marginBottom: 50 }}>
                 <Image source={sloganVacom} style={styles.logo} />
-                <TextDrop text='Accounting' heightDrop={400} />
+                {/* <TextDrop text='Accounting' heightDrop={400} /> */}
             </View>
 
             <Card style={{ padding: 20, backgroundColor: colors.background }} contentStyle={{ gap: 20 }}>

@@ -75,6 +75,11 @@ export type IInputField = IFieldBase & {
     upperCase?: boolean;
     height?: DimensionValue
 };
+export type IInputBarcode = IFieldBase & {
+    type: 'inputBarcode';
+    label?: string;
+    style?: StyleProp<ViewStyle>
+};
 export type IIconField = IFieldBase & {
     type: 'icon';
     iconType: 'A' | 'E' | 'F' | 'I' | 'M',
@@ -236,6 +241,7 @@ export type IField =
     | IDateField
     | ITimeField
     | IInputField
+    | IInputBarcode
     | IIconField
     | IActionListField
     | ISelectField

@@ -36,7 +36,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
         showFilter,
         printSamples,
         permissions,
-        resetSource,
+        resetTableWin,
         setFilterRows,
         setTextSearch,
         handleLayout,
@@ -110,7 +110,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
             },
             ...actionMap,
         }
-    }, [handleAction]);
+    }, [actionMap, handleAction]);
 
     const [layoutAction, setLayoutAction] = useState<IHandleActionConfig | null>(null);
 
@@ -156,7 +156,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
     const navigation = useNavigation();
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', () => {
-            resetSource(itemMenuWin.tableWin); // xoá dữ liệu khi không dùng đến...
+            resetTableWin(itemMenuWin.tableWin); // xoá dữ liệu khi không dùng đến...
         });
         return unsubscribe;
     }, [navigation]);

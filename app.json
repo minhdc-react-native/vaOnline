@@ -10,7 +10,12 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.accountingonline"
+      "bundleIdentifier": "com.anonymous.accountingonline",
+      "infoPlist": {
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) uses the camera to scan product barcodes, take product photos, and capture user profile pictures for shop setup.",
+        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photo library to upload product photos and attach receipts.",
+        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save downloaded PDF invoices and images to your photo library."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +23,12 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.accountingonline"
+      "package": "com.anonymous.accountingonline",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
     },
     "plugins": [
       "expo-router",

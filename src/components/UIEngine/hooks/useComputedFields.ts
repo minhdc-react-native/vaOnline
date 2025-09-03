@@ -1,6 +1,7 @@
 import { Helper } from '@/utils/Helper';
 import get from 'lodash.get';
 import { useEffect, useMemo } from 'react';
+import { collectRequiredKeys } from '../schemaUIEngine';
 import { IField } from '../types';
 import { useEvalExpr } from './useEvalExpr';
 import { FormState } from './useFormState';
@@ -21,7 +22,19 @@ export function useComputedFields<T>(
     paramSystem: IParamSystem | null,
     onChangeItemData?: (change: Record<string, any>) => void
 ) {
-    const evalExpr = useEvalExpr(data);
+    const requiredKeys = useMemo(() => {
+        return collectRequiredKeys(fields0 ?? []);
+    }, [fields0]);
+
+    const watchRequiredValues = useMemo(() => {
+        let obj: Record<string, any> = {};
+        requiredKeys.forEach(k => {
+            obj[k] = data[k];  // lấy giá trị hiện tại trong data
+        });
+        return obj;
+    }, [JSON.stringify(requiredKeys.map(k => data[k]))]);
+
+    const evalExpr = useEvalExpr(watchRequiredValues);
 
     // Lấy danh sách field cần compute
     const fields = useMemo(() => flatten(fields0), [fields0]);

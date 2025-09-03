@@ -3,6 +3,7 @@ import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { VcHeaderWin } from "@/components/vcHeaderWin";
 import { VcTabBar } from "@/components/vcTabBar";
 import { useTranslation } from "@/context/TranslationContext";
+import { useVoucherHv } from "@/hooks/useVoucher";
 import { useWinPage } from "@/hooks/useWinPage";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -35,6 +36,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
     } = useWinPage({
         itemMenuWin: itemMenuWin
     });
+    const { isHt2 } = useVoucherHv(itemMenuWin?.defaultValue?.MA_CT);
 
     const [showEditMaster, setShowEditMaster] = useState<boolean>(id === undefined && schemaUI.action?.showEditMaster !== false);
 
@@ -43,7 +45,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
             resetItem(itemMenuWin.tableWin); // xoá dữ liệu khi không dùng đến...
         });
         return unsubscribe;
-    }, [navigation]);
+    }, [itemMenuWin.tableWin, navigation, resetItem]);
 
     const actionMap = useMemo(() => {
         return {
@@ -51,7 +53,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                 detail.handleActionDetail.delete(param?.data);
             }
         }
-    }, []);
+    }, [detail.handleActionDetail]);
 
     const onSaveMaster = useCallback((data?: IData) => {
         if (data) {

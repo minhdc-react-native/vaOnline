@@ -171,27 +171,6 @@ const dmhv0: ISchemaWin = {
                     }
                 ]
             },
-            // {
-            //     type: "rows",
-            //     fields: [
-            //         {
-            //             type: "search",
-            //             tableSearch: "DMTTDB",
-            //             clean: false,
-            //             fField: 'id',
-            //             numCharSearch: 2,
-            //             label: "MA_TTDB",
-            //             bind: "MA_TTDB",
-            //             style: { flex: 1 }
-            //         },
-            //         {
-            //             type: "input",
-            //             label: "BARCODE",
-            //             bind: "BARCODE",
-            //             style: { flex: 1 }
-            //         }
-            //     ]
-            // },
             {
                 type: "rows",
                 fields: [
@@ -203,7 +182,7 @@ const dmhv0: ISchemaWin = {
                         style: { flex: 1 }
                     },
                     {
-                        type: "input",
+                        type: "inputBarcode",
                         label: "BARCODE",
                         bind: "BARCODE",
                         style: { flex: 1 }

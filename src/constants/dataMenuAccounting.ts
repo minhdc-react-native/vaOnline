@@ -48,6 +48,16 @@ export const DataMenuAccounting: Record<string, Partial<Record<IKeyMenuWin, ICon
 
     },
     voucher: {
-
-    },
+        banHangPhaiThu: [
+            {
+                title: 'Bán hàng', titleE: 'Sales',
+                data: [
+                    {
+                        id: 'WIN00052', typeWin: "(winMaster)", tableWin: "DPHV", label: 'Hóa đơn bán hàng', labelE: 'Sale invoice',
+                        defaultValue: { MA_CT: 'PBH', DIEN_GIAI: 'Hóa đơn bán hàng' }, icon: icon, row: 4, col: 1
+                    },
+                ]
+            }
+        ]
+    }
 }

@@ -9,7 +9,7 @@ import { Keyboard, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "rea
 import { ActivityIndicator, Divider, IconButton, Portal, Text, TextInput, useTheme } from "react-native-paper";
 import { useToast } from "./dialog/useToast";
 import { useEvalExpr } from "./UIEngine/hooks/useEvalExpr";
-import { SchemaUIEngine } from "./UIEngine/schemaUIEngine";
+import { collectRequiredKeys, SchemaUIEngine } from "./UIEngine/schemaUIEngine";
 import { IRowsColsField } from "./UIEngine/types";
 type IListProps = {
     label?: string;
@@ -180,7 +180,25 @@ const ItemViewComponent: React.FC<IProps> = ({
     const { colors } = useTheme();
     const isShowEdit = tableWin !== undefined && isNewEdit;
     const { showToast } = useToast();
-    const evalExpr = useEvalExpr(item);
+    const viewSchema = itemView || (schemaWin[tableWin ?? "Empty"] ?? schemaWinEmpty).config.itemList;
+
+    const requiredKeys = useMemo(() => {
+        return collectRequiredKeys(viewSchema.fields ?? []);
+    }, [viewSchema.fields]);
+
+    // Tạo object chỉ chứa các key cần theo dõi
+    const watchRequiredValues = useMemo(() => {
+
+        let obj: Record<string, any> = {};
+        requiredKeys.forEach(k => {
+            obj[k] = item[k];  // lấy giá trị hiện tại trong data
+        });
+        return obj;
+    }, [JSON.stringify(requiredKeys.map(k => item[k]))]);
+
+    // eval expression
+    const evalExpr = useEvalExpr(watchRequiredValues);
+
     return (
         <Pressable onPress={() => {
             if (checkSelected) {
@@ -196,7 +214,7 @@ const ItemViewComponent: React.FC<IProps> = ({
             alignItems: tableWin ? "flex-start" : "center", justifyContent: "space-between", backgroundColor: isSelect ? colors.elevation.level1 : "transparent"
         }}>
             <View style={{ paddingVertical: 10, paddingLeft: 10, paddingHorizontal: isShowEdit ? 0 : 10 }}>
-                <SchemaUIEngine schema={itemView || (schemaWin[tableWin ?? "Empty"] ?? schemaWinEmpty).config.itemList} data={item} />
+                <SchemaUIEngine schema={viewSchema} data={item} />
             </View>
             {isShowEdit && <Pressable style={{ backgroundColor: colors.elevation.level1, borderRadius: 50, marginTop: 5 }} onPress={() => {
                 closeModal(() => { });
