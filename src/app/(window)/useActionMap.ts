@@ -1,5 +1,8 @@
 
 import { useLoading } from "@/components/dialog/loadingProvider";
+import { api } from "@/utils/apiMethods";
+import { router } from "expo-router";
+import { useMemo } from "react";
 import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
 interface IShareFile {
@@ -24,6 +27,32 @@ export const useActionMap = ({ handleRefresh, checkLayoutAction }: IProgs) => {
         }).finally(() => isDelete && RNFS.unlink(uri));
     };
 
+    const handlePrint = useMemo(() => {
+        return {
+            printItem: (param?: Record<string, any>) => {
+                checkLayoutAction('printItem', async (values: Record<string, any>) => {
+                    const data = {
+                        parameter: {
+                            id: param?.data?.id
+                        },
+                        CODE: values.id, type: "pdf"
+                    };
+                    show('Tải file ...');
+                    const file = await api.file.post({
+                        link: `/api/System/InChungTu`,
+                        data: data,
+                        fileName: values.REPORT_FILE
+                    });
+                    hide();
+                    if (file) {
+                        router.navigate({ pathname: '/viewPdf', params: { title: values.NAME, uriPdf: file.uri } });
+                    }
+                });
+            },
+        }
+    }, [checkLayoutAction, hide, show]);
+
     return {
+        ...handlePrint
     };
 }

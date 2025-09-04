@@ -61,6 +61,16 @@ export const VcData = {
 }
 
 export const VcReferences: IDataSource = {
+    STATUS: {
+        data: [
+            { id: 1, value: 'Đã ghi sổ', color: '#4CAF50' },
+            { id: 2, value: 'Chưa ghi sổ', color: 'gray' }
+        ]
+    },
+    p_MA_NT: { url: `/api/System/GetDataByReferencesId?id=f7f3ab94-4917-4830-bfa5-46b309d978b2` },
+    DMNT: { url: `/api/System/GetDataByReferencesId?id=98665935-a3db-487e-8bc5-2a63515972b5` },
+    DMTHUE: { url: `/api/System/GetDataByReferencesId?id=6bba44d6-6a47-4471-ad98-656ed502fc5a` },
+    DMNHOMHD: { url: `/api/System/GetDataByReferencesId?id=933e15df-235e-452f-a38b-8b8a54bfe73a` },
     DMNHDT: { url: `/api/System/GetDataByReferencesId?id=0749b993-1b71-47d4-833a-338082f4755b`, typeData: "tree", fieldCode: "id" },
     DMNHHV: { url: `/api/System/GetDataByReferencesId?id=379afc91-6f0d-4011-8bfc-f6f941f2288a`, typeData: "tree", fieldCode: "id" },
     DMKHO: { url: `/api/System/GetDataByReferencesId?id=189d7179-da87-40cc-a5b3-64f52cef8b86`, typeData: "tree", fieldCode: "id" },

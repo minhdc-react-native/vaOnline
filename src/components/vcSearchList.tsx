@@ -5,12 +5,12 @@ import { Helper } from "@/utils/Helper";
 import { EvilIcons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import debounce from "lodash.debounce";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Keyboard, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { ActivityIndicator, Divider, IconButton, Portal, Text, TextInput, useTheme } from "react-native-paper";
 import { useToast } from "./dialog/useToast";
 import { useEvalExpr } from "./UIEngine/hooks/useEvalExpr";
-import { collectRequiredKeys, SchemaUIEngine } from "./UIEngine/schemaUIEngine";
+import { SchemaUIEngine } from "./UIEngine/schemaUIEngine";
 import { IRowsColsField } from "./UIEngine/types";
 
 const EmptyView: IRowsColsField = {
@@ -25,6 +25,13 @@ const EmptyView: IRowsColsField = {
 };
 
 const urlBase: Record<ITableSearch, string> = { // gắn api cho đỡ nhầm...
+    DMTHUE: `/api/System/GetDataByReferencesId?id=6bba44d6-6a47-4471-ad98-656ed502fc5a&filtervalue=#filterValue#`,
+    DMQS: `/api/System/GetDataByReferencesId?id=9c19a269-2c63-46df-8912-e4c9569fd46b&filtervalue=#filterValue#`,
+    DMDT: `/api/System/GetDataByReferencesId?id=86de5f41-4277-4a91-bf68-16acc89295c4&filtervalue=#filterValue#`,
+    DMCS: `/api/System/GetDataByReferencesId?id=a228db46-2754-4fa3-a2b4-6729d3f0c248&filtervalue=#filterValue#`,
+    DMKM: `/api/System/GetDataByReferencesId?id=49e80ac4-2b07-47ef-8297-6efb2074fbdd&filtervalue=#filterValue#`,
+    DMHDG: `/api/System/GetDataByReferencesId?id=67b663cb-d062-4057-83ff-cec81a60a996&filtervalue=#filterValue#`,
+    DMVV: `/api/System/GetDataByReferencesId?id=4fcca1d7-9011-4b4f-b9e8-721a546aa637&filtervalue=#filterValue#`,
     DMMNGH: '/api/System/GetDataByReferencesId?id=0b22c919-a275-4d05-83bd-c34844d9ec67&filtervalue=#filterValue#',
     DMMCN: '/api/System/GetDataByReferencesId?id=0600dd65-9cf4-4fd7-bf43-ff50a5578b42&filtervalue=#filterValue#',
     DMTK: '/api/System/GetDataByReferencesId?id=0a93c38b-5f1f-422a-8039-a6cee1967af2&filtervalue=#filterValue#',
@@ -58,7 +65,8 @@ const ViewComponent: React.FC<IProgs> = ({ tableSearch, label, placeholder, valu
     const snapPoints = useMemo(() => ['50%', '70%', '90%'], []);
     const [data, setData] = useState<IData[]>([]);
     const [loading, setLoading] = useState(false);
-    const [txtSearch, setTxtSearch] = useState("");
+    const _txtSearch = value?.toString() ?? '';
+    const [txtSearch, setTxtSearch] = useState(_txtSearch);
 
     const onDebounceSearch = (value: string) => {
         onSearch(value);
@@ -95,7 +103,11 @@ const ViewComponent: React.FC<IProgs> = ({ tableSearch, label, placeholder, valu
             callBack();
         }, 100); // delay nhẹ
     }
-
+    useEffect(() => {
+        if (isNotEmpty(_txtSearch)) {
+            onSearch(_txtSearch);
+        }
+    }, []);
     return (
         <>
             <Pressable
@@ -147,7 +159,7 @@ const ViewComponent: React.FC<IProgs> = ({ tableSearch, label, placeholder, valu
                     keyboardBlurBehavior="restore"
                     containerStyle={{ marginTop: 60 }}
                 >
-                    <HeaderView setSearchText={onChangeTextSearch} label={label || placeholder} />
+                    <HeaderView setSearchText={onChangeTextSearch} txtSearch={txtSearch} label={label || placeholder} />
                     {loading ? <View style={{ marginVertical: 50 }}><ActivityIndicator
                         size={30}
                         color={colors.primary}
@@ -183,18 +195,14 @@ const ItemViewComponent: React.FC<IProps> = ({ item, onPress, isSelect, tableSea
 
     const viewSchema = itemView || schemaItemSearch[tableSearch] || EmptyView;
 
-    const requiredKeys = useMemo(() => {
-        return collectRequiredKeys(viewSchema.fields ?? []);
-    }, [viewSchema.fields]);
-
     // Tạo object chỉ chứa các key cần theo dõi
     const watchRequiredValues = useMemo(() => {
         let obj: Record<string, any> = {};
-        requiredKeys.forEach(k => {
+        checkSelected?.requiredKeys.forEach(k => {
             obj[k] = item[k];  // lấy giá trị hiện tại trong data
         });
         return obj;
-    }, [JSON.stringify(requiredKeys.map(k => item[k]))]);
+    }, [JSON.stringify(checkSelected?.requiredKeys.map(k => item[k]))]);
     // eval expression
     const evalExpr = useEvalExpr(watchRequiredValues);
     const { colors } = useTheme();
@@ -220,11 +228,12 @@ const ItemViewComponent: React.FC<IProps> = ({ item, onPress, isSelect, tableSea
 };
 const ItemView = React.memo(ItemViewComponent);
 
-const HeaderView = ({ setSearchText, label = "Chọn mã" }: {
+const HeaderView = ({ setSearchText, txtSearch, label = "Chọn mã" }: {
     setSearchText: (value: string) => void;
     label?: string;
+    txtSearch: string;
 }) => {
-    const [valueSearch, setValueSerach] = useState("");
+    const [valueSearch, setValueSerach] = useState(txtSearch);
     const { colors } = useTheme();
     return (
         <>

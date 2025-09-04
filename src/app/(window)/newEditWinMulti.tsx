@@ -6,6 +6,7 @@ import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { IRowsColsField } from "@/components/UIEngine/types";
 import { useTranslation } from "@/context/TranslationContext";
+import { useVoucherHv } from "@/hooks/useVoucher";
 import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { VACOMTheme } from "@/theme/theme";
 import React, { useEffect, useRef, useState } from "react";
@@ -28,11 +29,12 @@ interface IProps {
 }
 
 const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, schemaUi, dataSource }) => {
+    Object.keys(dataSource ?? {}).map((key, index) => console.log('key>>', key, index));
     const slideAnim = useRef(new Animated.Value(HEIGHT_WINDOW)).current;
     const { colors } = useTheme<VACOMTheme>();
     const { showPopup } = usePopup();
     const [dataItem, setDataItem] = useState<IData | null>(data || null);
-
+    const { tangSoCt } = useVoucherHv();
     const schemaEdit: IRowsColsField = schemaUi.config.itemEdit;
     const zod = schemaUi.zod;
 
@@ -49,8 +51,12 @@ const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, sch
     const onSubmit = (confirm: boolean, data?: IData) => {
         if (!confirm || checkFilter()) onSave(data);
     }
-    const setValue = (change: Record<string, string>) => {
-        setDataItem(prev => prev ? ({ ...prev, ...change }) : null);
+    const setValue = async (change: Record<string, string>) => {
+        let changeAdd: any = {};
+        if (change.NGAY_CT !== undefined && data) {
+            changeAdd = await tangSoCt(data, change.NGAY_CT);
+        }
+        setDataItem(prev => prev ? ({ ...prev, ...change, ...changeAdd }) : null);
         if (!isChange) setIsChange(true);
     }
     const [containHeight, setContainHeight] = useState<number>(0);

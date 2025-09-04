@@ -10,7 +10,8 @@ import {
     View,
     ViewStyle,
 } from 'react-native';
-import { Button, Divider, IconButton, Modal, Text, useTheme } from 'react-native-paper';
+import Modal from "react-native-modal";
+import { Button, Divider, IconButton, Text, useTheme } from 'react-native-paper';
 
 interface IProgs {
     label?: string;
@@ -131,7 +132,12 @@ const TimePicker = ({
 
 
     return (
-        <Modal visible={visible} onDismiss={onClose}>
+        <Modal isVisible={visible}
+            animationIn={'bounceIn'}
+            animationOut={'bounceOut'}
+            onBackdropPress={onClose}
+            style={{ zIndex: 1 }}  // chỉnh zIndex được    
+        >
             <View style={styles.overlay}>
                 <View style={styles.popup}>
                     <Text variant='titleMedium' style={styles.columnTitle}>{`Thời gian: ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`}</Text>

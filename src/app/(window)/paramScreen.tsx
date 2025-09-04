@@ -4,9 +4,11 @@ import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { IRowsColsField } from "@/components/UIEngine/types";
 import VcSelectList from "@/components/vcSelectList";
 import { useDataApp } from "@/hooks/zustand/useDataApp";
+import { ListItemView } from "@/schema/voucher/itemView";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
-import { useEffect, useRef, useState } from "react";
+import dayjs from 'dayjs';
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, Pressable, StyleSheet, View } from "react-native";
 import { Button, customText, IconButton, useTheme } from "react-native-paper";
 import { IHandleActionConfig } from "../../schema";
@@ -20,11 +22,18 @@ interface IProgs {
 }
 // thêm vào cho hết warning
 export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeItem }: IProgs) {
+    const orgUnit = useDataApp((state) => state.orgUnit);
+    const userLogin = useDataApp((state) => state.userLogin);
+    const currentYear = useDataApp((state) => state.currentYear);
+
     const slideAnim = useRef(new Animated.Value(HEIGHT_WINDOW)).current;
     const { colors } = useTheme();
 
     const arrReplace: Record<string, any> = {
-
+        '#DVCS_ID#': orgUnit,
+        '#USER_LOGIN#': userLogin,
+        '#NAM#': currentYear,
+        '#TODAY#': dayjs().format("YYYY-MM-DD")
     };
 
     const newDefault = Object.fromEntries(
@@ -92,101 +101,74 @@ export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeIte
     };
 
     const [dataSource, setDataSource] = useState<Record<string, any[]>>({});
-    const [tableRefresh, setTableRefresh] = useState<Record<string, Record<string, any>>>({});
+    const [tableRefresh, setTableRefresh] = useState<Record<string, { url: string, type?: string, dataPost?: Record<string, any>, key: string }>>({});
 
     const loadDataBegin = async () => {
         const source: any = schemaConfig.dataSource ?? {};
         const promises = Object.keys(source).map(async (key: any) => {
-            if (source[key]?.data) {
+            const configSource: any = source[key];
+            if (configSource?.data) {
                 setDataSource(prev => ({
                     ...prev,
                     [key]: source[key]?.data
                 }));
             }
-            // dataSource?: Record<string, { data?: any[], api?: { url: string, type?: 'get' | 'post', data?: Record<string, any>} }>,
-            if (source[key]?.api) {
-                const apiConfig = source[key].api;
-                if (apiConfig.type === "post") {
-                    await api.post({
-                        link: apiConfig.url,
-                        data: apiConfig.data,
-                        callBack: (res => {
-                            if (res) {
-                                const fields: string[] = apiConfig.fields || Object.keys(res[0]);
-                                const result = res.map((item: any) =>
-                                    Object.fromEntries(fields.map(key => [key, item[key]]))
-                                );
-                                setDataSource(prev => ({
+            if (configSource?.url) {
+                const url = configSource.url;
+                const apiGetPost = configSource.type === "post" ? api.post : api.get;
+                await apiGetPost({
+                    link: url, data: configSource.dataPost,
+                    callBack: (res => {
+                        if (res) {
+                            setSource(res, source, key);
+                            if (configSource?.tableWin) {
+                                setTableRefresh(prev => ({
                                     ...prev,
-                                    [key]: result
+                                    [configSource.tableWin]: { url: configSource.url, type: configSource.type, dataPost: configSource.dataPost, key: key }
                                 }));
-
-                                if (apiConfig?.tableWin) {
-                                    setTableRefresh(prev => ({
-                                        ...prev,
-                                        [apiConfig.tableWin]: { url: apiConfig.url, type: apiConfig.type, data: apiConfig.data, key: key }
-                                    }));
-                                }
                             }
-                        })
-                    });
-                } else {
-                    await api.get({
-                        link: apiConfig.url, callBack: (res => {
-                            if (res) {
-                                const fields: string[] = apiConfig.fields || Object.keys(res[0]);
-                                const result = res.map((item: any) =>
-                                    Object.fromEntries(fields.map(key => [key, item[key]]))
-                                );
-                                setDataSource(prev => ({
-                                    ...prev,
-                                    [key]: result
-                                }));
-
-                                if (apiConfig?.tableWin) {
-                                    setTableRefresh(prev => ({
-                                        ...prev,
-                                        [apiConfig.tableWin]: { url: apiConfig.url, type: apiConfig.type, data: apiConfig.data, key: key }
-                                    }));
-                                }
-                            }
-                        })
-                    });
-                }
+                        }
+                    })
+                });
             }
         });
         await Promise.all(promises);
     };
+    const setSource = useCallback((res: IData[], source: any, key: string) => {
+        const configSource: any = source[key];
+        if (configSource.typeData === "tree") res = Helper.sortTreeFlat(res, configSource.fieldCode);
+        const fields: string[] = configSource.fields || Object.keys(res[0]);
+        const isColor = fields.indexOf("color") < 0 && typeof configSource.getColor === "function";
+        const result = res.map((item: any) => {
+            const obj = Object.fromEntries(
+                fields.map(f => [f, item[f]])
+            );
+            if (isColor) {
+                obj.color = configSource.getColor(item);
+            }
+            return obj;
+        });
+        setDataSource(prev => ({
+            ...prev,
+            [key]: result
+        }));
+    }, []);
+
     const shouldRefresh = useDataApp((state) => state.shouldRefresh);
     const setShouldRefresh = useDataApp((state) => state.setShouldRefresh);
     useEffect(() => {
         if (shouldRefresh && tableRefresh[shouldRefresh]) {
+            const source: any = schemaConfig.dataSource ?? {};
             const apiConfig = tableRefresh[shouldRefresh];
-            if (apiConfig.type === "post") {
-                api.post({
-                    link: apiConfig.url,
-                    data: apiConfig.data,
-                    callBack: (res) => {
-                        setDataSource(prev => ({
-                            ...prev,
-                            [apiConfig.key]: res
-                        }));
-                        setShouldRefresh(null);
-                    }
-                });
-            } else {
-                api.get({
-                    link: apiConfig.url,
-                    callBack: (res) => {
-                        setDataSource(prev => ({
-                            ...prev,
-                            [apiConfig.key]: res
-                        }));
-                        setShouldRefresh(null);
-                    }
-                });
-            }
-
+            const apiRefresh = apiConfig.type === "post" ? api.post : api.get;
+            apiRefresh({
+                link: apiConfig.url,
+                data: apiConfig.dataPost,
+                callBack: (res) => {
+                    setSource(res, source, apiConfig.key);
+                    setShouldRefresh(null);
+                }
+            });
         }
     }, [shouldRefresh]);
 
@@ -210,6 +192,7 @@ export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeIte
                             data={isSelectTime?.data || Helper.filterTime}
                             placeholder="Chọn ngày"
                             value={filterTime?.id ?? ""}
+                            itemView={ListItemView.VALUE}
                             style={{ flex: 1, borderWidth: 0 }}
                             clean={true}
                             onChange={(item) => setFilterTime(item)}

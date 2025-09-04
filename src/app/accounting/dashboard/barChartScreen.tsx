@@ -1,6 +1,6 @@
 import LoadingScreen from "@/components/loadingScreen";
 import { api } from "@/utils/apiMethods";
-import { useFont } from "@shopify/react-native-skia";
+import { Text as TxtSkia, useFont } from "@shopify/react-native-skia";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -53,7 +53,7 @@ export default function BarChartScreen({ numRefresh, onFinish }: IProgs) {
     <Card style={[styles.card, { backgroundColor: colors.background }]}>
       {loading ? <LoadingScreen /> :
         <View>
-          <Text style={{ paddingTop: 10, textAlign: "center", fontWeight: "bold", color: colors.secondary }}>DOANH THU - CHI PHÍ</Text>
+          <Text style={{ paddingTop: 10, textAlign: "center", fontWeight: "bold", color: colors.secondary }}>DOANH THU - CHI PHÍ CÁC THÁNG (theo %)</Text>
           <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 10, paddingTop: 10 }}>
             {barTexts.map((text, index) => (
               <View key={`barTexts${index}`} style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
@@ -62,7 +62,7 @@ export default function BarChartScreen({ numRefresh, onFinish }: IProgs) {
             ))}
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={[styles.chart, { width: 50 * lengthData }]}>
+            <View style={[styles.chart, { width: 70 * lengthData }]}>
               <CartesianChart
                 data={data}
                 xKey="MONTH"
@@ -80,15 +80,35 @@ export default function BarChartScreen({ numRefresh, onFinish }: IProgs) {
                 {({ points, chartBounds }) => (
                   <BarGroup
                     chartBounds={chartBounds}
-                    betweenGroupPadding={0.3}
-                    withinGroupPadding={0.05}
+                    betweenGroupPadding={0.2}
+                    withinGroupPadding={0.01}
                     roundedCorners={{
                       topLeft: 5,
                       topRight: 5,
                     }}
                   >
-                    <BarGroup.Bar points={points.REVENUE} animate={{ type: "timing" }} color={barColors[0]} />
-                    <BarGroup.Bar points={points.EXPENSE} animate={{ type: "timing" }} color={barColors[1]} />
+                    <BarGroup.Bar points={points.REVENUE} animate={{ type: "timing" }} color={barColors[0]}>
+                      {points.REVENUE.map((p, i) => (
+                        <TxtSkia
+                          key={`rev-${i}`}
+                          x={p.x - ((p?.yValue ?? 0) > 99 ? 22 : ((p?.yValue ?? 0) > 9 ? 20 : 18))}
+                          y={(p.y ?? 0) - 2} // đặt text cao hơn đầu cột 10px
+                          text={`${p?.yValue?.toFixed(0)}`} // hiển thị giá trị
+                          font={font}
+                        />
+                      ))}
+                    </BarGroup.Bar>
+                    <BarGroup.Bar points={points.EXPENSE} animate={{ type: "timing" }} color={barColors[1]} >
+                      {points.EXPENSE.map((p, i) => (
+                        <TxtSkia
+                          key={`rev-${i}`}
+                          x={p.x + ((p?.yValue ?? 0) > 99 ? 4 : ((p?.yValue ?? 0) > 9 ? 6 : 8))}
+                          y={(p.y ?? 0) - 2} // đặt text cao hơn đầu cột 10px
+                          text={`${p?.yValue?.toFixed(0)}`} // hiển thị giá trị
+                          font={font}
+                        />
+                      ))}
+                    </BarGroup.Bar>
                   </BarGroup>
                 )}
               </CartesianChart>

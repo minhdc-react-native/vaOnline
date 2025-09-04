@@ -2,6 +2,7 @@ import { useLoading } from "@/components/dialog/loadingProvider";
 import { usePopup } from "@/components/dialog/popupProvider";
 import { useToast } from "@/components/dialog/useToast";
 import { buildZodSchema } from "@/components/UIEngine/buildZodSchema";
+import { useEvalExpr } from "@/components/UIEngine/hooks/useEvalExpr";
 import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { VcReferences } from "@/constants/vcData";
 import { useTranslation } from "@/context/TranslationContext";
@@ -17,6 +18,7 @@ import { DimensionValue, LayoutChangeEvent } from "react-native";
 import { useTheme } from "react-native-paper";
 import UUID from 'react-native-uuid';
 import { useDataItemWin } from "./useDataItem";
+import { useVoucherHv } from "./useVoucher";
 import { useDataApp } from "./zustand/useDataApp";
 const backHandQuestion = { title: "Cảnh báo", message: "Dữ liệu đã thay đổi, bạn có muốn thoát không?" };
 const backHandQuestionE = { title: "Warning", message: "Data has changed, do you want to exit?" };
@@ -32,7 +34,7 @@ interface IProgs {
 export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }: IProgs) => {
 
     const { id: windowId, tableWin, typeWin } = itemMenuWin;
-
+    const { tangSoCt } = useVoucherHv();
     const { colors } = useTheme<VACOMTheme>();
     const [rowHeights, setRowHeights] = useState<Record<string, DimensionValue>>({});
     const handleLayout = (itemId: string, event: LayoutChangeEvent) => {
@@ -76,6 +78,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     const onRemoveDetail = useDataItemWin((state) => state.onRemoveDetail);
 
     const orgUnit = useDataApp((state) => state.orgUnit);
+    const userLogin = useDataApp((state) => state.userLogin);
     const currentYear = useDataApp((state) => state.currentYear);
     const isLangVi = !!(useDataApp((state) => state.lang) === "vi");
 
@@ -95,13 +98,22 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         const defaultSchema = schemaWin[tableWin] ?? schemaWinEmpty;
         return Helper.deepMerge(defaultSchema, layoutData?.[tableWin]);
     }, [layoutData]);
+
     const getFilterRows = useCallback((values: Record<string, any>) => {
-        return { filter: [], tlbparam: [] };
+        return values;
     }, []);
 
-    const defaultFilter = useMemo(() => {
-        return getFilterRows(schemaUI.config.filterConfig?.values ?? {});
-    }, [schemaUI]);
+    const watchRequiredValues = useMemo(() => {
+        let obj: Record<string, any> = {};
+        (schemaUI?.dataMaster ?? []).forEach(k => {
+            obj[k] = dataItems?.[tableWin]?.[k];  // lấy giá trị hiện tại trong data
+        });
+        return obj;
+    }, [schemaUI, dataItems, tableWin]);
+
+    // eval expression
+    const evalExpr = useEvalExpr(watchRequiredValues);
+
 
     const numberAction: number = useMemo(() => {
         return schemaUI.config.itemAction.fields.length;
@@ -118,10 +130,10 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         setParams({
             page: 1,
             count: typeWin === "(winTree)" ? 99999 : pageSize,
-            filter: defaultFilter.filter ?? [],
+            filter: [],
             start: 0,
             infoparam: null,
-            tlbparam: defaultFilter.tlbparam ?? [],
+            tlbparam: [],
             window_id: windowId
         });
         const tabsWin: any[] = [...dataConfig.Tabs].filter((tab: any) => tab.HIDE_EDIT !== 'C').slice(1);
@@ -141,6 +153,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 WINDOW_ID: windowId,
                 MA_CT: dataConfig.MA_CT ?? "",
                 WINDOW_NAME: dataConfig.WINDOW_NAME ?? "",
+                VC_INFOWINDOW_ID: dataConfig.VC_INFOWINDOW_ID,
                 Tabs: dataConfig.Tabs.filter((tab: any) => tab.HIDE_EDIT !== 'C')
                     .map((tab: any): ITabWin => ({
                         id: tab.id ?? "",
@@ -187,13 +200,19 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 })(),
             } : undefined);
         } else {
-            setParams(prev => prev ? { ...prev, page: 1, start: 0, filter: defaultFilter.filter ?? [], tlbparam: defaultFilter.tlbparam ?? [] } : undefined);
+            setParams(prev => prev ? { ...prev, page: 1, start: 0, filter: [] } : undefined);
         }
     };
 
     const setFilterRows = (values: Record<string, any>) => {
-        const filter = getFilterRows(values);
-        setParams(prev => prev ? { ...prev, page: 1, start: 0, filter: filter.filter, tlbparam: filter.tlbparam } : undefined);
+        const infoparam = getFilterRows(values);
+        setParams(prev => prev ? {
+            ...prev, page: 1, start: 0,
+            infoparam: {
+                infowindow_id: winConfig?.window.VC_INFOWINDOW_ID ?? '',
+                parameter: infoparam
+            }
+        } : undefined);
     };
 
     const getDataPage = useCallback(async () => {
@@ -243,8 +262,9 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     }, [params]);
 
     const handleRefresh = useCallback(() => {
-        setParams(prev => prev ? { ...prev, page: 1, start: 0 } : undefined)
+        setParams(prev => prev ? { ...prev, page: 1, start: 0, infoparam: null } : undefined)
     }, []);
+
     const handleLoadMore = useCallback(() => {
         if (!infoData.hasMore || stateLoading.current.refresh) return;
         setParams(prev => prev ? { ...prev, page: prev.page + 1, start: (prev.page + 1) * pageSize } : undefined)
@@ -258,15 +278,18 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         onChangeValue(tableWin, valueChange);
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const onChangeItemDataDetail = (tableDetail: ITableWin, index: number, valueChange: Record<string, any>) => {
         setIsChange(true);
         onChangeValueDetail(tableWin, tableDetail, index, valueChange);
     };
 
-    const onNew = useCallback(() => {
+    const onNew = useCallback(async () => {
         const arrReplace: Record<string, any> = {
+            '#DVCS_ID#': orgUnit,
+            '#USER_LOGIN#': userLogin,
             '#NAM#': currentYear,
-            '#TODAY#': dayjs().format("YYYY-MM-DD HH:mm:ss")
+            '#TODAY#': dayjs().format("YYYY-MM-DD")
         };
 
         const newDefault = Object.fromEntries(
@@ -280,8 +303,11 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         const defaultValue = itemMenuWin.defaultValue ?? {};
         const typeView = itemMenuWin.typeView ?? {};
 
+        const itemNew: IData = { id: UUID.v4(), _isNew: true, DVCS_ID: orgUnit, ...newDefault, ...defaultValue, ...typeView };
+        // nếu là chứng từ
+        const soCt = await tangSoCt(itemNew);
         setEditMode('new');
-        setItemData(tableWin, { id: UUID.v4(), _isNew: true, DVCS_ID: orgUnit, ...newDefault, ...defaultValue, ...typeView });
+        setItemData(tableWin, { ...itemNew, ...soCt });
 
         const tabMaster = winConfig?.window.Tabs[0];
         const action = schemaUI.action ? { ...schemaUI.action, edit: tabMaster?.PERMISSION.EDIT, new: tabMaster?.PERMISSION.NEW } : { edit: true, new: true };
@@ -336,7 +362,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 const dataDetail = dataItemDetail[tableWin] ? dataItemDetail[tableWin][tab.TAB_TABLE] : [];
 
                 if (isRequire && dataDetail.length === 0) {
-                    showToast(`${isLangVi ? 'Bạn chưa nhập chi tiết' : 'You have not entered details'} [${tab.TAB_NAME}]!`, { type: "warning" });
+                    showToast(`${isLangVi ? 'Bạn chưa nhập chi tiết' : 'You have not entered details'} [${_(tab.TAB_NAME)}]!`, { type: "warning" });
                     return;
                 }
                 details.push({
@@ -426,11 +452,21 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     };
 
     const loadDetail = async (id?: string) => {
+        const itemData = dataItems[tableWin]!;
+        const addDetails = schemaUI.addDetails ? Object.fromEntries(schemaUI.addDetails.map(f => [f, itemData[f]])) : {};
+        const typeView = itemMenuWin.typeView ?? {};
         const promises = tabs.map(async (tab) => {
             if (id) {
                 await api.get({
                     link: `/api/System/GetDataDetailsByTabTable?window_id=${itemMenuWin.id}&id=${id}&tab_table=${tab.TAB_TABLE}`,
-                    callBack: (res) => setDataItemDetail(tableWin, tab.TAB_TABLE, res)
+                    callBack: (res: IData[]) => {
+                        res = res.map((item, index) => ({
+                            ...item,
+                            ...addDetails,
+                            ...typeView
+                        }));
+                        setDataItemDetail(tableWin, tab.TAB_TABLE, res);
+                    }
                 })
             } else {
                 setDataItemDetail(tableWin, tab.TAB_TABLE, []);
@@ -471,11 +507,30 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     const onNewDetail = useCallback(() => {
         typeNewEdit.current = 'new';
         const typeView = itemMenuWin.typeView ?? {};
+        const itemData = dataItems[tableWin]!;
+        const addDetails = schemaUI.addDetails ? Object.fromEntries(schemaUI.addDetails.map(f => [f, itemData[f]])) : {};
+
+        const arrReplace: Record<string, any> = {
+            '#DVCS_ID#': orgUnit,
+            '#USER_LOGIN#': userLogin,
+            '#NAM#': currentYear,
+            '#TODAY#': dayjs().format("YYYY-MM-DD")
+        };
+
+        const newDefault = Object.fromEntries(
+            Object.entries(schemaWinDetail.defaultNew).map(([key, value]) =>
+                typeof value === 'string' && arrReplace.hasOwnProperty(value)
+                    ? [key, arrReplace[value]]
+                    : [key, evalExpr(value)]
+            )
+        );
+
         setItemDetail({
             id: UUID.v4(),
             _isNew: true,
-            ...schemaWinDetail.defaultNew,
-            ...typeView
+            ...newDefault,
+            ...typeView,
+            ...addDetails
         });
         setShowNewEdit(true);
     }, [itemMenuWin.typeView, schemaWinDetail.defaultNew]);
@@ -485,9 +540,10 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         if (!isEdit) return;
         typeNewEdit.current = 'edit';
         currentIndex.current = index;
-        const typeView = itemMenuWin.typeView ?? {};
         const itemDetail = dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"]?.[index] ?? { id: UUID.v4() };
-        setItemDetail({ ...itemDetail, ...typeView });
+        const itemData = dataItems[tableWin]!;
+        const addDetails = schemaUI.addDetails ? Object.fromEntries(schemaUI.addDetails.map(f => [f, itemData[f]])) : {};
+        setItemDetail({ ...itemDetail, ...addDetails });
         setShowNewEdit(true);
     }, [currentTab?.TAB_TABLE, dataItemDetail, itemMenuWin.typeView, schemaWinDetail.action?.edit, tableWin]);
 
@@ -581,7 +637,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             return obj;
         });
         setDataSource(tableWin, key, result);
-    }, [tableWin]);
+    }, [setDataSource, tableWin]);
 
     useEffect(() => {
         if (shouldRefresh && tableRefresh[shouldRefresh]) {
@@ -603,7 +659,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         }
     }, [shouldRefresh]);
     //
-    const [printSamples, setPrintSamples] = useState<any[]>([]);
+    const [printSamples, setPrintSamples] = useState<IData[]>([]);
     const getConfigWin = useCallback(async () => {
         show("...");
         // lấy cấu hình layout từ data
@@ -636,7 +692,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         // lấy các dữ liệu reference liên quan
         await loadDataBegin();
         hide();
-    }, []);
+    }, [tabs]);
 
     const onBack = () => {
         if (isChange) {

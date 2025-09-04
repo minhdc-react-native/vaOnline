@@ -1,5 +1,6 @@
 import LoadingScreen from "@/components/loadingScreen";
 import { api } from "@/utils/apiMethods";
+import { Helper } from "@/utils/Helper";
 import { useDrawerStatus } from "@react-navigation/drawer";
 import { Group, SkFont, Text as TxtSkia, useFont } from "@shopify/react-native-skia";
 import React, { useCallback, useEffect, useState } from "react";
@@ -41,20 +42,22 @@ export default function PieChartScreen({ numRefresh, onFinish }: IProgs) {
     }, [numRefresh]);
 
     return (
-        <Card style={[styles.card, { backgroundColor: colors.background }]}>
+        <Card style={[styles.card, { backgroundColor: colors.background, paddingHorizontal: 20 }]}>
             {loading ? <LoadingScreen /> : <View>
                 <Text style={{ textAlign: "center", paddingBottom: 10, fontWeight: "bold", color: colors.secondary }}>CƠ CẤU CHI PHÍ</Text>
                 <Divider />
                 <ScrollView showsHorizontalScrollIndicator={false} horizontal contentContainerStyle={{ margin: 20 }}>
-                    {data.map((item, index) => (
-                        <View key={`barTexts${index}`} style={{
-                            flexDirection: "row", gap: 5, alignItems: "center",
-                            marginRight: 10, backgroundColor: colors.elevation.level1,
-                            paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, borderWidth: 0.5, borderColor: colors.elevation.level5
-                        }}>
-                            <View style={{ borderRadius: 10, height: 10, width: 10, backgroundColor: item.Color }} /><Text>{item.Name}</Text>
-                        </View>
-                    ))}
+                    {data.map((item, index) => {
+                        const fullNumber = Helper.formatFullNumber(item.Amount, 0);
+                        return (
+                            <View key={`barTexts${index}`} style={{
+                                flexDirection: "row", gap: 5, alignItems: "center",
+                                marginRight: 10, backgroundColor: colors.elevation.level1,
+                                paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, borderWidth: 0.5, borderColor: colors.elevation.level5
+                            }}>
+                                <View style={{ borderRadius: 10, height: 10, width: 10, backgroundColor: item.Color }} /><Text>{`${item.Name}:`}<Text style={{ fontWeight: "bold", color: item.Color }}>{` ${fullNumber?.textNum} ${fullNumber?.label}`}</Text></Text>
+                            </View>)
+                    })}
                 </ScrollView>
                 <View style={{ height: 250 }}>
                     <PolarChart
@@ -125,26 +128,28 @@ export const PieChartCustomLabel = ({
             .reduce((sum, value) => sum + value, 0) ?? 0;
 
     const isGoodUnits = slice.value > 130;
-    const label = slice.label;
-    const value = `${slice.value}`;
+    // const label = slice.label;
+    const fullNumber = Helper.formatFullNumber(slice.value);
+    const value = `${fullNumber?.textNum}`;
+    const label = `${fullNumber?.label}`;
     const centerLabel = (font?.getSize() ?? 0) / 2;
     const { colors } = useTheme();
     return (
         <Group transform={[{ translateY: -centerLabel }]}>
-            <TxtSkia
+            {/* <TxtSkia
                 x={x - getLabelWidth(label) / 2}
                 y={y}
                 text={label}
                 font={font}
-                color={colors.secondary}
-            />
+                color={colors.background}
+            /> */}
             <Group>
                 <TxtSkia
                     x={x - getLabelWidth(value) / 2}
                     y={y + fontSize}
                     text={value}
                     font={font}
-                    color={colors.primary}
+                    color={colors.background}
                 />
             </Group>
         </Group>

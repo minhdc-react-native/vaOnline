@@ -3,9 +3,8 @@ import { useTranslation } from '@/context/TranslationContext';
 import { VACOMTheme } from '@/theme/theme';
 import React, { useCallback, useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Button, Card, SegmentedButtons, Text, useTheme } from 'react-native-paper';
+import { Button, Card, Divider, SegmentedButtons, Text, useTheme } from 'react-native-paper';
 import { useContextSelector } from 'use-context-selector';
-import DashedLine from '../dashedLine';
 import { useToast } from '../dialog/useToast';
 import { StarRating } from '../starRating';
 import VcCheckBox from '../vcCheckbox';
@@ -204,7 +203,7 @@ const ViewComponent: React.FC<IProps> = ({
             const labelNumber = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={field.style}>
-                    <VcNum disabled={disabled} label={_(labelNumber)} key={key} value={value} onChange={setValue} />
+                    <VcNum disabled={disabled} label={_(labelNumber)} typeFormat={field.format} key={key} value={value} onChange={setValue} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
@@ -313,7 +312,7 @@ const ViewComponent: React.FC<IProps> = ({
                 </View>
             );
         case 'line':
-            return <DashedLine />
+            return <Divider />
         case 'empty':
             return <View style={field.style} />
         case 'checkbox':

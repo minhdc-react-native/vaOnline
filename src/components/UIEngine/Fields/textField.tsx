@@ -5,7 +5,7 @@ import { useTranslation } from "@/context/TranslationContext";
 import { VACOMTheme } from "@/theme/theme";
 import { Helper } from "@/utils/Helper";
 import React from "react";
-import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, TextStyle, View, ViewStyle } from "react-native";
 import { Chip, Icon, Text, useTheme } from "react-native-paper";
 import { useContextSelector } from "use-context-selector";
 import { useBoundField } from "../hooks/useBoundField";
@@ -186,7 +186,7 @@ const TextFieldComponent: React.FC<IProps> = ({
 
     const renderDefault = () => {
         let addStyle: StyleProp<ViewStyle> = null;
-
+        let addTextStyle: StyleProp<TextStyle> = null;
         if (!field.bind) {
             valueText = labelText;
             labelText = undefined;
@@ -194,6 +194,7 @@ const TextFieldComponent: React.FC<IProps> = ({
 
         switch (field.format?.type) {
             case "number":
+                if (valueText < 0) addTextStyle = { color: colors.primary };
                 valueText = Helper.formatAmount(
                     valueText,
                     false,
@@ -230,7 +231,6 @@ const TextFieldComponent: React.FC<IProps> = ({
                 }
                 break;
         }
-
         return (
             <View style={field.style}>
                 {labelText && (
@@ -243,8 +243,7 @@ const TextFieldComponent: React.FC<IProps> = ({
                     style={[
                         addStyle as any,
                         field.textStyle,
-                        field.format?.type === "number" &&
-                        Number(valueText) < 0 && { color: colors.primary },
+                        addTextStyle,
                         isBold && { fontWeight: "bold" },
                     ]}
                 >

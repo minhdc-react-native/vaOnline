@@ -9,7 +9,7 @@ import { Keyboard, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "rea
 import { ActivityIndicator, Divider, IconButton, Portal, Text, TextInput, useTheme } from "react-native-paper";
 import { useToast } from "./dialog/useToast";
 import { useEvalExpr } from "./UIEngine/hooks/useEvalExpr";
-import { collectRequiredKeys, SchemaUIEngine } from "./UIEngine/schemaUIEngine";
+import { SchemaUIEngine } from "./UIEngine/schemaUIEngine";
 import { IRowsColsField } from "./UIEngine/types";
 type IListProps = {
     label?: string;
@@ -182,19 +182,15 @@ const ItemViewComponent: React.FC<IProps> = ({
     const { showToast } = useToast();
     const viewSchema = itemView || (schemaWin[tableWin ?? "Empty"] ?? schemaWinEmpty).config.itemList;
 
-    const requiredKeys = useMemo(() => {
-        return collectRequiredKeys(viewSchema.fields ?? []);
-    }, [viewSchema.fields]);
-
     // Tạo object chỉ chứa các key cần theo dõi
     const watchRequiredValues = useMemo(() => {
 
         let obj: Record<string, any> = {};
-        requiredKeys.forEach(k => {
+        checkSelected?.requiredKeys.forEach(k => {
             obj[k] = item[k];  // lấy giá trị hiện tại trong data
         });
         return obj;
-    }, [JSON.stringify(requiredKeys.map(k => item[k]))]);
+    }, [JSON.stringify(checkSelected?.requiredKeys.map(k => item[k]))]);
 
     // eval expression
     const evalExpr = useEvalExpr(watchRequiredValues);
@@ -213,7 +209,7 @@ const ItemViewComponent: React.FC<IProps> = ({
             paddingHorizontal: 10, flexDirection: "row",
             alignItems: tableWin ? "flex-start" : "center", justifyContent: "space-between", backgroundColor: isSelect ? colors.elevation.level1 : "transparent"
         }}>
-            <View style={{ paddingVertical: 10, paddingLeft: 10, paddingHorizontal: isShowEdit ? 0 : 10 }}>
+            <View style={{ paddingVertical: 10, paddingLeft: 10, paddingHorizontal: isShowEdit ? 0 : 10, flex: 1 }}>
                 <SchemaUIEngine schema={viewSchema} data={item} />
             </View>
             {isShowEdit && <Pressable style={{ backgroundColor: colors.elevation.level1, borderRadius: 50, marginTop: 5 }} onPress={() => {

@@ -23,6 +23,9 @@ interface IDataApp {
     orgUnit: string | null,
     setOrgUnit: (currentYear: string) => void
 
+    userLogin: string | null,
+    setUserLogin: (userLogin: string) => void
+
     currentYear: string | null,
     setCurrentYear: (currentYear: string) => void
 
@@ -38,12 +41,13 @@ interface IDataApp {
 
 const initialState: Omit<IDataApp,
     'setParamSystem' | 'setShouldRefresh' | 'setBackHandlerQuestion' | 'setYears' |
-    'setLang' | 'setListVoucher2' | 'setCurrentYear' | 'setOrgUnit' | 'reset' | 'setMenuIds' | 'setDataMenuWin'
+    'setLang' | 'setListVoucher2' | 'setCurrentYear' | 'setOrgUnit' | 'setUserLogin' | 'reset' | 'setMenuIds' | 'setDataMenuWin'
 > = {
     paramSystem: null,
     shouldRefresh: null,
     backHandlerQuestion: null,
     orgUnit: null,
+    userLogin: null,
     currentYear: null,
     years: [],
     lang: 'vi',
@@ -60,6 +64,7 @@ export const useDataApp = create<IDataApp>()(
         setBackHandlerQuestion: (backHandlerQuestion) => set({ backHandlerQuestion }),
         setYears: (years) => set({ years }),
         setOrgUnit: (orgUnit) => set({ orgUnit }),
+        setUserLogin: (userLogin) => set({ userLogin }),
         setCurrentYear: (currentYear) => set({ currentYear }),
         reset: () => set(initialState),
         setMenuIds: (menuIds) => set({ menuIds }),

@@ -7,7 +7,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { Pressable } from 'react-native-gesture-handler';
-import { IconButton, Modal, Text, useTheme } from 'react-native-paper';
+import Modal from "react-native-modal";
+import { IconButton, Text, useTheme } from 'react-native-paper';
 import { VcTabBar } from './vcTabBar';
 dayjs.extend(utc);
 
@@ -136,11 +137,11 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
         }
       </View >
 
-      <Modal visible={visible}
-        onDismiss={() => {
-          setVisible(false);
-          setCurrentValue();
-        }}
+      <Modal isVisible={visible}
+        animationIn={'bounceIn'}
+        animationOut={'bounceOut'}
+        onBackdropPress={() => setVisible(false)}
+        onModalHide={() => setCurrentValue()}
         style={{ zIndex: 1 }}  // chỉnh zIndex được    
       >
         <View style={styles.modalBackground}>
@@ -191,6 +192,7 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
   );
 };
 export const VcDatePicker = React.memo(ViewComponent);
+
 const styles = StyleSheet.create({
   button: {
     flexDirection: "row",

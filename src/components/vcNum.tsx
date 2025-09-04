@@ -53,14 +53,13 @@ const ViewComponent: React.FC<NumericInputProps> = ({
     width,
     height,
     disabled,
-    minValue = 0,
+    minValue,
     maxValue,
     iconColors,
     isError
 }) => {
     const defaultIconColors = useMemo(() => ({ minus: "red", plus: "blue" }), []);
     iconColors = iconColors || defaultIconColors;
-
     const paramSystem = useDataApp((state) => state.paramSystem);
     const { showPopup } = usePopup();
     const decimalLimit = paramSystem?.[typeFormat] ?? 0;
@@ -104,7 +103,7 @@ const ViewComponent: React.FC<NumericInputProps> = ({
                         // label={label}
                         label={label && <Text style={{ color: Helper.isEmpty(value) ? colors.backdrop : colors.onSurface }}>{label}</Text>}
                         value={value || value === 0 ? numberFormatter.format(value) : ''}
-                        textColor={value && value < 0 ? "red" : "black"}
+                        // textColor={value && value < 0 ? "red" : "black"}
                         // onFocus={() => setVisible(true)}
                         showSoftInputOnFocus={false}
                         // disabled={disabled}
@@ -118,10 +117,8 @@ const ViewComponent: React.FC<NumericInputProps> = ({
                             outlineStyle
                         ]}
                         contentStyle={[
-                            {
-                                textAlign: showMinusPlus ? 'center' : 'right',
-                                color: typeof textStyle === 'object' && textStyle !== null && 'color' in textStyle ? (textStyle as TextStyle).color : undefined
-                            },
+                            { textAlign: showMinusPlus ? 'center' : 'right' },
+                            { color: value && value < 0 ? colors.primary : (typeof textStyle === 'object' && textStyle !== null && 'color' in textStyle ? (textStyle as TextStyle).color : undefined) },
                             showMinusPlus && { marginLeft: -15, marginRight: -15 }
                         ]}
                         style={[
@@ -218,8 +215,7 @@ const KeyBoardNumber = ({ value, onChange, locale, decimalLimit, minValue, maxVa
         } else if (key === '⌫') {
             setTempValue(prev => prev.slice(0, -1));
         } else {
-            let newValue = tempValue + key;
-
+            let newValue = (key === '-' ? key : '') + tempValue + (key !== '-' ? key : '');
             // Replace multiple commas
             const parts = newValue.split(',');
 

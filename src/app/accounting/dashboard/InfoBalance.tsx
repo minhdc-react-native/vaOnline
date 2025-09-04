@@ -68,17 +68,19 @@ interface IProgViewCard {
 }
 const ViewCard = ({ index, item }: IProgViewCard) => {
     const { colors } = useTheme<VACOMTheme>();
+    const fullNumberNo = Helper.formatFullNumber(item.DU_NO);
+    const fullNumberCo = Helper.formatFullNumber(item.DU_CO);
     return (
-        <View style={{ backgroundColor: colors.background, padding: 10, borderRadius: 10, borderWidth: 0.5, gap: 5, borderColor: colors.vacom.borderColor }}>
-            <Text style={{ textAlign: "left", flex: 1 }}><FontAwesome name={icons[item.TK]} size={15} color={item.COLOR || colors.secondary} /> {titles[item.TK]}</Text>
+        <View style={{ backgroundColor: colors.elevation.level1, padding: 10, borderRadius: 10, borderWidth: 0.5, gap: 5, borderColor: colors.elevation.level5 }}>
+            <Text style={{ textAlign: "left", flex: 1, fontWeight: "bold" }}><FontAwesome name={icons[item.TK]} size={15} color={item.COLOR || colors.secondary} /> {titles[item.TK]}</Text>
             <Divider />
             <View style={{ flexDirection: "row", gap: 10, alignItems: "center", justifyContent: "space-between" }}>
                 <Text>{'Nợ:'}</Text>
-                <Text style={{ color: colors.secondary, fontWeight: "bold", flex: 1, textAlign: "right" }}>{Helper.formatAmount(item.DU_NO)}</Text>
+                <Text style={{ color: item.COLOR || colors.secondary, fontWeight: "bold", flex: 1, textAlign: "right" }}>{`${fullNumberNo?.textNum} ${fullNumberNo?.label}`}</Text>
             </View>
             <View style={{ flexDirection: "row", gap: 10, alignItems: "center", justifyContent: "space-between" }}>
                 <Text>{'Có:'}</Text>
-                <Text style={{ color: colors.secondary, fontWeight: "bold", flex: 1, textAlign: "right" }}>{Helper.formatAmount(item.DU_CO)}</Text>
+                <Text style={{ color: item.COLOR || colors.secondary, fontWeight: "bold", flex: 1, textAlign: "right" }}>{`${fullNumberCo?.textNum} ${fullNumberCo?.label}`}</Text>
             </View>
         </View>
     );

@@ -54,7 +54,18 @@ export const DataMenuAccounting: Record<string, Partial<Record<IKeyMenuWin, ICon
                 data: [
                     {
                         id: 'WIN00052', typeWin: "(winMaster)", tableWin: "DPHV", label: 'Hóa đơn bán hàng', labelE: 'Sale invoice',
-                        defaultValue: { MA_CT: 'PBH', DIEN_GIAI: 'Hóa đơn bán hàng' }, icon: icon, row: 4, col: 1
+                        defaultValue: { MA_CT: 'PBH', DIEN_GIAI: 'Hóa đơn bán hàng' }, icon: icon, row: 1, col: 1, typeView: { _typeView: 1 }
+                    },
+                ]
+            }
+        ],
+        vonBangTien: [
+            {
+                title: 'Bán hàng', titleE: 'Sales',
+                data: [
+                    {
+                        id: 'WIN00040', typeWin: "(winMaster)", tableWin: "DPKT", label: 'Phiếu kế toán khác', labelE: 'Other accounting slips',
+                        defaultValue: { MA_CT: 'PKT', DIEN_GIAI: 'Phiếu hạch toán' }, icon: icon, row: 1, col: 1, typeView: { _typeView: 1 }
                     },
                 ]
             }

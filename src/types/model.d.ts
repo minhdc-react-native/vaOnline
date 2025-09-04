@@ -53,6 +53,7 @@ declare global {
             WINDOW_ID: string;
             MA_CT: string;
             WINDOW_NAME: string;
+            VC_INFOWINDOW_ID: string | null;
             Tabs: ITabWin[]
         }
     }
@@ -62,7 +63,7 @@ declare global {
         page: number;
         count: number;
         filter: IFilter[];
-        infoparam: any;
+        infoparam: { infowindow_id: string, parameter: Record<string, any> } | null;
         start: number;
         tlbparam: any[];
         window_id: string;
@@ -78,12 +79,14 @@ declare global {
     type ITableWin = 'Empty' | 'Year' |
         'DMNHDT' | 'DMDT' | 'DMDT_NGH' | 'DMBP' | 'DMPX' | 'DMOB' | 'DMTK' |
         'DMKHO' | 'DMNHHV' | 'DMHV' | 'DMHV_DVT' | 'DMHV_GIA' | 'DMDVT' |
-        'DPHV' | 'CTHV' | 'PSTHUE' | 'PSCF' | 'PBDT';
+        'DPHV' | 'CTHV' | 'PSTHUE' | 'PSCF' | 'PBDT' |
+        'DPKT' | 'CTKT';
 
-    type ITableSearch = 'DMMNGH' | 'DMMCN' | 'DMTK' | 'DMTTDB' | 'DMDVT';
+    type ITableSearch = 'DMDT' | 'DMCS' | 'DMKM' | 'DMHDG' | 'DMVV' | 'DMMNGH' | 'DMMCN' | 'DMTK' | 'DMTTDB' | 'DMDVT' |
+        'DMTHUE' | 'DMQS';
 
     type IKeyMenuWin = 'acCatalogBalance' | 'acCatalogBank' | 'acCatalogGood' | 'acCatalogOther' | 'acCatalogPartner' |
-        'banHangPhaiThu'
+        'banHangPhaiThu' | 'vonBangTien'
 
     var isNotEmpty: (value: any) => boolean;
 }

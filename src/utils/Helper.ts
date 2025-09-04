@@ -111,7 +111,7 @@ export const Helper = {
             .replace(/đ/g, "d")              // Thay chữ đ
             .replace(/Đ/g, "D");             // Thay chữ Đ
     },
-    formatFullNumber: (value: number) => {
+    formatFullNumber: (value: number, maximumFractionDigits = 2) => {
         if (isNaN(value)) return null;
         const units = [
             { value: 1e12, label: 'ngàn tỷ' },
@@ -128,8 +128,8 @@ export const Helper = {
                 num = Math.floor(num * 1000) / 1000;
                 // Định dạng số, dùng dấu phẩy cho thập phân
                 let str = num.toLocaleString('vi-VN', {
-                    maximumFractionDigits: 3,
-                    minimumFractionDigits: num % 1 === 0 ? 0 : 2
+                    maximumFractionDigits: maximumFractionDigits,
+                    minimumFractionDigits: Math.min(num % 1 === 0 ? 0 : 2, maximumFractionDigits)
                 });
                 // Nếu là đơn vị nhỏ nhất (đ), không thêm dấu phẩy
                 if (unit.value === 1) str = num.toLocaleString('vi-VN', { maximumFractionDigits: 0 });

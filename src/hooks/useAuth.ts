@@ -67,6 +67,7 @@ export const useAuth = () => {
     const { setLoading, showToast, showPopup } = useFeedback();
     const setYears = useDataApp((state) => state.setYears);
     const setOrgUnit = useDataApp((state) => state.setOrgUnit);
+    const setUserLogin = useDataApp((state) => state.setUserLogin);
     const setCurrentYear = useDataApp((state) => state.setCurrentYear);
     const setMenuIds = useDataApp((state) => state.setMenuIds);
     const setParamSystem = useDataApp((state) => state.setParamSystem);
@@ -107,6 +108,7 @@ export const useAuth = () => {
                 await saveToken(res.token);
 
                 setOrgUnit(data.dvcs);
+                setUserLogin(data.username);
 
                 await saveOrgUnit(data.dvcs);
 
