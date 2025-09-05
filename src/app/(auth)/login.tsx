@@ -3,6 +3,7 @@ import FormWrapper from '@/components/formWrapper';
 import { useZodValidation } from '@/components/UIEngine/hooks/useZodValidation';
 import { SchemaUIEngine } from '@/components/UIEngine/schemaUIEngine';
 import { IRowsColsField } from '@/components/UIEngine/types';
+import { useTranslation } from '@/context/TranslationContext';
 import { useAuth } from '@/hooks/useAuth';
 import { loginForm } from '@/schemaUI/loginForm';
 import { Helper } from '@/utils/Helper';
@@ -11,6 +12,26 @@ import { useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { Card, Text, ToggleButton, useTheme } from 'react-native-paper';
 const sloganVacom = require('@/assets/images/splash.png') // Logo
+const loginTranslations = {
+    vi: {
+        'Link': 'Liên kết',
+        'User Name': 'Tên truy cập',
+        'Password': 'Mật khẩu',
+        'Select OrgUnit': 'Chọn đơn vị',
+        'Remember': 'Ghi nhớ',
+        'Forgot Password': 'Quên mật khẩu',
+        'Login': 'Đăng nhập'
+    },
+    en: {
+        'Link': 'Link',
+        'User Name': 'User Name',
+        'Password': 'Password',
+        'Select OrgUnit': 'Select OrgUnit',
+        'Remember': 'Remember',
+        'Forgot Password': 'Forgot Password',
+        'Login': 'Login'
+    }
+}
 const infoVacom: IRowsColsField = {
     type: "rows",
     style: { justifyContent: "center", alignItems: "center" },
@@ -35,8 +56,9 @@ export default function LoginScreen() {
     const [data, setData] = useState<Record<string, string>>({});
     const { validate, errors, setErrors } = useZodValidation(data, zod);
     const { login, listDvcs, getDvcsByUser } = useAuth();
-
+    const { setTranslations } = useTranslation();
     const onChangeLang = async (lang: 'vi' | 'en') => {
+        setTranslations(loginTranslations[lang]);
         onChangeItemData({ lang: lang });
     }
     const onChangeItemData = (valueChange: any) => {
@@ -91,6 +113,8 @@ export default function LoginScreen() {
             const _data = dataDefault ?? { captcha_token: '', remember: false, lang: 'vi' };
             const remember = await getRemember();
             const domain = await getSubDomain();
+            const lang: 'vi' | 'en' = remember ? remember.lang : _data.lang;
+            setTranslations(loginTranslations[lang]);
             setData({ ..._data, ...remember, domain: domain || '' });
         }
         getStorage();

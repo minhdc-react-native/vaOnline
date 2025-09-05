@@ -74,6 +74,7 @@ export const useAuth = () => {
     const setDataMenuWin = useDataApp((state) => state.setDataMenuWin);
     const setLang = useDataApp((state) => state.setLang);
     const setListVoucher2 = useDataApp((state) => state.setListVoucher2);
+    const setCurrencies = useDataApp((state) => state.setCurrencies);
     const { setTranslations, _ } = useTranslation();
 
     const logout = async () => {
@@ -125,6 +126,8 @@ export const useAuth = () => {
                 setLang(data.lang ?? 'vi');
 
                 await getListVoucher2();
+
+                await getCurrencies();
 
                 await getLangTitle(data.lang ?? 'vi');
                 setLoggedIn(true);
@@ -198,6 +201,20 @@ export const useAuth = () => {
                     return;
                 }
                 setListApp(res.data.filter((item: any) => VcData.listApp.includes(item.id)));
+            },
+            // setLoading: setLoading
+        });
+    }
+
+    const getCurrencies = async () => {
+        await api.get({
+            link: `/api/System/GetDataByReferencesId?id=98665935-a3db-487e-8bc5-2a63515972b5`,
+            callBack: (res: any[]) => {
+                if (res && res.length > 0) {
+                    setCurrencies(Object.fromEntries(
+                        res.map(({ MA_NT, CONG_THUC, TY_GIA }) => [MA_NT, { isMultiplication: CONG_THUC === 1, TY_GIA }])
+                    ))
+                }
             },
             // setLoading: setLoading
         });

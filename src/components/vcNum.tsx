@@ -207,7 +207,7 @@ const KeyBoardNumber = ({ value, onChange, locale, decimalLimit, minValue, maxVa
                     showToast(messMinMaxValue, { type: "warning" });
                     return;
                 }
-                onChange(parsed);
+                if (value !== parsed) onChange(parsed);
             }
             closeModal();
         } else if (key === 'CE') {

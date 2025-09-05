@@ -52,11 +52,14 @@ const ViewComponent: React.FC<IProps> = ({
 
     const { value, getValue, setValue, setValues, onBlurTaxCode } = useBoundField(formState, field.bind || '__none__', onChangeItemData);
 
-    const handleBlur = useCallback(() => {
+    const handleBlur = useCallback((prevValue: React.RefObject<any>) => {
         if (field.type !== "input") return;
         handleAction("onBlur", field.bind);
         if (field.typeInput === "taxCode" && value && value.length >= 10) {
-            onBlurTaxCode(value, field.expression);
+            if (prevValue.current !== value) { // chỉ chạy khi thay đổi giá trị.
+                prevValue.current = value;
+                onBlurTaxCode(value, field.expression)
+            };
         }
     }, [value, field, handleAction, onBlurTaxCode]);
 
@@ -197,7 +200,7 @@ const ViewComponent: React.FC<IProps> = ({
         case 'icon':
             const IconComponent = ICON_REGISTRY[field.iconType];
             // @ts-ignore: next-line
-            return <IconComponent key={key} name={field.name} size={field.size} color={field.color} />;
+            return <IconComponent key={key} name={field.name} size={field.size ?? 20} color={field.color} />;
 
         case 'number':
             const labelNumber = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;

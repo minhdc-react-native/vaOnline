@@ -190,6 +190,12 @@ const ctkt0: ISchemaWin = {
                 ]
             },
             {
+                type: "input",
+                label: "TEN_DT",
+                typeInput: "multi",
+                bind: "TEN_DT"
+            },
+            {
                 type: "rows",
                 fields: [
                     {
@@ -221,11 +227,8 @@ const ctkt0: ISchemaWin = {
 }
 
 export const ctkt: ISchemaWinValue = {
-    dataSource: {
-        TK: 'DMTK'
-    },
     config: ctkt0,
-    defaultNew: { DPKT_id: "{{id}}", GHI_CHU: "{{DIEN_GIAI}}", IS_CP0: false }, require: true,
+    defaultNew: { DPKT_id: "{{id}}", NAM: '#NAM#', GHI_CHU: "{{DIEN_GIAI}}", MA_DT: "{{MA_DT0}}", TEN_DT: "{{TEN_DT0}}", IS_CP0: false }, require: true,
     zod: {
         TK_NO: { type: 'string', msgError: '...' },
         TK_CO: { type: 'string' },

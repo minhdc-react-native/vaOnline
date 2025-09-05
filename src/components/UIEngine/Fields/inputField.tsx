@@ -1,6 +1,6 @@
 import { useTranslation } from "@/context/TranslationContext";
 import { VACOMTheme } from "@/theme/theme";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { DimensionValue, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { Text, TextInput, useTheme } from "react-native-paper";
 
@@ -9,7 +9,7 @@ interface IProps {
     label?: string;
     disabled: boolean,
     setValue: (value: any) => void;
-    handleBlur: () => void;
+    handleBlur: (prevValue: React.RefObject<any>) => void;
     texRight?: string;
     icon?: {
         name: string;
@@ -37,6 +37,7 @@ const InputFieldComponent: React.FC<IProps> = ({
     height,
     msgError
 }) => {
+    const prevValue = useRef(value);
     const { colors } = useTheme<VACOMTheme>();
     const { _ } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
@@ -48,9 +49,12 @@ const InputFieldComponent: React.FC<IProps> = ({
         },
         [setValue, upperCase]
     );
+
     const isMulti = typeInput === "multi";
     const isPassword = typeInput === "password";
-
+    const onHandleBlur = () => {
+        handleBlur(prevValue);
+    }
     const togglePassword = useCallback(
         () => setShowPassword((prev) => !prev),
         []
@@ -102,7 +106,7 @@ const InputFieldComponent: React.FC<IProps> = ({
                 mode="outlined"
                 disabled={disabled}
                 readOnly={disabled}
-                onBlur={handleBlur}
+                onBlur={onHandleBlur}
                 secureTextEntry={isPassword && !showPassword}
                 autoCapitalize={autoCapitalize}
                 value={value}

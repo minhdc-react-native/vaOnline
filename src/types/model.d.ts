@@ -52,6 +52,7 @@ declare global {
         window: {
             WINDOW_ID: string;
             MA_CT: string;
+            MA_NT?: string;
             WINDOW_NAME: string;
             VC_INFOWINDOW_ID: string | null;
             Tabs: ITabWin[]

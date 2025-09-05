@@ -15,7 +15,6 @@ interface IProgs {
 }
 export default function BarChartScreen({ numRefresh, onFinish }: IProgs) {
   const [data, setData] = useState<any[]>([]);
-
   const lengthData = useMemo(() => {
     if (data.length === 0) return 0;
     return data[data.length - 1].MONTH - data[0].MONTH + 1;

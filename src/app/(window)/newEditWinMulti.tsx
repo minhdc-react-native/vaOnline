@@ -6,7 +6,7 @@ import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { IRowsColsField } from "@/components/UIEngine/types";
 import { useTranslation } from "@/context/TranslationContext";
-import { useVoucherHv } from "@/hooks/useVoucher";
+import { useVoucher } from "@/hooks/useVoucher";
 import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { VACOMTheme } from "@/theme/theme";
 import React, { useEffect, useRef, useState } from "react";
@@ -23,18 +23,21 @@ interface IProps {
     title: string;
     titleButton?: string;
     schemaUi: ISchemaWinValue;
+    changeOtherDetail?: React.RefObject<boolean>;
+    tableWin: ITableWin;
+    voucherCode?: string;
+    currentTab?: ITabWin;
     onSave: (data?: IData) => void;
     data: IData | null;
     dataSource?: Record<string, any[]>;
 }
 
-const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, schemaUi, dataSource }) => {
-    Object.keys(dataSource ?? {}).map((key, index) => console.log('key>>', key, index));
+const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, schemaUi, changeOtherDetail, tableWin, voucherCode, currentTab, dataSource }) => {
     const slideAnim = useRef(new Animated.Value(HEIGHT_WINDOW)).current;
     const { colors } = useTheme<VACOMTheme>();
     const { showPopup } = usePopup();
     const [dataItem, setDataItem] = useState<IData | null>(data || null);
-    const { tangSoCt } = useVoucherHv();
+    const { tangSoCt, valueChange } = useVoucher(tableWin, voucherCode, currentTab, changeOtherDetail);
     const schemaEdit: IRowsColsField = schemaUi.config.itemEdit;
     const zod = schemaUi.zod;
 
@@ -52,7 +55,7 @@ const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, sch
         if (!confirm || checkFilter()) onSave(data);
     }
     const setValue = async (change: Record<string, string>) => {
-        let changeAdd: any = {};
+        let changeAdd: any = valueChange(dataItem, change);
         if (change.NGAY_CT !== undefined && data) {
             changeAdd = await tangSoCt(data, change.NGAY_CT);
         }

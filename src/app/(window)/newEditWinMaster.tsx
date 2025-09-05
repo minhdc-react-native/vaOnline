@@ -3,7 +3,7 @@ import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { VcHeaderWin } from "@/components/vcHeaderWin";
 import { VcTabBar } from "@/components/vcTabBar";
 import { useTranslation } from "@/context/TranslationContext";
-import { useVoucherHv } from "@/hooks/useVoucher";
+import { useVoucher } from "@/hooks/useVoucher";
 import { useWinPage } from "@/hooks/useWinPage";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -36,8 +36,6 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
     } = useWinPage({
         itemMenuWin: itemMenuWin
     });
-    const { isHt2 } = useVoucherHv(itemMenuWin?.defaultValue?.MA_CT);
-
     const [showEditMaster, setShowEditMaster] = useState<boolean>(id === undefined && schemaUI.action?.showEditMaster !== false);
 
     useEffect(() => {
@@ -60,11 +58,20 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
             onChangeItemData(data);
         }
         setShowEditMaster(false);
-    }, []);
+    }, [onChangeItemData]);
 
     useEffect(() => {
         detail.loadDetail(id?.toString());
     }, []);
+
+    const { changeOther } = useVoucher(itemMenuWin.tableWin, itemMenuWin.defaultValue?.MA_CT, detail.currentTab);
+    useEffect(() => {
+        if (detail.changeOtherDetail.current === true) {
+            changeOther();
+            detail.changeOtherDetail.current = false;
+        }
+    }, [changeOther, detail.changeOtherDetail, detail.dataDetail]);
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
             <VcHeaderWin edit={true} title={titleWin} onBack={onBack} onPressAction={handleAction.save} />
@@ -106,11 +113,12 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                 variant='primary'
             />}
             {detail.showNewEdit && <NewEditWinMulti title={_(detail.currentTab?.TAB_NAME)}
-                data={detail.itemDetail} schemaUi={detail.schemaWinDetail}
+                data={detail.itemDetail} schemaUi={detail.schemaWinDetail} changeOtherDetail={detail.changeOtherDetail}
+                tableWin={itemMenuWin.tableWin} voucherCode={itemMenuWin.defaultValue?.MA_CT} currentTab={detail.currentTab}
                 dataSource={dataSource} onSave={detail.handleActionDetail.update} titleButton={_('COMPLETE')} />}
 
             {showEditMaster && <NewEditWinMulti title={titleWin}
-                data={itemData ?? null} schemaUi={schemaUI}
+                tableWin={itemMenuWin.tableWin} data={itemData ?? null} schemaUi={schemaUI}
                 dataSource={dataSource} onSave={onSaveMaster} titleButton={_('COMPLETE')} />}
 
         </SafeAreaView>

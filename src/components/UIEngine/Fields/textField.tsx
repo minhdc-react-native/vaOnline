@@ -186,6 +186,7 @@ const TextFieldComponent: React.FC<IProps> = ({
 
     const renderDefault = () => {
         let addStyle: StyleProp<ViewStyle> = null;
+        let addLabelStyle: StyleProp<TextStyle> = null;
         let addTextStyle: StyleProp<TextStyle> = null;
         if (!field.bind) {
             valueText = labelText;
@@ -194,7 +195,9 @@ const TextFieldComponent: React.FC<IProps> = ({
 
         switch (field.format?.type) {
             case "number":
-                if (valueText < 0) addTextStyle = { color: colors.primary };
+                addTextStyle = { textAlign: "right" };
+                addLabelStyle = { textAlign: "right" };
+                if (valueText < 0) addTextStyle.color = colors.primary;
                 valueText = Helper.formatAmount(
                     valueText,
                     false,
@@ -234,7 +237,7 @@ const TextFieldComponent: React.FC<IProps> = ({
         return (
             <View style={field.style}>
                 {labelText && (
-                    <Text style={[styles.label, field.labelStyle]}>{_(labelText)}</Text>
+                    <Text style={[styles.label, addLabelStyle, field.labelStyle]}>{_(labelText)}</Text>
                 )}
                 <Text
                     key={key}

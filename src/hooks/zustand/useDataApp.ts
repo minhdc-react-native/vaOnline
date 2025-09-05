@@ -26,6 +26,9 @@ interface IDataApp {
     userLogin: string | null,
     setUserLogin: (userLogin: string) => void
 
+    currencies: Record<string, { isMultiplication: boolean; TY_GIA: number }> | null,
+    setCurrencies: (currencies: Record<string, { isMultiplication: boolean; TY_GIA: number }>) => void
+
     currentYear: string | null,
     setCurrentYear: (currentYear: string) => void
 
@@ -41,7 +44,7 @@ interface IDataApp {
 
 const initialState: Omit<IDataApp,
     'setParamSystem' | 'setShouldRefresh' | 'setBackHandlerQuestion' | 'setYears' |
-    'setLang' | 'setListVoucher2' | 'setCurrentYear' | 'setOrgUnit' | 'setUserLogin' | 'reset' | 'setMenuIds' | 'setDataMenuWin'
+    'setLang' | 'setListVoucher2' | 'setCurrentYear' | 'setOrgUnit' | 'setUserLogin' | 'setCurrencies' | 'reset' | 'setMenuIds' | 'setDataMenuWin'
 > = {
     paramSystem: null,
     shouldRefresh: null,
@@ -49,6 +52,7 @@ const initialState: Omit<IDataApp,
     orgUnit: null,
     userLogin: null,
     currentYear: null,
+    currencies: null,
     years: [],
     lang: 'vi',
     listVoucher2: '',
@@ -70,6 +74,7 @@ export const useDataApp = create<IDataApp>()(
         setMenuIds: (menuIds) => set({ menuIds }),
         setDataMenuWin: (dataMenuWin) => set({ dataMenuWin }),
         setLang: (lang) => set({ lang }),
-        setListVoucher2: (listVoucher2) => set({ listVoucher2 })
+        setListVoucher2: (listVoucher2) => set({ listVoucher2 }),
+        setCurrencies: (currencies) => set({ currencies })
     })
 );

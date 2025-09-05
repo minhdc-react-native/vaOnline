@@ -11,7 +11,7 @@ export const loginForm: ISchemaForm = {
                 type: "input",
                 bind: "domain",
                 requiredKeys: ["lang"],
-                label: "{{lang==='vi'?'Liên kết':'Link'}}",
+                label: "Link",
                 leftIcon: { name: "web", color: "darkblue" },
                 autoCapitalize: "none",
                 texRight: ".vaonline.vn"
@@ -22,13 +22,13 @@ export const loginForm: ISchemaForm = {
                 leftIcon: { name: "account" },
                 autoCapitalize: "characters",
                 requiredKeys: ["lang"],
-                label: "{{lang==='vi'?'Tên truy cập':'User Name'}}",
+                label: "User Name",
             },
             {
                 type: "input",
                 bind: "pass",
                 requiredKeys: ["lang"],
-                label: "{{lang==='vi'?'Mật khẩu':'Password'}}",
+                label: "Password",
                 leftIcon: { name: "key-chain-variant", color: theme.colors.primary },
                 typeInput: "password"
             },
@@ -39,7 +39,7 @@ export const loginForm: ISchemaForm = {
                 fDisplay: { fId: 'id', fValue: "value", field: "id" },
                 bind: "dvcs",
                 requiredKeys: ["lang"],
-                label: "{{lang==='vi'?'Chọn đơn vị':'Select OrgUnit'}}"
+                label: "Select OrgUnit"
             },
             {
                 type: "rows",
@@ -48,7 +48,7 @@ export const loginForm: ISchemaForm = {
                     {
                         type: "checkbox",
                         requiredKeys: ["lang"],
-                        label: "{{lang==='vi'?'Ghi nhớ':'Remember'}}",
+                        label: "Remember",
                         bind: "remember",
                         typeView: "switch",
                         actionName: "remember",
@@ -57,7 +57,7 @@ export const loginForm: ISchemaForm = {
                     {
                         type: "button",
                         requiredKeys: ["lang"],
-                        label: "{{lang==='vi'?'Quên mật khẩu':'Forgot Password'}}",
+                        label: "Forgot Password",
                         actionName: "forgotPass"
                     }
                 ]
@@ -66,7 +66,7 @@ export const loginForm: ISchemaForm = {
                 type: "button",
                 mode: "contained",
                 requiredKeys: ["lang"],
-                label: "{{lang==='vi'?'Đăng nhập':'Login'}}",
+                label: "Login",
                 actionName: "login",
                 style: { width: 200, alignSelf: "center" }
             }

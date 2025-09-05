@@ -326,7 +326,7 @@ const dpkt0: ISchemaWin = {
                         type: "search",
                         tableSearch: "DMDT",
                         fField: 'MA_DT',
-                        expression: { TEN_DT: 'TEN_DT', DIA_CHI: 'DIA_CHI', ONG_BA: 'DAI_DIEN' },
+                        expression: { TEN_DT0: 'TEN_DT', DIA_CHI: 'DIA_CHI', ONG_BA: 'DAI_DIEN' },
                         itemView: ListItemView.MA_DT,
                         label: "MA_DT0",
                         bind: "MA_DT0",
@@ -344,9 +344,9 @@ const dpkt0: ISchemaWin = {
             },
             {
                 type: "input",
-                label: "TEN_DT",
+                label: "TEN_DT0",
                 typeInput: "multi",
-                bind: "TEN_DT"
+                bind: "TEN_DT0"
             },
             {
                 type: "input",
@@ -360,14 +360,16 @@ const dpkt0: ISchemaWin = {
 
 export const dpkt: ISchemaWinValue = {
     dataSource: {
+        TK: 'DMTK',
         MA_NT: 'DMNT',
         STATUS: 'STATUS',
+        DMNHOMHD: 'DMNHOMHD'
     },
     config: dpkt0,
     fieldSearch: 'INFO_FILTER COLLATE SQL_Latin1_General_CP1_CI_AI', isRmTone: true,
-    defaultNew: { NAM: '#NAM#', NGAY_CT: '#TODAY#', MA_NT: 'VND', TY_GIA: 1, STATUS: 1 },
-    dataMaster: ['id', 'NGAY_CT', 'TY_GIA', 'T_TIEN_TT_NT', 'T_TIEN_TT', 'DIEN_GIAI'],
-    addDetails: ['TY_GIA', 'MA_CT'],
+    defaultNew: { NAM: '#NAM#', NGAY_CT: '#TODAY#', MA_NT: '#MA_NT#', TY_GIA: '#TY_GIA#', STATUS: 1 },
+    dataMaster: ['id', 'NGAY_CT', 'TY_GIA', 'T_TIEN_TT_NT', 'T_TIEN_TT', 'DIEN_GIAI', 'MA_DT0', 'TEN_DT0'],
+    addDetails: ['TY_GIA', 'MA_CT', 'MA_NT'],
     zod: {
         NGAY_CT: { type: 'string', msgError: '...' },
         SO_CT: { type: 'string' },

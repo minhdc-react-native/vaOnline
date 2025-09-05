@@ -241,6 +241,17 @@ const psthue0: ISchemaWin = {
                 ]
             },
             {
+                type: "input",
+                label: "TEN_DT_KT",
+                bind: "TEN_DT_KT"
+            },
+            {
+                type: "input",
+                label: "DIA_CHI",
+                typeInput: "multi",
+                bind: "DIA_CHI"
+            },
+            {
                 type: "rows",
                 fields: [
                     {
@@ -300,12 +311,8 @@ const psthue0: ISchemaWin = {
 }
 
 export const psthue: ISchemaWinValue = {
-    dataSource: {
-        TK: 'DMTK',
-        DMNHOMHD: 'DMNHOMHD'
-    },
     config: psthue0,
-    defaultNew: { DPKT_id: "{{id}}", NGAY_HD: "{{NGAY_CT}}", TIEN_TT_NT: "{{T_TIEN_TT_NT}}", TIEN_TT: "{{T_TIEN_TT}}" },
+    defaultNew: { DPKT_id: "{{id}}", NAM: '#NAM#', NGAY_HD: "{{NGAY_CT}}", SO_SERIAL: '', SO_HD: '', NHOM_HD: '1', TIEN_TT_NT: "{{T_TIEN_TT_NT}}", TIEN_TT: "{{T_TIEN_TT}}" },
     zod: {
         MA_THUE: { type: 'string' },
         TK_NO: { type: 'string', msgError: '...' },

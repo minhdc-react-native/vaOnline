@@ -1,3 +1,4 @@
+import { useLoading } from '@/components/dialog/loadingProvider';
 import { api } from '@/utils/apiMethods';
 import get from 'lodash.get';
 import { useCallback, useRef } from 'react';
@@ -8,6 +9,7 @@ export function useBoundField<T = any>(
     path: string,
     onChangeItemData?: (change: Record<string, any>) => void
 ) {
+    const { show, hide } = useLoading();
     const updateRef = useRef(formState.update);
     const updateManyRef = useRef(formState.updateMany);
     const onChangeRef = useRef(onChangeItemData);
@@ -42,9 +44,10 @@ export function useBoundField<T = any>(
                         setValues(valueChange);
                     }
                 }
-            }
+            },
+            setLoading: (loading) => loading ? show() : hide()
         })
-    }, [setValues]);
+    }, [hide, setValues, show]);
 
     return {
         value: get(formState.state, path),

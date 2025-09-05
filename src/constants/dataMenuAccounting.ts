@@ -61,7 +61,7 @@ export const DataMenuAccounting: Record<string, Partial<Record<IKeyMenuWin, ICon
         ],
         vonBangTien: [
             {
-                title: 'Bán hàng', titleE: 'Sales',
+                title: 'Chứng từ khác', titleE: 'Other vouchers',
                 data: [
                     {
                         id: 'WIN00040', typeWin: "(winMaster)", tableWin: "DPKT", label: 'Phiếu kế toán khác', labelE: 'Other accounting slips',
