@@ -84,7 +84,7 @@ declare global {
         'DPKT' | 'CTKT';
 
     type ITableSearch = 'DMDT' | 'DMCS' | 'DMKM' | 'DMHDG' | 'DMVV' | 'DMMNGH' | 'DMMCN' | 'DMTK' | 'DMTTDB' | 'DMDVT' |
-        'DMTHUE' | 'DMQS';
+        'DMTHUE' | 'DMQS' | 'DMHV' | 'DMKHO' | 'DMLH' | 'DMNG';
 
     type IKeyMenuWin = 'acCatalogBalance' | 'acCatalogBank' | 'acCatalogGood' | 'acCatalogOther' | 'acCatalogPartner' |
         'banHangPhaiThu' | 'vonBangTien'

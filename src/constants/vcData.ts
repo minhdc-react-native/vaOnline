@@ -91,6 +91,7 @@ export const VcReferences: IDataSource = {
     DMTK: { url: `/api/System/GetDataByReferencesId?id=0a93c38b-5f1f-422a-8039-a6cee1967af2` },
     DMTTDB: { url: `/api/System/GetDataByReferencesId?id=ad61024c-69cc-4d3b-9d5e-e5685db5bdce` },
     DMSX: { url: `/api/System/GetDataByReferencesId?id=4f4a3acd-c873-45aa-9d1b-098cea801f65` },
+    DVT_CB: { url: `/api/System/GetDataByReferencesId?id=81ac9446-6c9f-410e-af92-a724a142cafc&filtervalue=null&extrafilter=#ExtraFilter#` },
 }
 
 export interface IConfigDateMenuWin {

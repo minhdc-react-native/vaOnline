@@ -223,6 +223,13 @@ const psthue0: ISchemaWin = {
                     {
                         type: "input",
                         expression: { TEN_DT_KT: 'CompanyName', DIA_CHI: 'Address' },
+                        requiredKeys: ['TK_NO'],
+                        // expression: `{{
+                        //     { 
+                        //         TEN_DT_KT: 'CompanyName', 
+                        //         ...(TK_NO === "1111" && { DIA_CHI: "Address" })
+                        //     }
+                        // }}`,
                         label: "MS_THUE",
                         bind: 'MS_THUE',
                         typeInput: "taxCode",

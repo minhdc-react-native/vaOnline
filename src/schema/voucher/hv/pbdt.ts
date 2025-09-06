@@ -47,7 +47,7 @@ const pbdt0: ISchemaWin = {
 
 export const pbdt: ISchemaWinValue = {
     config: pbdt0,
-    defaultNew: { DPHV_id: "{{id}}", NAM: '#NAM#', MA_DT: "{{MA_DT0}}" }, require: true,
+    defaultNew: { DPHV_id: "{{id}}", NAM: '#NAM#', MA_DT: "{{MA_DT0}}" }, require: false,
     action: { new: false, edit: false },
     zod: {
         TK_NO: { type: 'string', msgError: '...' },

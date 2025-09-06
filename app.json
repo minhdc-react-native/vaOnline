@@ -14,7 +14,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "$(PRODUCT_NAME) uses the camera to scan product barcodes, take product photos, and capture user profile pictures for shop setup.",
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photo library to upload product photos and attach receipts.",
-        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save downloaded PDF invoices and images to your photo library."
+        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save downloaded PDF invoices and images to your photo library.",
+        "NSFaceIDUsageDescription": "Allow $(PRODUCT_NAME) to use Face ID for quick and secure login."
       }
     },
     "android": {

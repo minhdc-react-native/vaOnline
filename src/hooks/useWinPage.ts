@@ -543,6 +543,14 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         setShowNewEdit(true);
     }, [currentYear, dataItems, evalExpr, isHt2, itemMenuWin.typeView, orgUnit, schemaUI.addDetails, schemaWinDetail.defaultNew, tableWin, userLogin]);
 
+    const refreshSourceDvtCb = useCallback((MA_HV: string) => {
+        const url = VcReferences.DVT_CB.url?.replace('#ExtraFilter#', encodeURIComponent(`MA_HV=N'${MA_HV}'`));
+        api.get({
+            link: url!,
+            callBack: (res) => setDataSource(tableWin, 'DVT_CB', res)
+        });
+    }, [setDataSource, tableWin]);
+
     const onSelectDetail = useCallback((index: number) => {
         const isEdit = schemaWinDetail.action?.edit !== false;
         if (!isEdit) return;
@@ -551,9 +559,10 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         const itemDetail = dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"]?.[index] ?? { id: UUID.v4() };
         const itemData = dataItems[tableWin]!;
         const addDetails = schemaUI.addDetails ? Object.fromEntries(schemaUI.addDetails.map(f => [f, itemData[f]])) : {};
+        if (currentTab.TAB_TABLE === "CTHV") refreshSourceDvtCb(itemDetail.MA_HV ?? '***');
         setItemDetail({ ...itemDetail, ...addDetails, _isHt2: isHt2 });
         setShowNewEdit(true);
-    }, [currentTab?.TAB_TABLE, dataItemDetail, dataItems, isHt2, schemaUI.addDetails, schemaWinDetail.action?.edit, tableWin]);
+    }, [refreshSourceDvtCb, currentTab?.TAB_TABLE, dataItemDetail, dataItems, isHt2, schemaUI.addDetails, schemaWinDetail.action?.edit, tableWin]);
 
     const onChangeDetail = useCallback((valueChange: IData) => {
         setIsChange(true);
@@ -610,7 +619,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 setDataSource(tableWin, key, configSource?.data);
             }
             if (configSource?.url) {
-                const url = configSource.url;
+                const url = key === "DVT_CB" ? configSource.url.replace('#ExtraFilter#', encodeURIComponent("MA_HV=N'***'")) : configSource.url;
                 const apiGetPost = configSource.type === "post" ? api.post : api.get;
                 await apiGetPost({
                     link: url, data: configSource.dataPost,
@@ -657,8 +666,10 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 source = { ...source, ..._source };
             });
             const apiRefresh = tableRefresh[shouldRefresh].type === "post" ? api.post : api.get;
+            const url = tableRefresh[shouldRefresh].key === "DVT_CB" ?
+                tableRefresh[shouldRefresh].url.replace('#ExtraFilter#', encodeURIComponent("MA_HV=N'***'")) : tableRefresh[shouldRefresh].url;
             apiRefresh({
-                link: tableRefresh[shouldRefresh].url,
+                link: url,
                 data: tableRefresh[shouldRefresh].dataPost,
                 callBack: (res) => {
                     setSource(res, source, tableRefresh[shouldRefresh].key);
@@ -757,6 +768,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             changeOtherDetail,
             dataDetail,
             currentTab,
+            refreshSourceDvtCb,
             setCurrentTab,
             itemDetail,
             rowHeightDetails,

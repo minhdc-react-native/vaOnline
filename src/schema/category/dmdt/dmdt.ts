@@ -151,6 +151,7 @@ const dmdt0: ISchemaWin = {
                         label: "MS_THUE",
                         bind: "MS_THUE",
                         typeInput: "taxCode",
+                        requiredKeys: ['MA_DT'],
                         expression: { MA_DT: "id", TEN_DT: "CompanyName", DIA_CHI: "Address", GHI_CHU: "Status" },
                         style: { flex: 1 }
                     },

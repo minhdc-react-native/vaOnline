@@ -363,7 +363,8 @@ export const dphv: ISchemaWinValue = {
         TK: 'DMTK',
         MA_NT: 'DMNT',
         STATUS: 'STATUS',
-        DMNHOMHD: 'DMNHOMHD'
+        DMNHOMHD: 'DMNHOMHD',
+        DVT_CB: 'DVT_CB'
     },
     config: dphv0,
     fieldSearch: 'INFO_FILTER COLLATE SQL_Latin1_General_CP1_CI_AI', isRmTone: true,

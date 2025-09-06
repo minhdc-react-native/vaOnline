@@ -36,7 +36,11 @@ const urlBase: Record<ITableSearch, string> = { // gắn api cho đỡ nhầm...
     DMMCN: '/api/System/GetDataByReferencesId?id=0600dd65-9cf4-4fd7-bf43-ff50a5578b42&filtervalue=#filterValue#',
     DMTK: '/api/System/GetDataByReferencesId?id=0a93c38b-5f1f-422a-8039-a6cee1967af2&filtervalue=#filterValue#',
     DMTTDB: '/api/System/GetDataByReferencesId?id=ad61024c-69cc-4d3b-9d5e-e5685db5bdce&filtervalue=#filterValue#',
-    DMDVT: '/api/System/GetDataByReferencesId?id=2beb4691-3bc8-40aa-a5ba-6170fef7a7c4&filtervalue=#filterValue#'
+    DMDVT: '/api/System/GetDataByReferencesId?id=2beb4691-3bc8-40aa-a5ba-6170fef7a7c4&filtervalue=#filterValue#',
+    DMKHO: `/api/System/GetDataByReferencesId?id=189d7179-da87-40cc-a5b3-64f52cef8b86&filtervalue=#filterValue#`,
+    DMHV: `/api/System/GetDataByReferencesId?id=c0c79756-5702-4e39-840e-11c3fa759b81&filtervalue=#filterValue#`,
+    DMLH: `/api/System/GetDataByReferencesId?id=77b75702-c884-4752-bfe5-2170214945ba&filtervalue=#filterValue#`,
+    DMNG: `/api/System/GetDataByReferencesId?id=4f263d9d-a736-447b-a126-e338fc700f5d&filtervalue=#filterValue#`
 }
 interface IProgs {
     tableSearch: ITableSearch,

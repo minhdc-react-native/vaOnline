@@ -8,9 +8,9 @@ import { Text, TextInput, useTheme } from "react-native-paper";
 interface IProps {
     value: any;
     label?: string;
-    disabled: boolean,
+    disabled?: boolean,
     setValue: (value: any) => void;
-    handleBlur: (prevValue: React.RefObject<any>) => void;
+    handleBlur?: (prevValue: React.RefObject<any>) => void;
     style?: StyleProp<ViewStyle>;
     msgError?: string;
 }
@@ -28,7 +28,7 @@ const InputBarcodeComponent: React.FC<IProps> = ({
     const { _ } = useTranslation();
     const [scannerVisible, setScannerVisible] = useState(false);
     const onHandleBlur = () => {
-        handleBlur(prevValue);
+        handleBlur?.(prevValue);
     }
     return (
         <View style={style}>

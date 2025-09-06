@@ -27,12 +27,13 @@ interface IProps {
     tableWin: ITableWin;
     voucherCode?: string;
     currentTab?: ITabWin;
+    refreshSourceDvtCb?: (MA_HV: string) => void;
     onSave: (data?: IData) => void;
     data: IData | null;
     dataSource?: Record<string, any[]>;
 }
 
-const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, schemaUi, changeOtherDetail, tableWin, voucherCode, currentTab, dataSource }) => {
+const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, schemaUi, changeOtherDetail, tableWin, voucherCode, currentTab, refreshSourceDvtCb, dataSource }) => {
     const slideAnim = useRef(new Animated.Value(HEIGHT_WINDOW)).current;
     const { colors } = useTheme<VACOMTheme>();
     const { showPopup } = usePopup();
@@ -58,6 +59,9 @@ const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, sch
         let changeAdd: any = valueChange(dataItem, change);
         if (change.NGAY_CT !== undefined && data) {
             changeAdd = await tangSoCt(data, change.NGAY_CT);
+        }
+        if (currentTab?.TAB_TABLE === "CTHV" && change.MA_HV !== undefined && data) {
+            refreshSourceDvtCb?.(change.MA_HV);
         }
         setDataItem(prev => prev ? ({ ...prev, ...change, ...changeAdd }) : null);
         if (!isChange) setIsChange(true);

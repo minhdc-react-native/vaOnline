@@ -200,7 +200,7 @@ const pscf0: ISchemaWin = {
 
 export const pscf: ISchemaWinValue = {
     config: pscf0,
-    defaultNew: { DPHV_id: "{{id}}", NAM: '#NAM#', MA_DT: "{{MA_DT0}}" }, require: true,
+    defaultNew: { DPHV_id: "{{id}}", NAM: '#NAM#', MA_DT: "{{MA_DT0}}" }, require: false,
     zod: {
         TK_NO: { type: 'string', msgError: '...' },
         TK_CO: { type: 'string' },

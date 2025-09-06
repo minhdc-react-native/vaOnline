@@ -20,7 +20,8 @@ const loginTranslations = {
         'Select OrgUnit': 'Chọn đơn vị',
         'Remember': 'Ghi nhớ',
         'Forgot Password': 'Quên mật khẩu',
-        'Login': 'Đăng nhập'
+        'Login': 'Đăng nhập',
+        'SEARCH': 'Tìm kiếm'
     },
     en: {
         'Link': 'Link',
@@ -29,7 +30,8 @@ const loginTranslations = {
         'Select OrgUnit': 'Select OrgUnit',
         'Remember': 'Remember',
         'Forgot Password': 'Forgot Password',
-        'Login': 'Login'
+        'Login': 'Login',
+        'SEARCH': 'Search'
     }
 }
 const infoVacom: IRowsColsField = {
@@ -91,15 +93,14 @@ export default function LoginScreen() {
                     break;
                 case "username":
                     const username = data[value.param];
-                    if (!Helper.isEmpty(username)) {
+                    if (!Helper.isEmpty(username) && lastLoad.current.username !== username) {
+                        lastLoad.current = { domain: data.domain, username: data.username };
                         getDvcsByUser(username);
                     }
                     break;
                 default:
                     break;
             }
-
-
         }
     }
     const [dataSource, setDataSource] = useState({ dvcs: listDvcs });
@@ -114,20 +115,20 @@ export default function LoginScreen() {
             const remember = await getRemember();
             const domain = await getSubDomain();
             const lang: 'vi' | 'en' = remember ? remember.lang : _data.lang;
-            setTranslations(loginTranslations[lang]);
+            setTranslations(loginTranslations[lang ?? 'vi']);
             setData({ ..._data, ...remember, domain: domain || '' });
         }
         getStorage();
     }, [])
     const lastLoad = useRef({ domain: data.domain, username: data.username });
-
+    const firstLoad = useRef(false);
     useEffect(() => {
-        if (!Helper.isEmpty(data.domain) && lastLoad.current.domain !== data.domain
-            && !Helper.isEmpty(data.username) && lastLoad.current.username !== data.username) {
+        if (!Helper.isEmpty(data.domain) && !Helper.isEmpty(data.username) && !firstLoad.current) {
+            firstLoad.current = true;
             lastLoad.current = { domain: data.domain, username: data.username };
             getDvcsByUser(data.username);
         }
-    }, [data])
+    }, [data, getDvcsByUser])
     return (
         <FormWrapper style={{ flex: 1, justifyContent: 'flex-end', padding: 20 }}>
             <View style={{ justifyContent: "center", alignItems: "center", marginBottom: 50 }}>

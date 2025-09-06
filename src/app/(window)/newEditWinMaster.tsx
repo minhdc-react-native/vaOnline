@@ -1,5 +1,7 @@
 import LoadingScreen from "@/components/loadingScreen";
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
+import { VcButtonScanner } from "@/components/vcButtonScanner";
+import VcCheckBox from "@/components/vcCheckbox";
 import { VcHeaderWin } from "@/components/vcHeaderWin";
 import { VcTabBar } from "@/components/vcTabBar";
 import { useTranslation } from "@/context/TranslationContext";
@@ -71,7 +73,10 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
             detail.changeOtherDetail.current = false;
         }
     }, [changeOther, detail.changeOtherDetail, detail.dataDetail]);
+    const [groupCode, setGroupCode] = useState(true);
+    const onScanned = (value: any) => {
 
+    }
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
             <VcHeaderWin edit={true} title={titleWin} onBack={onBack} onPressAction={handleAction.save} />
@@ -81,6 +86,15 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
             </Card>
             {detail.tabs.length > 0 && <VcTabBar style={{ borderRadius: 0, borderWidth: 0 }} value={detail.currentTab?.id ?? ''} data={detail.tabs} onPress={(tab: any) => detail.setCurrentTab(tab)} />}
             <Divider />
+            {detail.currentTab.TAB_TABLE === "CTHV" &&
+                <>
+                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, backgroundColor: colors.background }}>
+                        <VcCheckBox label={_('GOP_MA')} type="switch" value={groupCode} onChange={(value) => setGroupCode(typeof value === "boolean" ? value : value === "C")} />
+                        <VcButtonScanner onScanned={onScanned} />
+                    </View>
+                    <Divider />
+                </>
+            }
             <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
                 {detail.loadingDetail ? <LoadingScreen /> : <SwipeListView
                     data={detail.dataDetail ?? []}
@@ -113,6 +127,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                 variant='primary'
             />}
             {detail.showNewEdit && <NewEditWinMulti title={_(detail.currentTab?.TAB_NAME)}
+                refreshSourceDvtCb={detail.refreshSourceDvtCb}
                 data={detail.itemDetail} schemaUi={detail.schemaWinDetail} changeOtherDetail={detail.changeOtherDetail}
                 tableWin={itemMenuWin.tableWin} voucherCode={itemMenuWin.defaultValue?.MA_CT} currentTab={detail.currentTab}
                 dataSource={dataSource} onSave={detail.handleActionDetail.update} titleButton={_('COMPLETE')} />}

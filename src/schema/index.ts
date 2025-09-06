@@ -15,6 +15,7 @@ import { dmob } from "./category/dmob";
 import { dmpx } from "./category/dmpx";
 import { dmtk } from "./category/dmtk";
 import { empty } from "./empty";
+import { cthv } from "./voucher/hv/cthv";
 import { dphv } from "./voucher/hv/dphv";
 import { pbdt } from "./voucher/hv/pbdt";
 import { pscf } from "./voucher/hv/pscf";
@@ -83,7 +84,7 @@ export const schemaWin: Partial<Record<ITableWin, ISchemaWinValue>> = {
     Empty: empty, Year: year,
     DMNHDT: dmnhdt, DMDT: dmdt, DMDT_NGH: dmdt_ngh, DMBP: dmbp, DMPX: dmpx, DMOB: dmob, DMTK: dmtk,
     DMKHO: dmkho, DMNHHV: dmnhhv, DMDVT: dmdvt, DMHV: dmhv, DMHV_DVT: dmhv_dvt, DMHV_GIA: dmhv_gia,
-    DPKT: dpkt, CTKT: ctkt, PSTHUE: psthue, DPHV: dphv, PSCF: pscf, PBDT: pbdt
+    DPKT: dpkt, CTKT: ctkt, PSTHUE: psthue, DPHV: dphv, CTHV: cthv, PSCF: pscf, PBDT: pbdt
 }
 
 export const schemaWinEmpty: ISchemaWinValue = {

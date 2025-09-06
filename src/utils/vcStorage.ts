@@ -44,7 +44,8 @@ export const clearToken = async () => {
 
 export const saveRemember = async (data: Record<string, any>) => {
     try {
-        await AsyncStorage.setItem(REMEMBER, JSON.stringify(data));
+        const { pass, ...newData } = data; // bỏ thuộc tính password
+        await AsyncStorage.setItem(REMEMBER, JSON.stringify(newData));
     } catch (error) { }
 };
 

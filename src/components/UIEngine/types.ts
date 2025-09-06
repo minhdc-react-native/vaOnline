@@ -65,7 +65,7 @@ export type IInputField = IFieldBase & {
     type: 'input';
     label?: string;
     typeInput?: 'text' | 'multi' | 'password' | 'taxCode';
-    expression?: Record<string, string>;
+    expression?: Record<string, string> | string;
     style?: StyleProp<ViewStyle>;
     showPassword?: boolean;
     setShowPassWord?: (show: boolean) => void;
@@ -118,7 +118,7 @@ export type ISearchListField = IFieldBase & {
     tableSearch: ITableSearch;
     itemView?: IRowsColsField,
     fField: string;
-    expression?: Record<string, string>;
+    expression?: Record<string, string> | string;
     label?: string;
     placeholder?: string;
     clean?: boolean; // nếu true thì có nút xóa
@@ -137,7 +137,7 @@ export type ISelectListField = IFieldBase & {
     fId?: string;
     fValue?: string;
     fDisplay?: { fId?: string, fValue?: string, field?: string };
-    expression?: Record<string, string>;
+    expression?: Record<string, string> | string;
     clean?: boolean; // nếu true thì có nút xóa
     rightIcon?: React.ReactNode; // nếu có thì hiển thị icon bên phải
     style?: StyleProp<ViewStyle>;

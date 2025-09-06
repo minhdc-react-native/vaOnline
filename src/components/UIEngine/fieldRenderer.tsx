@@ -58,7 +58,9 @@ const ViewComponent: React.FC<IProps> = ({
         if (field.typeInput === "taxCode" && value && value.length >= 10) {
             if (prevValue.current !== value) { // chỉ chạy khi thay đổi giá trị.
                 prevValue.current = value;
-                onBlurTaxCode(value, field.expression)
+                const expression: Record<string, string> = typeof field.expression === "string" ?
+                    evalExpr(field.expression, field.requiredKeys) : field.expression;
+                onBlurTaxCode(value, expression)
             };
         }
     }, [value, field, handleAction, onBlurTaxCode]);
@@ -77,11 +79,12 @@ const ViewComponent: React.FC<IProps> = ({
 
     const onSelectSearch = useCallback((item: Record<string, any> | null) => {
         if (field.type !== "search") return;
-
+        const expression: Record<string, string> = typeof field.expression === "string" ?
+            evalExpr(field.expression, field.requiredKeys) : field.expression;
         let valueChange: any = { [field.bind!]: (item?.[field.fField] ?? "") };
         if (field.expression && item) {
             Object.keys(field.expression).map(key => {
-                valueChange[key] = item[field.expression ? field.expression[key] : key];
+                valueChange[key] = item[expression ? expression[key] : key];
             });
         }
         setValues(valueChange);
@@ -89,11 +92,12 @@ const ViewComponent: React.FC<IProps> = ({
 
     const onSelectList = useCallback((item: IData | null) => {
         if (field.type !== "selectList") return;
-
+        const expression: Record<string, string> = typeof field.expression === "string" ?
+            evalExpr(field.expression, field.requiredKeys) : field.expression;
         let valueChange: any = { [field.bind!]: item?.[field.fId ?? "id"] };
         if (field.expression && item) {
             Object.keys(field.expression).map(key => {
-                valueChange[key] = item[field.expression ? field.expression[key] : key];
+                valueChange[key] = item[expression ? expression[key] : key];
             });
         }
         setValues(valueChange);

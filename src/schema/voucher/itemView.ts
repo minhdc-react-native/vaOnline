@@ -57,5 +57,15 @@ export const ListItemView: Record<string, IRowsColsField> = {
                 label: "{{value}}"
             }
         ]
-    }
+    },
+    MA_HV: {
+        type: "cols",
+        fields: [
+            {
+                type: "text",
+                requiredKeys: ['MA_HV', 'TEN_HV', 'DVT'],
+                label: "{{`${MA_HV} - ${TEN_HV} (${DVT})`}}"
+            }
+        ]
+    },
 }
