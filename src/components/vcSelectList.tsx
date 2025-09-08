@@ -73,6 +73,7 @@ const ViewComponent: React.FC<IListProps> = ({
         if (value) {
             const selectedItem = data.find(item => item[fId] === value);
             setItemSelected(selectedItem || null);
+            setSearchText(value.toString());
         } else {
             setItemSelected(null);
         }
@@ -134,7 +135,7 @@ const ViewComponent: React.FC<IListProps> = ({
                     keyboardBlurBehavior="restore"
                     containerStyle={{ marginTop: 60 }}
                 >
-                    <HeaderView setSearchText={setSearchText} label={label || placeholder} tableWin={tableWin} closeModal={closeModal} isNewEdit={isNewEdit} />
+                    <HeaderView setSearchText={setSearchText} txtSearch={value?.toString()} label={label || placeholder} tableWin={tableWin} closeModal={closeModal} isNewEdit={isNewEdit} />
                     <BottomSheetFlatList
                         data={filteredList}
                         keyExtractor={(item: IData) => item[fId].toString()}
@@ -220,8 +221,9 @@ const ItemViewComponent: React.FC<IProps> = ({
 };
 const ItemView = React.memo(ItemViewComponent);
 
-const HeaderView = ({ setSearchText, label, tableWin, closeModal, isNewEdit }: {
+const HeaderView = ({ setSearchText, txtSearch, label, tableWin, closeModal, isNewEdit }: {
     setSearchText: (value: string) => void;
+    txtSearch?: string;
     label?: string;
     tableWin?: ITableWin;
     closeModal: (callBack: () => void) => void;
@@ -229,7 +231,7 @@ const HeaderView = ({ setSearchText, label, tableWin, closeModal, isNewEdit }: {
 }) => {
     const { _ } = useTranslation();
     label = label || _('CHON')
-    const [valueSearch, setValueSerach] = useState("");
+    const [valueSearch, setValueSerach] = useState(txtSearch);
     const { colors } = useTheme();
     return (
         <View style={{ justifyContent: "center", flexDirection: "row", paddingLeft: 20, paddingRight: 10, gap: 5, alignItems: "center", borderBottomWidth: 0.4, paddingBottom: 10, borderBottomColor: colors.backdrop }}>

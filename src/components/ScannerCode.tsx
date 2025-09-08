@@ -147,7 +147,7 @@ export default function ScannerCode({ onScanned, scannerVisible, setScannerVisib
                 />
                 {/* Tiêu đề giống Zalo */}
                 {continuous && <View style={styles.header}>
-                    <View style={[styles.containerProduct, { opacity: isContinuous ? 1 : 0 }]}>
+                    <View style={[styles.containerProduct, { opacity: isContinuous ? 0 : 0 }]}>
                         <Text style={{ textAlign: "center", color: "#c1c1c1" }}>Thông tin quét</Text>
 
                     </View>

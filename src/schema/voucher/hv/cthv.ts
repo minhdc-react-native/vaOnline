@@ -2,6 +2,17 @@ import { ISchemaWin, ISchemaWinValue } from "@/schema";
 import { theme } from "@/theme/theme";
 import { ListItemView } from "../itemView";
 const colors = theme.colors;
+
+const requiredKeysMa_hv = ['_isHt2', 'NHOM_CT', 'MA_CT', 'TK_HT'];
+const expressionMa_hv = `{{
+    { 
+        TEN_HV: 'TEN_HV',TEN_HV0:'TEN_HV',DVT_CB:'DVT',PT_THUE:'PT_THUE',
+        ...(_isHt2 && NHOM_CT==='2' && { TK_NO2: TK_HT }),
+        ...(_isHt2 && NHOM_CT==='2' && { TK_CO2: 'TK_DTHU' }),
+        ...(_isHt2 && NHOM_CT==='2' && { TK_NO: 'TK_GV' }),
+        ...(_isHt2 && NHOM_CT==='2' && { TK_CO: 'TK_HV' })
+    }
+}}`;
 const cthv0: ISchemaWin = {
     itemAction: {
         type: "cols",
@@ -86,7 +97,8 @@ const cthv0: ISchemaWin = {
                         type: "search",
                         tableSearch: "DMHV",
                         itemView: ListItemView.MA_HV,
-                        expression: { TEN_HV: 'TEN_HV', DVT_CB: 'DVT' },
+                        requiredKeys: requiredKeysMa_hv,
+                        expression: expressionMa_hv,
                         fField: 'MA_HV',
                         label: "MA_HV",
                         bind: 'MA_HV',
@@ -96,8 +108,8 @@ const cthv0: ISchemaWin = {
             },
             {
                 type: "input",
-                label: 'TEN_HV',
-                bind: 'TEN_HV'
+                label: 'TEN_HV0',
+                bind: 'TEN_HV0'
             },
             {
                 type: "rows",
@@ -135,7 +147,7 @@ const cthv0: ISchemaWin = {
                     },
                     {
                         type: "number",
-                        label: "TIEN_NT2",
+                        label: "DOANH_THU_NT",
                         bind: 'TIEN_NT2',
                         format: "rAmountNt",
                         style: { flex: 1 }
@@ -157,7 +169,7 @@ const cthv0: ISchemaWin = {
                     },
                     {
                         type: "number",
-                        label: "TIEN2",
+                        label: "DOANH_THU",
                         bind: 'TIEN2',
                         format: "rAmount",
                         style: { flex: 1 }
@@ -280,6 +292,8 @@ const cthv0: ISchemaWin = {
                     },
                     {
                         type: "rows",
+                        requiredKeys: ['_isHt2'],
+                        visibleIf: "{{_isHt2}}",
                         fields: [
                             {
                                 type: "selectList",
@@ -287,7 +301,8 @@ const cthv0: ISchemaWin = {
                                 tableWin: "Empty",
                                 fDisplay: { fValue: "id" },
                                 checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
-                                label: "TK_NO2",
+                                requiredKeys: ['NHOM_CT'],
+                                label: "{{NHOM_CT==='2'?'TK_HT':'TK_DTHU'}}",
                                 bind: "TK_NO2",
                                 keySource: "TK",
                                 style: { flex: 1 }
@@ -298,7 +313,8 @@ const cthv0: ISchemaWin = {
                                 tableWin: "Empty",
                                 fDisplay: { fValue: "id" },
                                 checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
-                                label: "TK_CO2",
+                                requiredKeys: ['NHOM_CT'],
+                                label: "{{NHOM_CT==='2'?'TK_DTHU':'TK_HT'}}",
                                 bind: "TK_CO2",
                                 keySource: "TK",
                                 style: { flex: 1 }

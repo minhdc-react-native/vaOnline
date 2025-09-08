@@ -93,7 +93,6 @@ export const VcReferences: IDataSource = {
     DMSX: { url: `/api/System/GetDataByReferencesId?id=4f4a3acd-c873-45aa-9d1b-098cea801f65` },
     DVT_CB: { url: `/api/System/GetDataByReferencesId?id=81ac9446-6c9f-410e-af92-a724a142cafc&filtervalue=null&extrafilter=#ExtraFilter#` },
 }
-
 export interface IConfigDateMenuWin {
     title: string,
     titleE: string,
@@ -101,4 +100,16 @@ export interface IConfigDateMenuWin {
     icon?: React.ReactNode;
     expanded?: boolean;
     disable?: boolean
+}
+
+export const defaultNumberNew: Partial<Record<ITableWin, string[]>> = {
+    CTKT: ['TIEN_NT', 'TIEN'],
+    PSTHUE: ['TIEN_TT_NT', 'TIEN_TT', 'TIEN_NT', 'TIEN', 'TONG_TIEN_NT', 'TONG_TIEN'],
+    CTHV: [
+        'SO_LUONG', 'GIA_NT2', 'GIA2', 'TIEN_NT2', 'TIEN2', 'GIA_NT', 'GIA', 'TIEN_NT', 'TIEN',
+        'PT_CK', 'T_CK_NT', 'T_CK', 'PT_GG', 'GIA_GG_NT', 'GIA_GG', 'T_GG_NT', 'T_GG', 'PT_NK', 'T_NK_NT', 'T_NK',
+        'PT_DB', 'T_DB_NT', 'T_DB', 'PT_THUE', 'T_THUE_NT', 'T_THUE',
+        'T_CP_NT', 'T_CP', 'T_CP_NT1', 'T_CP1', 'T_CP_NT0', 'T_CP0'
+    ],
+    PSCF: ['TIEN_NT', 'TIEN'],
 }

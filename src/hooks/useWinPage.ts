@@ -4,7 +4,7 @@ import { useToast } from "@/components/dialog/useToast";
 import { buildZodSchema } from "@/components/UIEngine/buildZodSchema";
 import { useEvalExpr } from "@/components/UIEngine/hooks/useEvalExpr";
 import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
-import { VcReferences } from "@/constants/vcData";
+import { defaultNumberNew, VcReferences } from "@/constants/vcData";
 import { useTranslation } from "@/context/TranslationContext";
 import { schemaWin, schemaWinEmpty } from "@/schema";
 import { VACOMTheme } from "@/theme/theme";
@@ -45,6 +45,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         }));
     };
     const stateLoading = useRef({ refresh: false, loadMore: false, loading: loadingBegin });
+
+    const defaultTk = useDataApp((state) => state.paramSystem?.TK);
 
     const shouldRefresh = useDataApp((state) => state.shouldRefresh);
     const setShouldRefresh = useDataApp((state) => state.setShouldRefresh);
@@ -155,6 +157,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 WINDOW_ID: windowId,
                 MA_CT: dataConfig.MA_CT ?? "",
                 MA_NT: dmct?.data?.[0]?.MA_NT,
+                NHOM_CT: dmct?.data?.[0]?.NHOM_CT,
                 WINDOW_NAME: dataConfig.WINDOW_NAME ?? "",
                 VC_INFOWINDOW_ID: dataConfig.VC_INFOWINDOW_ID,
                 Tabs: dataConfig.Tabs.filter((tab: any) => tab.HIDE_EDIT !== 'C')
@@ -304,7 +307,13 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             )
         );
 
-        const defaultValue = itemMenuWin.defaultValue ?? {};
+        const Tk_ht = isHt2 ? defaultTk?.TK_PTHU : (['PNH', 'PNK', 'PNX'].includes(winConfig?.window.MA_CT ?? '') ? defaultTk?.TK_PTRA : '');
+
+        const defaultValue = {
+            ...itemMenuWin.defaultValue ?? {},
+            ...winConfig?.window.NHOM_CT && { NHOM_CT: winConfig?.window.NHOM_CT, TK_HT: Tk_ht }
+        };
+
         const typeView = itemMenuWin.typeView ?? {};
 
         const itemNew: IData = { id: UUID.v4(), _isNew: true, DVCS_ID: orgUnit, ...newDefault, ...defaultValue, ...typeView };
@@ -328,7 +337,13 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     const onEdit = useCallback((item: IData) => {
         setEditMode('edit');
 
-        const typeView = itemMenuWin.typeView ?? {};
+        const Tk_ht = isHt2 ? defaultTk?.TK_PTHU : (['PNH', 'PNK', 'PNX'].includes(winConfig?.window.MA_CT ?? '') ? defaultTk?.TK_PTRA : '');
+
+        const typeView = {
+            ...itemMenuWin.typeView ?? {},
+            ...winConfig?.window.NHOM_CT && { TK_HT: Tk_ht }
+        };
+
         setItemData(tableWin, { ...item, ...typeView });
 
         const tabMaster = winConfig?.window.Tabs[0];
@@ -354,6 +369,12 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                     setErrors({});
                 }, 5000); //sau 10.000 ms = 10 giây sẽ tự xoá các error message...
             }
+            if (tableWin === "DPHV") {
+                if (isNotEmpty(itemData.T_TDB) && (!isNotEmpty(itemData.TK_NO_DB) || !isNotEmpty(itemData.TK_CO_DB))) {
+                    showToast('Bạn cần hạch toán thuế TTĐB', { type: "warning" });
+                    return false;
+                }
+            }
             return isResult;
         };
         if (!_checkSave()) return;
@@ -364,7 +385,6 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             for (const tab of tabs) {
                 const isRequire = schemaWin[tab.TAB_TABLE]?.require;
                 const dataDetail = dataItemDetail[tableWin] ? dataItemDetail[tableWin][tab.TAB_TABLE] : [];
-
                 if (isRequire && dataDetail.length === 0) {
                     showToast(`${isLangVi ? 'Bạn chưa nhập chi tiết' : 'You have not entered details'} [${_(tab.TAB_NAME)}]!`, { type: "warning" });
                     return;
@@ -511,8 +531,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         return dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"];
     }, [dataItemDetail, currentTab, tableWin]);
 
-    const onNewDetail = useCallback(() => {
-        typeNewEdit.current = 'new';
+    const onNewDetail = useCallback((addDetailMore?: Record<string, any>) => {
+        if (!addDetailMore) typeNewEdit.current = 'new';
         const typeView = itemMenuWin.typeView ?? {};
         const itemData = dataItems[tableWin]!;
         const addDetails = schemaUI.addDetails ? Object.fromEntries(schemaUI.addDetails.map(f => [f, itemData[f]])) : {};
@@ -530,17 +550,37 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                     : [key, evalExpr(value)]
             )
         );
-
-        setItemDetail({
-            id: UUID.v4(),
-            DVCS_ID: orgUnit,
-            _isNew: true,
-            _isHt2: isHt2,
-            ...newDefault,
-            ...typeView,
-            ...addDetails
-        });
-        setShowNewEdit(true);
+        const defaultNumber = defaultNumberNew[currentTab.TAB_TABLE] ?? [];
+        const initNumber = defaultNumber.reduce((acc, f) => {
+            acc[f] = 0;
+            return acc;
+        }, {} as Record<string, number>);
+        if (addDetailMore) {
+            return {
+                id: UUID.v4(),
+                DVCS_ID: orgUnit,
+                _isNew: true,
+                _isHt2: isHt2,
+                ...initNumber,
+                ...newDefault,
+                ...typeView,
+                ...addDetails,
+                ...addDetailMore
+            };
+        } else {
+            setItemDetail({
+                id: UUID.v4(),
+                DVCS_ID: orgUnit,
+                _isNew: true,
+                _isHt2: isHt2,
+                ...initNumber,
+                ...newDefault,
+                ...typeView,
+                ...addDetails
+            });
+            setShowNewEdit(true);
+            return null;
+        }
     }, [currentYear, dataItems, evalExpr, isHt2, itemMenuWin.typeView, orgUnit, schemaUI.addDetails, schemaWinDetail.defaultNew, tableWin, userLogin]);
 
     const refreshSourceDvtCb = useCallback((MA_HV: string) => {

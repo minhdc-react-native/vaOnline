@@ -81,10 +81,11 @@ const ViewComponent: React.FC<IProps> = ({
         if (field.type !== "search") return;
         const expression: Record<string, string> = typeof field.expression === "string" ?
             evalExpr(field.expression, field.requiredKeys) : field.expression;
+
         let valueChange: any = { [field.bind!]: (item?.[field.fField] ?? "") };
-        if (field.expression && item) {
-            Object.keys(field.expression).map(key => {
-                valueChange[key] = item[expression ? expression[key] : key];
+        if (expression && item) {
+            Object.keys(expression).map(key => {
+                valueChange[key] = item[expression ? expression[key] : key] ?? expression[key];
             });
         }
         setValues(valueChange);
@@ -95,8 +96,8 @@ const ViewComponent: React.FC<IProps> = ({
         const expression: Record<string, string> = typeof field.expression === "string" ?
             evalExpr(field.expression, field.requiredKeys) : field.expression;
         let valueChange: any = { [field.bind!]: item?.[field.fId ?? "id"] };
-        if (field.expression && item) {
-            Object.keys(field.expression).map(key => {
+        if (expression && item) {
+            Object.keys(expression).map(key => {
                 valueChange[key] = item[expression ? expression[key] : key];
             });
         }

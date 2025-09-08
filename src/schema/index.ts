@@ -77,7 +77,7 @@ export interface ISchemaWinValue {
     defaultNew: Record<string, any>,
     dataMaster?: string[],
     addDetails?: string[],
-    zod?: Record<string, { type: 'string' | 'number', msgError?: string }>
+    zod?: Record<string, { type: 'string' | 'number', requiredIf?: string | string[], msgError?: string }>
 }
 
 export const schemaWin: Partial<Record<ITableWin, ISchemaWinValue>> = {

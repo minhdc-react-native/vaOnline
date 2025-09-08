@@ -353,6 +353,66 @@ const dphv0: ISchemaWin = {
                 label: "DIEN_GIAI",
                 typeInput: "multi",
                 bind: "DIEN_GIAI"
+            },
+            {
+                type: "expand",
+                title: "Thông tin bổ xung...",
+                fields: [
+                    {
+                        type: "rows",
+                        fields: [
+                            {
+                                type: "selectList",
+                                clean: false,
+                                tableWin: "Empty",
+                                fDisplay: { fValue: "id" },
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
+                                label: "TK_NO_DB",
+                                bind: "TK_NO_DB",
+                                keySource: "TK",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "selectList",
+                                clean: false,
+                                tableWin: "Empty",
+                                fDisplay: { fValue: "id" },
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
+                                label: "TK_CO_DB",
+                                bind: "TK_CO_DB",
+                                keySource: "TK",
+                                style: { flex: 1 }
+                            },
+                        ]
+                    },
+                    {
+                        type: "rows",
+                        fields: [
+                            {
+                                type: "selectList",
+                                clean: false,
+                                tableWin: "Empty",
+                                fDisplay: { fValue: "id" },
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
+                                label: "TK_NO_CK",
+                                bind: "TK_NO_CK",
+                                keySource: "TK",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "selectList",
+                                clean: false,
+                                tableWin: "Empty",
+                                fDisplay: { fValue: "id" },
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
+                                label: "TK_CO_CK",
+                                bind: "TK_CO_CK",
+                                keySource: "TK",
+                                style: { flex: 1 }
+                            },
+                        ]
+                    },
+                ]
             }
         ]
     }
@@ -369,12 +429,12 @@ export const dphv: ISchemaWinValue = {
     config: dphv0,
     fieldSearch: 'INFO_FILTER COLLATE SQL_Latin1_General_CP1_CI_AI', isRmTone: true,
     defaultNew: { NAM: '#NAM#', NGAY_CT: '#TODAY#', MA_NT: '#MA_NT#', TY_GIA: '#TY_GIA#', STATUS: 1 },
-    dataMaster: ['id', 'NGAY_CT', 'TY_GIA', 'T_TIEN_TT_NT', 'T_TIEN_TT', 'DIEN_GIAI', 'MA_DT0'],
-    addDetails: ['TY_GIA', 'MA_CT', 'MA_NT'],
+    dataMaster: ['id', 'NGAY_CT', 'TY_GIA', 'T_TIEN_TT_NT', 'T_TIEN_TT', 'DIEN_GIAI', 'MA_DT0', 'TK_HT'],
+    addDetails: ['TY_GIA', 'MA_CT', 'NHOM_CT', 'MA_NT', 'TK_HT'],
     zod: {
         NGAY_CT: { type: 'string', msgError: '...' },
         SO_CT: { type: 'string' },
         MA_NT: { type: 'string' },
-        TY_GIA: { type: 'number' },
+        TY_GIA: { type: 'number' }
     }
 }

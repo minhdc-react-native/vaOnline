@@ -87,7 +87,7 @@ export const useAuth = () => {
                 accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
             });
         } else {
-            showToast('❌ Máy của bạn chưa cài đặt sinh trắc học!');
+            // showToast('❌ Máy của bạn chưa cài đặt sinh trắc học!');
             await Keychain.setGenericPassword("user", password, {
                 service: "com.anonymous.accountingonline",
                 accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
@@ -197,6 +197,11 @@ export const useAuth = () => {
                     rExchangeRate: item?.TY_GIA ?? 2,
                     rRate: item?.TY_LE ?? 2,
                     minAmountChange: 1000,
+                    TK: {
+                        TK_PTHU: '131',
+                        TK_PTRA: '331',
+                        TK_CK: '5211'
+                    }
                 });
             }
         })

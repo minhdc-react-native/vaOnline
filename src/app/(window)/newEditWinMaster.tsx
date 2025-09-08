@@ -3,6 +3,7 @@ import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { VcButtonScanner } from "@/components/vcButtonScanner";
 import VcCheckBox from "@/components/vcCheckbox";
 import { VcHeaderWin } from "@/components/vcHeaderWin";
+import VcSearchList from "@/components/vcSearchList";
 import { VcTabBar } from "@/components/vcTabBar";
 import { useTranslation } from "@/context/TranslationContext";
 import { useVoucher } from "@/hooks/useVoucher";
@@ -66,17 +67,25 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
         detail.loadDetail(id?.toString());
     }, []);
 
-    const { changeOther } = useVoucher(itemMenuWin.tableWin, itemMenuWin.defaultValue?.MA_CT, detail.currentTab);
+    const { showToast, changeOther, onScanned } = useVoucher(itemMenuWin.tableWin, itemMenuWin.defaultValue?.MA_CT, detail.currentTab, undefined, detail.handleActionDetail.new);
+
     useEffect(() => {
         if (detail.changeOtherDetail.current === true) {
             changeOther();
             detail.changeOtherDetail.current = false;
         }
     }, [changeOther, detail.changeOtherDetail, detail.dataDetail]);
+    const [MA_KHO, setMA_KHO] = useState('');
     const [groupCode, setGroupCode] = useState(true);
-    const onScanned = (value: any) => {
 
-    }
+    const onScanBarCode = useCallback((value: string, quantity?: number | null) => {
+        if (!isNotEmpty(MA_KHO)) {
+            showToast('Bạn cần nhập mã kho trước!', { type: "warning" });
+            return;
+        }
+        onScanned(value, quantity ?? 1, MA_KHO, groupCode);
+    }, [MA_KHO, onScanned, showToast]);
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
             <VcHeaderWin edit={true} title={titleWin} onBack={onBack} onPressAction={handleAction.save} />
@@ -90,7 +99,8 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                 <>
                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, backgroundColor: colors.background }}>
                         <VcCheckBox label={_('GOP_MA')} type="switch" value={groupCode} onChange={(value) => setGroupCode(typeof value === "boolean" ? value : value === "C")} />
-                        <VcButtonScanner onScanned={onScanned} />
+                        <VcSearchList style={{ flex: 1 }} label={_('MA_KHO')} tableSearch="DMKHO" fField="MA_KHO" value={MA_KHO} onChange={(item) => setMA_KHO(item?.id)} />
+                        <VcButtonScanner onScanned={onScanBarCode} />
                     </View>
                     <Divider />
                 </>

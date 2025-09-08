@@ -10,6 +10,11 @@ declare global {
         rExchangeRate: number;
         rRate: number;
         minAmountChange: number;
+        TK: {
+            TK_PTHU: string,
+            TK_PTRA: string,
+            TK_CK: string
+        }
     }
     interface IData {
         id: string | number;
@@ -53,6 +58,7 @@ declare global {
             WINDOW_ID: string;
             MA_CT: string;
             MA_NT?: string;
+            NHOM_CT?: string;
             WINDOW_NAME: string;
             VC_INFOWINDOW_ID: string | null;
             Tabs: ITabWin[]

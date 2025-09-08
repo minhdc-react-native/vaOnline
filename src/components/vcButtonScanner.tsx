@@ -4,7 +4,7 @@ import { StyleProp, View, ViewStyle } from "react-native";
 import { IconButton } from "react-native-paper";
 
 interface IProps {
-    onScanned: (value: any) => void;
+    onScanned: (value: string, quantity?: number | null) => void;
     style?: StyleProp<ViewStyle>;
 }
 const ButtonScannerComponent: React.FC<IProps> = ({
