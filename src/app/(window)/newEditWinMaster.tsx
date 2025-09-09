@@ -34,7 +34,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
     const insets = useSafeAreaInsets();
     const { _ } = useTranslation();
     const {
-        colors, schemaUI, resetItem, handleAction,
+        colors, schemaUI, resetItem, handleAction, setIsChange,
         itemData, dataSource, onChangeItemData, onBack, detail
     } = useWinPage({
         itemMenuWin: itemMenuWin
@@ -83,7 +83,10 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
             showToast('Bạn cần nhập mã kho trước!', { type: "warning" });
             return;
         }
-        onScanned(value, quantity ?? 1, MA_KHO, groupCode);
+        onScanned(value, quantity ?? 1, MA_KHO, groupCode, () => {
+            detail.changeOtherDetail.current = true;
+            setIsChange(true)
+        });
     }, [MA_KHO, onScanned, showToast]);
 
     return (

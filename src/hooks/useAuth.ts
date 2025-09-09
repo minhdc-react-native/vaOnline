@@ -82,14 +82,14 @@ export const useAuth = () => {
         const biometryType = await Keychain.getSupportedBiometryType();
         if (biometryType) {
             await Keychain.setGenericPassword("user", password, {
-                service: "com.anonymous.accountingonline",
+                service: "com.vacom.accountingonline",
                 accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
                 accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
             });
         } else {
             // showToast('❌ Máy của bạn chưa cài đặt sinh trắc học!');
             await Keychain.setGenericPassword("user", password, {
-                service: "com.anonymous.accountingonline",
+                service: "com.vacom.accountingonline",
                 accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
             });
         }
@@ -103,7 +103,7 @@ export const useAuth = () => {
                     subtitle: "Xác thực bằng Face ID / vân tay",
                     description: "Sử dụng sinh trắc học để đăng nhập",
                 },
-                service: "com.anonymous.accountingonline",
+                service: "com.vacom.accountingonline",
             });
             console.log("credentials>>", credentials);
             if (credentials) {

@@ -78,7 +78,7 @@ const dphv0: ISchemaWin = {
                         type: "actionList",
                         style: { backgroundColor: "red" },
                         actionName: "deleteItem",
-                        typeButton: "btnOnlyOneTop",
+                        typeButton: "btnLeft",
                         fields: [
                             {
                                 type: "icon",
@@ -92,7 +92,7 @@ const dphv0: ISchemaWin = {
                         type: "actionList",
                         style: { backgroundColor: "blue" },
                         actionName: "printItem",
-                        typeButton: "btnOnlyOneBottom",
+                        typeButton: "btnLeft",
                         fields: [
                             {
                                 type: "icon",
@@ -102,6 +102,28 @@ const dphv0: ISchemaWin = {
                             }
                         ]
                     }
+                ]
+            },
+            {
+                type: "actionList",
+                style: { backgroundColor: "green" },
+                actionName: "exportInvoice",
+                typeButton: "btnRight",
+                fields: [
+                    {
+                        type: "cols",
+                        style: { justifyContent: "center", alignItems: "center" },
+                        fields: [
+                            { type: "text", label: 'NĐ123', textStyle: { color: colors.background } },
+                            {
+                                type: "icon",
+                                iconType: "F",
+                                name: "file-text",
+                                color: "#fff"
+                            }
+                        ]
+                    }
+
                 ]
             },
         ]
@@ -429,7 +451,7 @@ export const dphv: ISchemaWinValue = {
     config: dphv0,
     fieldSearch: 'INFO_FILTER COLLATE SQL_Latin1_General_CP1_CI_AI', isRmTone: true,
     defaultNew: { NAM: '#NAM#', NGAY_CT: '#TODAY#', MA_NT: '#MA_NT#', TY_GIA: '#TY_GIA#', STATUS: 1 },
-    dataMaster: ['id', 'NGAY_CT', 'TY_GIA', 'T_TIEN_TT_NT', 'T_TIEN_TT', 'DIEN_GIAI', 'MA_DT0', 'TK_HT'],
+    dataMaster: ['id', 'MA_CT', 'NGAY_CT', 'TY_GIA', 'T_TIEN_TT_NT', 'T_TIEN_TT', 'DIEN_GIAI', 'MA_DT0', 'TK_HT'],
     addDetails: ['TY_GIA', 'MA_CT', 'NHOM_CT', 'MA_NT', 'TK_HT'],
     zod: {
         NGAY_CT: { type: 'string', msgError: '...' },

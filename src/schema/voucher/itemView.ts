@@ -1,6 +1,18 @@
 import { IRowsColsField } from "@/components/UIEngine/types";
 import { theme } from "@/theme/theme";
 const colors = theme.colors;
+export const getListItemView = (id: string, value: string): IRowsColsField => {
+    return {
+        type: "cols",
+        fields: [
+            {
+                type: "text",
+                requiredKeys: [id, value],
+                label: "{{`${" + id + "} - ${" + value + "}`}}"
+            }
+        ]
+    };
+};
 export const ListItemView: Record<string, IRowsColsField> = {
     MA_NT: {
         type: "rows",

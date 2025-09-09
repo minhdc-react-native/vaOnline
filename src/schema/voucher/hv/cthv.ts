@@ -1,12 +1,12 @@
 import { ISchemaWin, ISchemaWinValue } from "@/schema";
 import { theme } from "@/theme/theme";
-import { ListItemView } from "../itemView";
+import { getListItemView, ListItemView } from "../itemView";
 const colors = theme.colors;
 
 const requiredKeysMa_hv = ['_isHt2', 'NHOM_CT', 'MA_CT', 'TK_HT'];
 const expressionMa_hv = `{{
     { 
-        TEN_HV: 'TEN_HV',TEN_HV0:'TEN_HV',DVT_CB:'DVT',PT_THUE:'PT_THUE',
+        TEN_HV: 'TEN_HV',TEN_HV0:'TEN_HV',DVT_CB:'DVT',
         ...(_isHt2 && NHOM_CT==='2' && { TK_NO2: TK_HT }),
         ...(_isHt2 && NHOM_CT==='2' && { TK_CO2: 'TK_DTHU' }),
         ...(_isHt2 && NHOM_CT==='2' && { TK_NO: 'TK_GV' }),
@@ -277,6 +277,7 @@ const cthv0: ISchemaWin = {
                                 tableSearch: "DMLH",
                                 fField: 'MA_LH',
                                 label: "MA_LH",
+                                itemView: getListItemView('MA_LH', 'TEN_LH'),
                                 bind: 'MA_LH',
                                 style: { flex: 1 }
                             },
@@ -285,6 +286,7 @@ const cthv0: ISchemaWin = {
                                 tableSearch: "DMNG",
                                 fField: 'MA_NG',
                                 label: "MA_NG",
+                                itemView: getListItemView('MA_NG', 'TEN_NG'),
                                 bind: 'MA_NG',
                                 style: { flex: 1 }
                             },
@@ -402,6 +404,8 @@ const cthv0: ISchemaWin = {
 export const cthv: ISchemaWinValue = {
     config: cthv0,
     defaultNew: { DPHV_id: "{{id}}", NAM: '#NAM#' }, require: true,
+    // copyDetails: ['MA_KHO'],
+    copyDetails: "{{MA_CT!=='PDV'?['MA_KHO']:[]}}",
     zod: {
         MA_HV: { type: 'string', msgError: '...' },
         SO_LUONG: { type: 'number' },

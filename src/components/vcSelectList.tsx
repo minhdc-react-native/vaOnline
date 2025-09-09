@@ -60,7 +60,7 @@ const ViewComponent: React.FC<IListProps> = ({
     const getItemSelected = (item: IData | null) => {
         bottomSheetRef.current?.close();
         onChange(item);
-        setItemSelected(item);
+        if (itemSelected?.[fId] !== value) setItemSelected(item);
         // closeModal(() => { });
     }
     const closeModal = (callBack: () => void) => {

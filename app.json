@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.accountingonline",
+      "bundleIdentifier": "com.vacom.accountingonline",
       "infoPlist": {
         "NSCameraUsageDescription": "$(PRODUCT_NAME) uses the camera to scan product barcodes, take product photos, and capture user profile pictures for shop setup.",
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photo library to upload product photos and attach receipts.",
@@ -24,7 +24,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.accountingonline",
+      "package": "com.vacom.accountingonline",
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",

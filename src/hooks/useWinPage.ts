@@ -370,7 +370,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 }, 5000); //sau 10.000 ms = 10 giây sẽ tự xoá các error message...
             }
             if (tableWin === "DPHV") {
-                if (isNotEmpty(itemData.T_TDB) && (!isNotEmpty(itemData.TK_NO_DB) || !isNotEmpty(itemData.TK_CO_DB))) {
+                if (Number(itemData.T_TDB) !== 0 && (!isNotEmpty(itemData.TK_NO_DB) || !isNotEmpty(itemData.TK_CO_DB))) {
                     showToast('Bạn cần hạch toán thuế TTĐB', { type: "warning" });
                     return false;
                 }
@@ -531,7 +531,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         return dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"];
     }, [dataItemDetail, currentTab, tableWin]);
 
-    const onNewDetail = useCallback((addDetailMore?: Record<string, any>) => {
+    const onNewDetail = useCallback((e: any, addDetailMore?: Record<string, any>) => {
         if (!addDetailMore) typeNewEdit.current = 'new';
         const typeView = itemMenuWin.typeView ?? {};
         const itemData = dataItems[tableWin]!;
@@ -550,12 +550,21 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                     : [key, evalExpr(value)]
             )
         );
+        const copyFieldDetails = schemaWinDetail.copyDetails ? (Array.isArray(schemaWinDetail.copyDetails) ? schemaWinDetail.copyDetails : evalExpr(schemaWinDetail.copyDetails)) : [];
+
+        let copyDetails: any = {};
+        if (dataDetail && dataDetail.length > 0) {
+            const itemLast = dataDetail[dataDetail.length - 1];
+            copyDetails = Object.fromEntries(
+                copyFieldDetails.map((f: any) => [f, itemLast[f]])
+            );
+        }
         const defaultNumber = defaultNumberNew[currentTab.TAB_TABLE] ?? [];
         const initNumber = defaultNumber.reduce((acc, f) => {
             acc[f] = 0;
             return acc;
         }, {} as Record<string, number>);
-        if (addDetailMore) {
+        if (addDetailMore !== undefined) {
             return {
                 id: UUID.v4(),
                 DVCS_ID: orgUnit,
@@ -565,6 +574,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 ...newDefault,
                 ...typeView,
                 ...addDetails,
+                ...copyDetails,
                 ...addDetailMore
             };
         } else {
@@ -576,12 +586,13 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 ...initNumber,
                 ...newDefault,
                 ...typeView,
-                ...addDetails
+                ...addDetails,
+                ...copyDetails
             });
             setShowNewEdit(true);
             return null;
         }
-    }, [currentYear, dataItems, evalExpr, isHt2, itemMenuWin.typeView, orgUnit, schemaUI.addDetails, schemaWinDetail.defaultNew, tableWin, userLogin]);
+    }, [currentYear, dataDetail, dataItems, evalExpr, isHt2, itemMenuWin.typeView, orgUnit, schemaUI.addDetails, schemaWinDetail.defaultNew, tableWin, userLogin]);
 
     const refreshSourceDvtCb = useCallback((MA_HV: string) => {
         const url = VcReferences.DVT_CB.url?.replace('#ExtraFilter#', encodeURIComponent(`MA_HV=N'${MA_HV}'`));
@@ -790,6 +801,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         permissions: winConfig?.window.Tabs[0]?.PERMISSION,
         printSamples,
         tabMulti,
+        setIsChange,
         setFilterRows,
         setTextSearch,
         onChangeItemData,

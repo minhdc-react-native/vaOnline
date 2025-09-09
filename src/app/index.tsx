@@ -11,9 +11,10 @@ export default function AppScreen() {
             const token = await getToken();
             if (!!token) {
                 const remember = await getRemember();
-                await biometricLogin(async (password) => {
-                    await login({ ...remember, pass: password });
-                })
+                await login(remember);
+                // await biometricLogin(async (password) => {
+                //     await login({ ...remember, pass: password });
+                // })
             } else {
                 setLoggedIn(false);
             }

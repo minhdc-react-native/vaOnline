@@ -98,7 +98,7 @@ const ViewComponent: React.FC<IProgs> = ({ tableSearch, label, placeholder, valu
     }
     const getItemSelected = (item: Record<string, any> | null) => {
         bottomSheetRef.current?.close();
-        onChange(item);
+        if (item?.[fField] !== value) onChange(item);
         // closeModal(() => { });
     }
     const closeModal = (callBack: () => void) => {

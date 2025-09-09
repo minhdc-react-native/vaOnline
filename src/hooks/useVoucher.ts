@@ -52,11 +52,18 @@ const TableWin = {
     PSCF: 'PSCF',
     PBDT: 'PBDT'
 }
+const LoaiPhi = {
+    LP1: 'LP1',
+    LP2: 'LP2',
+    LP3: 'LP3'
+}
 export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab?: ITabWin,
-    changeOtherDetail?: React.RefObject<boolean>, onNewDetail?: (addDetailMore?: Record<string, any>) => void) => {
+    changeOtherDetail?: React.RefObject<boolean>, onNewDetail?: (e: any, addDetailMore?: Record<string, any>) => IData | null) => {
     const tableCthv = 'CTHV';
     const paramSystem = useDataApp((state) => state.paramSystem);
     const onChangeValue = useDataItemWin((state) => state.onChangeValue);
+
+    const defaultTk = useDataApp((state) => state.paramSystem?.TK);
 
     const dataMaster = useDataItemWin((state) => state.dataItems[tableWin]);
     const dataDetails = useDataItemWin((state) => state.dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"]);
@@ -64,51 +71,14 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
     const dataCthvs = useDataItemWin((state) => state.dataItemDetail[tableWin]?.[tableCthv]);
     const setDataItemDetail = useDataItemWin((state) => state.setDataItemDetail);
     const onChangeValueDetail = useDataItemWin((state) => state.onChangeValueDetail);
+    const onAddDetail = useDataItemWin((state) => state.onAddDetail);
 
     const { isHt2, changeCtHv, changePsCf, changePbDt } = useVoucherHv(voucherCode, changeOtherDetail);
 
     const { tangSoCt, changeCtKt, changePsThue } = useVoucherKt(voucherCode, changeOtherDetail);
     const { showToast } = useToast();
-    const onScanned = useCallback((value: string, quantity: number, warehouseCode: string, groupCode: boolean) => {
-        const fixValue = encodeURIComponent(value);
-        api.get({
-            link: `/api/System/GetDataByReferencesId?id=c0c79756-5702-4e39-840e-11c3fa759b81&filtervalue=${fixValue}`,
-            callBack: (res: IData[]) => {
-                if (res && res.length > 0) {
-                    const product = res[0];
-                    const idx = (dataCthvs ?? []).findIndex(item => item.MA_HV === product.MA_HV);
-                    if (idx && groupCode) {
-                        const existProduct = dataCthvs![idx];
-                        const changeAdd: Record<string, any> = changeCtHv(existProduct, { SO_LUONG: existProduct.SO_LUONG + quantity });
-                        onChangeValueDetail(tableWin, tableCthv, idx, changeAdd);
-                    } else {
-                        if (onNewDetail) {
-                            const newItemDetail = onNewDetail({ SO_LUONG: quantity });
-                            api.post({
-                                link: ``,
-                                data: {
-                                    DVCS_ID: dataMaster!.DVCS_ID,
-                                    MA_CT: dataMaster!.MA_CT,
-                                    NGAY_CT: dataMaster!.NGAY_CT,
-                                    SO_CT: dataMaster!.SO_CT,
-                                    MA_DT: dataMaster!.MA_DT0,
-                                    MA_HV: product.MA_HV,
-                                    DVT_CB: product.DVT
-                                },
-                                callBack: (res) => {
-                                    // update thêm GIA2, TIEN2 vào đây....
-                                }
-                            })
-                        }
-                    }
-                } else {
-                    showToast(`Không tìm thấy mã BarCode [${value}]`, { type: "warning" });
-                }
-            }
-        })
-    }, [changeCtHv, dataCthvs, onChangeValueDetail, showToast, tableWin]);
 
-    const valueChange = useCallback((dataItem: IData | null, change: Record<string, string>) => {
+    const valueChange = useCallback((dataItem: IData | null, change: Record<string, any>) => {
         dataItem = dataItem || { id: '***' };
         let changeDetail: any = {};
         if (!voucherCode || !currentTab) return changeDetail;
@@ -132,6 +102,186 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
         return changeDetail;
     }, [changeCtHv, changeCtKt, changePbDt, changePsCf, changePsThue, currentTab, voucherCode]);
 
+    const getGiaHv = useCallback(async (MA_HV: string, DVT: string) => {
+        const _fGia_nt = isHt2 ? 'GIA_NT2' : 'GIA_NT';
+        const _fGia = isHt2 ? 'GIA2' : 'GIA';
+        const res = await api.post({
+            link: `/api/System/Command`,
+            data: {
+                command: 'GET_GIA_HV',
+                parameter: {
+                    DVCS_ID: dataMaster!.DVCS_ID,
+                    MA_CT: dataMaster!.MA_CT,
+                    NGAY_CT: dataMaster!.NGAY_CT,
+                    SO_CT: dataMaster!.SO_CT,
+                    MA_DT: dataMaster!.MA_DT0,
+                    MA_HV: MA_HV,
+                    DVT_CB: DVT
+                }
+            },
+            // callBack: (res) => {
+            //     if (res && res.data && res.data.length > 0) {
+            //         const price = res.data[0];
+            //         const change = valueChange(newItemDetail!, {
+            //             ...(dataMaster?.TY_GIA === 1 && { [_fGia]: price[_fGia] }),
+            //             ...(dataMaster?.TY_GIA !== 1 && { [_fGia_nt]: price[_fGia_nt] })
+            //         });
+            //         // thêm vào.
+            //         onAddDetail(tableWin, tableCthv, { ...newItemDetail, ...change });
+            //         afterChange();
+            //     }
+
+            // }
+        });
+        const price = res.data[0];
+        return {
+            ...(dataMaster?.TY_GIA === 1 && { [_fGia]: price[_fGia] }),
+            ...(dataMaster?.TY_GIA !== 1 && { [_fGia_nt]: price[_fGia_nt] })
+        };
+
+    }, [dataMaster, isHt2]);
+    const onScanned = useCallback((value: string, quantity: number, warehouseCode: string, groupCode: boolean, afterChange: () => void) => {
+        const fixValue = encodeURIComponent(value);
+
+        api.get({
+            link: `/api/System/GetDataByReferencesId?id=c0c79756-5702-4e39-840e-11c3fa759b81&filtervalue=${fixValue}`,
+            callBack: async (res: IData[]) => {
+                if (res && res.length > 0) {
+                    const product = res[0];
+                    const idx = (dataCthvs ?? []).findIndex(item => item.MA_HV === product.MA_HV);
+                    if (idx !== -1 && groupCode) {
+                        const existProduct = dataCthvs![idx];
+                        const changeAdd: Record<string, any> = changeCtHv(existProduct, { SO_LUONG: existProduct.SO_LUONG + quantity });
+                        onChangeValueDetail(tableWin, tableCthv, idx, changeAdd);
+                        afterChange();
+                    } else {
+                        if (onNewDetail) {
+                            const Tk_ht = isHt2 ? defaultTk?.TK_PTHU : (['PNH', 'PNK', 'PNX'].includes(dataMaster!.MA_CT ?? '') ? defaultTk?.TK_PTRA : '');
+                            const expression: Record<string, string> =
+                            {
+                                TEN_HV: 'TEN_HV', TEN_HV0: 'TEN_HV', DVT_CB: 'DVT',
+                                ...(isHt2 && dataMaster!.NHOM_CT === '2' && { TK_NO2: Tk_ht }),
+                                ...(isHt2 && dataMaster!.NHOM_CT === '2' && { TK_CO2: 'TK_DTHU' }),
+                                ...(isHt2 && dataMaster!.NHOM_CT === '2' && { TK_NO: 'TK_GV' }),
+                                ...(isHt2 && dataMaster!.NHOM_CT === '2' && { TK_CO: 'TK_HV' })
+                            };
+
+                            let addExpression: any = { MA_HV: product.MA_HV, DVT_CB: product.DVT };
+                            if (expression) {
+                                Object.keys(expression).map(key => {
+                                    addExpression[key] = product[expression[key]] || expression[key];
+                                });
+                            }
+
+                            const priceInfo: Record<string, any> = await getGiaHv(product.MA_HV, product.DVT);
+
+                            const newItemDetail: IData | null = onNewDetail(null, {
+                                SO_LUONG: quantity,
+                                MA_KHO: warehouseCode,
+                                ...addExpression
+                            });
+
+                            const change = valueChange(newItemDetail!, priceInfo);
+
+                            onAddDetail(tableWin, tableCthv, { ...newItemDetail, ...change });
+                            afterChange();
+
+                        }
+                    }
+                } else {
+                    showToast(`Không tìm thấy mã BarCode [${value}]`, { type: "warning" });
+                }
+            }
+        })
+    }, [changeCtHv, dataCthvs, dataMaster, isHt2, onAddDetail, onChangeValueDetail, onNewDetail, showToast, tableWin, valueChange, getGiaHv, defaultTk]);
+
+    const pbPsCf = useCallback(() => {
+
+        const _fTIEN_NT = isHt2 ? 'TIEN_NT2' : 'TIEN_NT';
+        const _fTIEN = isHt2 ? 'TIEN2' : 'TIEN';
+
+        const totalCthv = dataCthvs!.reduce((acc, item) => {
+            acc.T_CP_NT += Number(item.T_CP_NT);
+            acc.T_CP += Number(item.T_CP);
+            acc.T_CP_NT1 += Number(item.T_CP_NT1);
+            acc.T_CP1 += Number(item.T_CP1);
+            acc.T_CP_NT0 += Number(item.T_CP_NT0);
+            acc.T_CP0 += Number(item.T_CP0);
+            acc.T_PB_NT += Number(item[_fTIEN_NT]) - item.T_CK_NT - item.T_GG_NT + item.T_NK_NT + item.T_DB_NT;
+            acc.T_PB += Number(item[_fTIEN]) - item.T_CK - item.T_GG + item.T_NK + item.T_DB;
+            return acc;
+        }, { T_CP_NT: 0, T_CP: 0, T_CP_NT1: 0, T_CP1: 0, T_CP_NT0: 0, T_CP0: 0, T_PB_NT: 0, T_PB: 0 });
+
+        const totalCp0 = dataDetails!.reduce((acc, item) => {
+            acc.T_CP_NT += Number(item.TIEN_NT);
+            acc.T_CP += Number(item.TIEN);
+            acc.T_CP_NT1 += item.LOAI_PHI === LoaiPhi.LP2 ? Number(item.TIEN_NT) : 0;
+            acc.T_CP1 += item.LOAI_PHI === LoaiPhi.LP2 ? Number(item.TIEN) : 0;
+            acc.T_CP_NT0 += item.LOAI_PHI === LoaiPhi.LP3 ? Number(item.TIEN_NT) : 0;
+            acc.T_CP0 += item.LOAI_PHI === LoaiPhi.LP3 ? Number(item.TIEN) : 0;
+            return acc;
+        }, { T_CP_NT: 0, T_CP: 0, T_CP_NT1: 0, T_CP1: 0, T_CP_NT0: 0, T_CP0: 0 });
+
+        if (totalCthv.T_CP_NT === totalCp0.T_CP_NT && totalCthv.T_CP === totalCp0.T_CP &&
+            totalCthv.T_CP_NT1 === totalCp0.T_CP_NT1 && totalCthv.T_CP1 === totalCp0.T_CP1 &&
+            totalCthv.T_CP_NT0 === totalCp0.T_CP_NT0 && totalCthv.T_CP0 === totalCp0.T_CP0
+        ) return null;
+
+
+        const totalCp = dataDetails!.filter(i => [LoaiPhi.LP2, LoaiPhi.LP3].includes(i.LOAI_PHI)).reduce((acc, item) => {
+            const key = `${(item.LOAI_PHI ?? LoaiPhi.LP3)}_${item.TK_NO ?? ''}`
+            acc[key] = acc[key] || {
+                TIEN_NT: 0, TIEN: 0, keyField: {
+                    TIEN_NT: item.LOAI_PHI === LoaiPhi.LP2 ? 'T_CP_NT1' : 'T_CP_NT0',
+                    TIEN: item.LOAI_PHI === LoaiPhi.LP2 ? 'T_CP1' : 'T_CP0'
+                }
+            };
+            acc[key].TIEN_NT += Number(item.TIEN_NT);
+            acc[key].TIEN += Number(item.TIEN);
+            return acc;
+        }, {} as Record<string, {
+            TIEN_NT: number, TIEN: number, keyField: {
+                TIEN_NT: string;
+                TIEN: string;
+            };
+        }>);
+
+
+        const dataPb = (dataCthvs ?? []).map(item => ({
+            id: item.id,
+            TK_PB: item.TK_NO,
+            T_PB_NT: Number(item[_fTIEN_NT]) - item.T_CK_NT - item.T_GG_NT + item.T_NK_NT + item.T_DB_NT,
+            T_PB: Number(item[_fTIEN]) - item.T_CK - item.T_GG + item.T_NK + item.T_DB
+        }));
+
+        const fields = ['T_CP_NT', 'T_CP', 'T_CP_NT1', 'T_CP1', 'T_CP_NT0', 'T_CP0'];
+        const updatesZezo = { T_CP_NT: 0, T_CP: 0, T_CP_NT1: 0, T_CP1: 0, T_CP_NT0: 0, T_CP0: 0 };
+        const updates: Record<string, { T_CP_NT: number, T_CP: number, T_CP_NT1: number, T_CP1: number, T_CP_NT0: number, T_CP0: number, T_PB_NT: number, T_PB: number }> = {};
+
+        const phanBoTotal = distribute(dataPb, { TIEN_NT: paramSystem?.rAmountNt!, TIEN: paramSystem?.rAmount! },
+            {
+                totalNeedDistribute: { TIEN_NT: totalCp0.T_CP_NT, TIEN: totalCp0.T_CP },
+                keyField: { TIEN_NT: 'T_CP_NT', TIEN: 'T_CP' }
+            }
+        );
+
+        const phanBoGroup = distribute(dataPb, { TIEN_NT: paramSystem?.rAmountNt!, TIEN: paramSystem?.rAmount! },
+            undefined,
+            totalCp
+        );
+
+        const phanBoAll = mergeByIdWithFields(fields, phanBoTotal, phanBoGroup)
+
+        for (const item of phanBoAll) {
+            const { id, ...newItem } = item;
+            updates[item.id] = newItem;
+        }
+
+        setDataItemDetail(tableWin, tableCthv, (dataCthvs ?? []).map((item: IData) => ({ ...item, ...(updates[item.id] || updatesZezo) })));
+
+        return totalCp0;
+    }, [isHt2, dataDetails, setDataItemDetail, tableWin, dataCthvs, paramSystem]);
+
     const pbPsThue = useCallback(() => {
         const _fTIEN_NT = isHt2 ? 'TIEN_NT2' : 'TIEN_NT';
         const _fTIEN = isHt2 ? 'TIEN2' : 'TIEN';
@@ -143,13 +293,13 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
             return acc;
         }, { MA_THUE: '', PT_THUE: 0, TIEN_NT: 0, TIEN: 0 });
         const totalCthv = dataCthvs!.reduce((acc, item) => {
-            acc.T_THUE_NT += Number(item.TIEN_NT);
-            acc.T_THUE += Number(item.TIEN);
+            acc.T_THUE_NT += Number(item.T_THUE_NT);
+            acc.T_THUE += Number(item.T_THUE);
             acc.T_PB_NT += Number(item[_fTIEN_NT]) - item.T_CK_NT - item.T_GG_NT + item.T_NK_NT + item.T_DB_NT;
             acc.T_PB += Number(item[_fTIEN]) - item.T_CK - item.T_GG + item.T_NK + item.T_DB;
             return acc;
         }, { T_THUE_NT: 0, T_THUE: 0, T_PB_NT: 0, T_PB: 0 });
-
+        console.log("log>>", totalCthv, totalVat);
         if (totalCthv.T_THUE_NT === totalVat.TIEN_NT && totalCthv.T_THUE === totalVat.TIEN) return null;
 
         const dataPb = (dataCthvs ?? []).map(item => ({
@@ -218,6 +368,7 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
         }
         return {
             ...totalCtHv,
+            ...tTien_tt,
             T_TIEN_NT: tTien_tt.T_TIEN_TT_NT + totalCtHv.T_THUE_NT,
             T_TIEN: tTien_tt.T_TIEN_TT + totalCtHv.T_THUE
         };
@@ -243,6 +394,7 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
             case TableWin.PSTHUE:
                 if (tableWin === TableWin.DPHV) {
                     const totalVat = pbPsThue();
+                    console.log('totalVat>>', totalVat);
                     if (!totalVat) break;
                     changeMaster = {
                         T_THUE_NT: totalVat.TIEN_NT,
@@ -274,13 +426,23 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
                 break;
             case TableWin.PSCF:
                 if (tableWin === TableWin.DPHV) {
-                    // phân bổ chi phí
+                    const totalCf = pbPsCf();
+                    if (!totalCf) break;
+                    changeMaster = {
+                        T_CP_NT: totalCf.T_CP_NT,
+                        T_CP: totalCf.T_CP,
+                        T_TCP_NT1: totalCf.T_CP_NT1,
+                        T_TCP1: totalCf.T_CP1,
+                        T_TCP_NT0: totalCf.T_CP_NT0,
+                        T_TCP0: totalCf.T_CP0,
+                        T_TIEN_NT: dataMaster?.T_TIEN_TT_NT + dataMaster?.T_THUE_NT + totalCf.T_CP_NT,
+                        T_TIEN: dataMaster?.T_TIEN_TT + dataMaster?.T_THUE + totalCf.T_CP
+                    }
                 }
-                console.log('change detail PSCF>> total?');
                 break;
         }
         if (changeMaster !== null) onChangeValue(tableWin, changeMaster);
-    }, [voucherCode, currentTab, onChangeValue, tableWin, dataMaster, dataDetails, sumCthv]);
+    }, [voucherCode, currentTab, onChangeValue, tableWin, dataMaster, dataDetails, sumCthv, pbPsCf, pbPsThue]);
 
     return {
         showToast,
@@ -288,6 +450,7 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
         tangSoCt,
         valueChange,
         changeOther,
+        getGiaHv,
         onScanned
     }
 };
@@ -298,7 +461,7 @@ const useVoucherHv = (voucherCode?: string, changeOtherDetail?: React.RefObject<
     const isHt2 = listVoucher2.includes(voucherCode ?? '***');
     const _fTIEN_NT = isHt2 ? 'TIEN_NT2' : 'TIEN_NT';
     const _fTIEN = isHt2 ? 'TIEN2' : 'TIEN';
-    const _refreshAmount = (dataItem: IData, change: Record<string, string>, currentValue: Record<string, string>, type: 'all' | 'amount' | 't_gg' | 't_ck' | 't_db' | 't_nk' = "all") => {
+    const _refreshAmount = (dataItem: IData, change: Record<string, any>, currentValue: Record<string, string>, type: 'all' | 'amount' | 't_gg' | 't_ck' | 't_db' | 't_nk' = "all") => {
         if (changeOtherDetail) changeOtherDetail.current = true;
         let changeAdd: any = currentValue;
         let changeAdd0: any = {
@@ -374,7 +537,7 @@ const useVoucherHv = (voucherCode?: string, changeOtherDetail?: React.RefObject<
         }
         return changeAdd;
     }
-    const changeCtHv = useCallback((dataItem: IData, change: Record<string, string>) => {
+    const changeCtHv = useCallback((dataItem: IData, change: Record<string, any>) => {
         const isMultiplication = !!currencies?.[dataItem.MA_NT].isMultiplication; //tỷ giá: phép nhân || phép chia
         let changeAdd: any = {};
         Object.keys(change).map(f => {
@@ -527,7 +690,7 @@ const useVoucherHv = (voucherCode?: string, changeOtherDetail?: React.RefObject<
         return { ...change, ...changeAdd };
     }, [changeOtherDetail, currencies, paramSystem]);
 
-    const changePsCf = useCallback((dataItem: IData, change: Record<string, string>) => {
+    const changePsCf = useCallback((dataItem: IData, change: Record<string, any>) => {
         const isMultiplication = !!currencies?.[dataItem.MA_NT].isMultiplication; //tỷ giá: phép nhân || phép chia
         let changeAdd: any = {};
         Object.keys(change).map(f => {
@@ -553,7 +716,7 @@ const useVoucherHv = (voucherCode?: string, changeOtherDetail?: React.RefObject<
         return { ...change, ...changeAdd };
     }, [changeOtherDetail, currencies, paramSystem]);
 
-    const changePbDt = useCallback((dataItem: IData, change: Record<string, string>) => {
+    const changePbDt = useCallback((dataItem: IData, change: Record<string, any>) => {
         return change;
     }, []);
 
@@ -580,7 +743,7 @@ const useVoucherKt = (voucherCode?: string, changeOtherDetail?: React.RefObject<
         return change;
     }, [currentYear, orgUnit]);
 
-    const changeCtKt = useCallback((dataItem: IData, change: Record<string, string>) => {
+    const changeCtKt = useCallback((dataItem: IData, change: Record<string, any>) => {
         const isMultiplication = !!currencies?.[dataItem.MA_NT].isMultiplication; //tỷ giá: phép nhân || phép chia
         let changeAdd: any = {};
         Object.keys(change).map(f => {
@@ -606,7 +769,7 @@ const useVoucherKt = (voucherCode?: string, changeOtherDetail?: React.RefObject<
         return { ...change, ...changeAdd };
     }, [changeOtherDetail, currencies, paramSystem]);
 
-    const changePsThue = useCallback((dataItem: IData, change: Record<string, string>) => {
+    const changePsThue = useCallback((dataItem: IData, change: Record<string, any>) => {
         const isMultiplication = !!currencies?.[dataItem.MA_NT].isMultiplication; //tỷ giá: phép nhân || phép chia
         let changeAdd: any = {};
         Object.keys(change).map(f => {
@@ -707,3 +870,138 @@ const sumByFields = (array: IData[], fields: string[], fieldsTotal?: string[]) =
         return acc;
     }, init);
 };
+
+/**
+ * Phân bổ số tiền với làm tròn và xử lý chênh lệch
+ */
+function groupBy<T>(arr: T[], key: (item: T) => string): Record<string, T[]> {
+    return arr.reduce((acc, item) => {
+        const k = key(item);
+        if (!acc[k]) acc[k] = [];
+        acc[k].push(item);
+        return acc;
+    }, {} as Record<string, T[]>);
+}
+
+
+function allocateWithRounding(
+    items: IData[],
+    totalNeedDistribute: { TIEN_NT: number, TIEN: number },
+    round: { TIEN_NT: number, TIEN: number },
+    keyField: { TIEN_NT: string, TIEN: string }
+): IData[] {
+    const total = items.reduce((sum, i) => {
+        sum.T_PB_NT += i.T_PB_NT;
+        sum.T_PB += i.T_PB;
+        return sum
+    }, { T_PB_NT: 0, T_PB: 0 });
+
+    // Tính tỷ lệ, làm tròn
+    let allocated: any[] = items.map(i => ({
+        id: i.id,
+        T_PB_NT: i.T_PB_NT,
+        T_PB: i.T_PB,
+        TIEN_NT: total.T_PB_NT !== 0 ? Helper.round((i.T_PB_NT / total.T_PB_NT) * totalNeedDistribute.TIEN_NT, round.TIEN_NT) : 0,
+        TIEN: total.T_PB !== 0 ? Helper.round((i.T_PB / total.T_PB) * totalNeedDistribute.TIEN, round.TIEN) : 0
+    }));
+
+    // Kiểm tra chênh lệch
+    const diff = allocated.reduce((sum, i) => {
+        sum.T_TIEN_NT += i.TIEN_NT;
+        sum.T_TIEN += i.TIEN;
+        return sum;
+    }, { T_TIEN_NT: 0, T_TIEN: 0 });
+
+    if (diff.T_TIEN_NT !== totalNeedDistribute.TIEN_NT || diff.T_TIEN !== totalNeedDistribute.TIEN) {
+        // Cộng/trừ chênh lệch vào các dòng có giá trị lớn nhất (hoặc nhỏ nhất)
+        // để đảm bảo tổng chính xác
+        if (diff.T_TIEN !== totalNeedDistribute.TIEN) {
+            const sorted = [...allocated].sort((a, b) => b.T_PB - a.T_PB);
+            sorted[0].TIEN += totalNeedDistribute.TIEN - diff.T_TIEN;
+            // copy lại giá trị TIEN đã chỉnh
+            allocated = allocated.map(item => {
+                const fixed = sorted.find(s => s.id === item.id)!;
+                return { ...item, TIEN: fixed.TIEN };
+            });
+        }
+        if (diff.T_TIEN_NT !== totalNeedDistribute.TIEN_NT) {
+            const sorted = [...allocated].sort((a, b) => b.T_PB_NT - a.T_PB_NT);
+            sorted[0].TIEN_NT += totalNeedDistribute.TIEN_NT - diff.T_TIEN_NT;
+            // copy lại giá trị TIEN_NT đã chỉnh
+            allocated = allocated.map(item => {
+                const fixed = sorted.find(s => s.id === item.id)!;
+                return { ...item, TIEN_NT: fixed.TIEN_NT };
+            });
+        }
+    }
+    return allocated.map(i => ({ id: i.id, [keyField.TIEN_NT]: i.TIEN_NT, [keyField.TIEN]: i.TIEN }));;
+}
+
+function distribute(
+    data: IData[],
+    round: { TIEN_NT: number, TIEN: number },
+    global?: {
+        totalNeedDistribute: { TIEN_NT: number, TIEN: number },
+        keyField: { TIEN_NT: string, TIEN: string }
+    },
+    groupPb?: Record<string, { TIEN_NT: number, TIEN: number, keyField: { TIEN_NT: string, TIEN: string } }>
+): IData[] {
+    if (!!global) {
+        return allocateWithRounding(data, global.totalNeedDistribute, round, global.keyField);
+    }
+    if (!!groupPb) {
+        const result: IData[] = [];
+        const groups = groupBy(data, i => i.TK_PB);
+        Object.keys(groupPb).map(key => {
+            const TK_PB = key.split('_')[1];
+            const group = groups[TK_PB] ?? [];
+            if (group.length > 0) {
+                result.push(...allocateWithRounding(group, groupPb[key], round, groupPb[key].keyField));
+            }
+        });
+        return result;
+    }
+
+    return data.map(i => ({ id: i.id, TIEN_NT: 0, TIEN: 0 }));
+}
+
+function mergeByIdWithFields(
+    fields: string[],
+    ...arrays: IData[][]
+) {
+    const allIds = new Set<string>();
+
+    // Gom tất cả id
+    for (const arr of arrays) {
+        for (const item of arr) {
+            allIds.add(item.id.toString());
+        }
+    }
+
+    // Map từng mảng để lookup nhanh
+    const maps = arrays.map(arr => {
+        const m = new Map<string, IData>();
+        for (const item of arr) m.set(item.id.toString(), item);
+        return m;
+    });
+    // Merge
+
+    const result: any[] = [];
+    for (const id of allIds) {
+        const row: any = { id };
+
+        fields.forEach((f) => {
+            row[f] = 0;
+            for (const m of maps) {
+                const found = m.get(id);
+                if (found && found[f] !== undefined) {
+                    row[f] += found[f]; // cộng dồn nếu bị trùng key
+                }
+            }
+        });
+
+        result.push(row);
+    }
+
+    return result;
+}

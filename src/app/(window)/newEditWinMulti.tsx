@@ -38,7 +38,7 @@ const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, sch
     const { colors } = useTheme<VACOMTheme>();
     const { showPopup } = usePopup();
     const [dataItem, setDataItem] = useState<IData | null>(data || null);
-    const { tangSoCt, valueChange } = useVoucher(tableWin, voucherCode, currentTab, changeOtherDetail);
+    const { tangSoCt, valueChange, getGiaHv } = useVoucher(tableWin, voucherCode, currentTab, changeOtherDetail);
     const schemaEdit: IRowsColsField = schemaUi.config.itemEdit;
     const zod = schemaUi.zod;
 
@@ -56,14 +56,23 @@ const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, sch
         if (!confirm || checkFilter()) onSave(data);
     }
     const setValue = async (change: Record<string, string>) => {
-        let changeAdd: any = valueChange(dataItem, change);
+        let changeAdd: any = change;
         if (change.NGAY_CT !== undefined && data) {
             changeAdd = await tangSoCt(data, change.NGAY_CT);
         }
-        if (currentTab?.TAB_TABLE === "CTHV" && change.MA_HV !== undefined && data) {
-            refreshSourceDvtCb?.(change.MA_HV);
+        if (currentTab?.TAB_TABLE === "CTHV" && data) {
+            if (change.MA_HV !== undefined) {
+                refreshSourceDvtCb?.(change.MA_HV);
+            }
+            if (change.MA_HV !== undefined || change.DVT_CB !== undefined) {
+                const priceInfo = await getGiaHv(change.MA_HV || data.MA_HV, change.DVT_CB || data.DVT_CB);
+                changeAdd = { ...changeAdd, ...priceInfo }
+            }
         }
-        setDataItem(prev => prev ? ({ ...prev, ...change, ...changeAdd }) : null);
+
+        const changeMore = valueChange(dataItem, changeAdd);
+
+        setDataItem(prev => prev ? ({ ...prev, ...changeMore, ...changeAdd }) : null);
         if (!isChange) setIsChange(true);
     }
     const [containHeight, setContainHeight] = useState<number>(0);

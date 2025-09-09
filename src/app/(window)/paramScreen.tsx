@@ -114,7 +114,8 @@ export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeIte
                 }));
             }
             if (configSource?.url) {
-                const url = configSource.url;
+                const url = (configSource.url as string).replace('#DVCS_ID#', encodeURIComponent(orgUnit!));
+
                 const apiGetPost = configSource.type === "post" ? api.post : api.get;
                 await apiGetPost({
                     link: url, data: configSource.dataPost,
