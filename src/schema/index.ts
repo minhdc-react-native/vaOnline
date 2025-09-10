@@ -77,7 +77,6 @@ export interface ISchemaWinValue {
     defaultNew: Record<string, any>,
     dataMaster?: string[],
     addDetails?: string[],
-    copyDetails?: string | string[],
     zod?: Record<string, { type: 'string' | 'number', requiredIf?: string | string[], msgError?: string }>
 }
 

@@ -1,7 +1,7 @@
 // =============================
 import { useTranslation } from '@/context/TranslationContext';
 import { VACOMTheme } from '@/theme/theme';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, Card, Divider, SegmentedButtons, Text, useTheme } from 'react-native-paper';
 import { useContextSelector } from 'use-context-selector';
@@ -60,10 +60,12 @@ const ViewComponent: React.FC<IProps> = ({
                 prevValue.current = value;
                 const expression: Record<string, string> = typeof field.expression === "string" ?
                     evalExpr(field.expression, field.requiredKeys) : field.expression;
-                onBlurTaxCode(value, expression)
+                const expressionIfEmpty = field.expressionIfEmpty ? (Array.isArray(field.expressionIfEmpty) ? field.expressionIfEmpty : evalExpr(field.expressionIfEmpty, field.requiredKeys)) : [];
+
+                onBlurTaxCode(value, expressionIfEmpty, expression)
             };
         }
-    }, [value, field, handleAction, onBlurTaxCode]);
+    }, [value, field, handleAction, onBlurTaxCode, evalExpr]);
 
     const { colors } = useTheme<VACOMTheme>();
     const { showToast } = useToast();
@@ -77,32 +79,44 @@ const ViewComponent: React.FC<IProps> = ({
             : false;
     }, [field.disabled, evalExpr, field.requiredKeys]);
 
+    const data = useRef<Record<string, any>>({});
+    data.current = formState.state;
+
     const onSelectSearch = useCallback((item: Record<string, any> | null) => {
         if (field.type !== "search") return;
         const expression: Record<string, string> = typeof field.expression === "string" ?
             evalExpr(field.expression, field.requiredKeys) : field.expression;
 
+        const expressionIfEmpty = field.expressionIfEmpty ? (Array.isArray(field.expressionIfEmpty) ? field.expressionIfEmpty : evalExpr(field.expressionIfEmpty, field.requiredKeys)) : [];
+
         let valueChange: any = { [field.bind!]: (item?.[field.fField] ?? "") };
         if (expression && item) {
             Object.keys(expression).map(key => {
-                valueChange[key] = item[expression ? expression[key] : key] ?? expression[key];
+                if (!expressionIfEmpty.includes(key) || !isNotEmpty(data.current[key])) {
+                    valueChange[key] = item[expression ? expression[key] : key] ?? expression[key];
+                }
             });
         }
         setValues(valueChange);
-    }, [field, setValues]);
+    }, [field, setValues, evalExpr]);
 
     const onSelectList = useCallback((item: IData | null) => {
         if (field.type !== "selectList") return;
         const expression: Record<string, string> = typeof field.expression === "string" ?
             evalExpr(field.expression, field.requiredKeys) : field.expression;
+
+        const expressionIfEmpty = field.expressionIfEmpty ? (Array.isArray(field.expressionIfEmpty) ? field.expressionIfEmpty : evalExpr(field.expressionIfEmpty, field.requiredKeys)) : [];
+
         let valueChange: any = { [field.bind!]: item?.[field.fId ?? "id"] };
         if (expression && item) {
             Object.keys(expression).map(key => {
-                valueChange[key] = item[expression ? expression[key] : key];
+                if (!expressionIfEmpty.includes(key) || !isNotEmpty(data.current[key])) {
+                    valueChange[key] = item[expression ? expression[key] : key];
+                }
             });
         }
         setValues(valueChange);
-    }, [field, setValues]);
+    }, [field, setValues, evalExpr]);
 
     const onPressButton = useCallback(() => {
         if (field.type !== "button") return;
@@ -279,7 +293,7 @@ const ViewComponent: React.FC<IProps> = ({
             return (
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
                     <VcSearchList value={value} disabled={disabled} label={_(labelSearch)} clean={field.clean} itemView={field.itemView} numCharSearch={field.numCharSearch}
-                        tableSearch={field.tableSearch} fField={field.fField} checkSelected={field.checkSelected} onChange={onSelectSearch} />
+                        idRef={field.idRef} tableSearch={field.tableSearch} fField={field.fField} checkSelected={field.checkSelected} onChange={onSelectSearch} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
@@ -289,7 +303,7 @@ const ViewComponent: React.FC<IProps> = ({
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
                     <VcSelectList disabled={disabled} data={dataSource[field.keySource || field.bind!] ?? []} label={_(labelList)} key={key} clean={field.clean}
                         fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit} checkSelected={field.checkSelected}
-                        itemView={field.itemView} fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={onSelectList} />
+                        itemView={field.itemView} fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={onSelectList} notFistFilter={field.notFistFilter} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );

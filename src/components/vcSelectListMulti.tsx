@@ -63,7 +63,7 @@ const VcSelectListMulti = ({
     loading,
     tableWin,
     isError,
-    isNewEdit = true,
+    isNewEdit = false,
     separator = ",",
     disabled,
     itemView

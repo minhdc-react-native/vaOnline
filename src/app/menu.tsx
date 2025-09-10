@@ -9,10 +9,11 @@ export default function MenuScreen({ menuMain, keyMenuWin }: { menuMain: string,
     const lang = useDataApp((state) => state.lang);
     const dataMenu = useMemo(() => {
         return dataMenuWin[menuMain][keyMenuWin];
-    }, [keyMenuWin]);
+    }, [dataMenuWin, keyMenuWin, menuMain]);
 
     const onPress = (item: IMenuWin) => {
-        router.navigate({ pathname: `/(window)`, params: { menuWin: JSON.stringify(item) } });
+        const pathName: any = item.typeWin === "(custom)" ? '/(custom)' : (item.typeWin === "(report)" ? '/(report)' : '/(window)');
+        router.navigate({ pathname: pathName, params: { menuWin: JSON.stringify(item) } });
     };
 
     return (

@@ -38,9 +38,10 @@ declare global {
         },
         row: number,
         col: number,
-        typeWin: '(window)' | '(winMaster)' | '(winTree)',
+        typeWin: '(window)' | '(winMaster)' | '(winTree)' | '(report)' | '(custom)',
         codeField?: string;
         defaultValue?: Record<string, any>;
+        copyDetails?: Partial<Record<ITableWin, string[]>>;
         typeView?: { _typeView: 1 | 2 | 3 } // 1: Kế toán, 2: Hkd, 3: System
     }
 
@@ -81,6 +82,7 @@ declare global {
         columnType: string,
         value: any
     };
+
     type IRoundNumber = 'rQuantity' | 'rPrice' | 'rPriceNt' | 'rPercentage' | 'rAmount' | 'rAmountNt' | 'rExchangeRate' | 'rRate';
 
     type ITableWin = 'Empty' | 'Year' |
@@ -89,11 +91,12 @@ declare global {
         'DPHV' | 'CTHV' | 'PSTHUE' | 'PSCF' | 'PBDT' |
         'DPKT' | 'CTKT';
 
-    type ITableSearch = 'DMDT' | 'DMCS' | 'DMKM' | 'DMHDG' | 'DMVV' | 'DMMNGH' | 'DMMCN' | 'DMTK' | 'DMTTDB' | 'DMDVT' |
+    type ITableSearch = 'CUSTOM' | 'DMDT' | 'DMCS' | 'DMKM' | 'DMHDG' | 'DMVV' | 'DMMNGH' | 'DMMCN' | 'DMTK' | 'DMTTDB' | 'DMDVT' |
         'DMTHUE' | 'DMQS' | 'DMHV' | 'DMKHO' | 'DMLH' | 'DMNG';
 
     type IKeyMenuWin = 'acCatalogBalance' | 'acCatalogBank' | 'acCatalogGood' | 'acCatalogOther' | 'acCatalogPartner' |
-        'banHangPhaiThu' | 'vonBangTien'
+        'banHangPhaiThu' | 'vonBangTien' | 'congTacCuoiKy' |
+        'baoCaoDonVi' | 'baoCaoToanNganh'
 
     var isNotEmpty: (value: any) => boolean;
 }

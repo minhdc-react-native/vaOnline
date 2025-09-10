@@ -2,6 +2,9 @@ import { IConfigDateMenuWin } from '@/constants/vcData';
 import { create } from 'zustand';
 
 interface IDataApp {
+    dataReportFilter: Record<string, any>;
+    setDataReportFilter: (dataReportFilter: Record<string, any>) => void;
+
     paramSystem: IParamSystem | null;
     setParamSystem: (paramSystem: IParamSystem | null) => void;
 
@@ -43,9 +46,10 @@ interface IDataApp {
 }
 
 const initialState: Omit<IDataApp,
-    'setParamSystem' | 'setShouldRefresh' | 'setBackHandlerQuestion' | 'setYears' |
+    'setDataReportFilter' | 'setParamSystem' | 'setShouldRefresh' | 'setBackHandlerQuestion' | 'setYears' |
     'setLang' | 'setListVoucher2' | 'setCurrentYear' | 'setOrgUnit' | 'setUserLogin' | 'setCurrencies' | 'reset' | 'setMenuIds' | 'setDataMenuWin'
 > = {
+    dataReportFilter: { NGAY_CT1: null, NGAY_CT2: null },
     paramSystem: null,
     shouldRefresh: null,
     backHandlerQuestion: null,
@@ -63,6 +67,9 @@ const initialState: Omit<IDataApp,
 export const useDataApp = create<IDataApp>()(
     (set) => ({
         ...initialState,
+        setDataReportFilter: (update: Record<string, any>) => set((state) => ({
+            dataReportFilter: { ...state.dataReportFilter, ...update }
+        })),
         setParamSystem: (paramSystem) => set({ paramSystem }),
         setShouldRefresh: (shouldRefresh) => set({ shouldRefresh }),
         setBackHandlerQuestion: (backHandlerQuestion) => set({ backHandlerQuestion }),

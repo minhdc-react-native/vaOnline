@@ -46,6 +46,8 @@ const StackApp = () => {
     <LayoutStack data={{
       '(auth)': { headerShown: false },
       '(window)': { headerShown: false },
+      '(report)': { headerShown: false },
+      '(custom)': { headerShown: false },
       'list-app': { headerShown: false },
       admin: { headerShown: false },
       accounting: { headerShown: false },

@@ -30,7 +30,10 @@ export function useBoundField<T = any>(
 
     const getValue = (p: string) => get(formState.state, p);
 
-    const onBlurTaxCode = useCallback((value: string, expression?: Record<string, string>) => {
+    const data = useRef(formState.state);
+    data.current = formState.state;
+
+    const onBlurTaxCode = useCallback((value: string, expressionIfEmpty: string[], expression?: Record<string, string>) => {
         api.get({
             link: `/api/System/GetDataByReferencesId?id=608bf6bb-360d-44eb-b43f-76937684bd41&filtervalue=${value}`,
             callBack: (res: any[]) => {
@@ -39,7 +42,9 @@ export function useBoundField<T = any>(
                     if (expression && item) {
                         let valueChange: any = {};
                         Object.keys(expression).map(key => {
-                            valueChange[key] = item[expression ? expression[key] : key];
+                            if (!expressionIfEmpty.includes(key) || !isNotEmpty((data.current as any)[key])) {
+                                valueChange[key] = item[expression ? expression[key] : key];
+                            }
                         });
                         setValues(valueChange);
                     }

@@ -41,7 +41,6 @@ const InputFieldComponent: React.FC<IProps> = ({
     const { colors } = useTheme<VACOMTheme>();
     const { _ } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
-    const [scannerVisible, setScannerVisible] = useState(false);
 
     const handleChangeText = useCallback(
         (val: string) => {

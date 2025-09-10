@@ -1,3 +1,4 @@
+import FormWrapper from "@/components/formWrapper";
 import LoadingScreen from "@/components/loadingScreen";
 import { buildZodSchema } from "@/components/UIEngine/buildZodSchema";
 import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
@@ -6,6 +7,7 @@ import { IRowsColsField } from "@/components/UIEngine/types";
 import VcSelectList from "@/components/vcSelectList";
 import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { ListItemView } from "@/schema/voucher/itemView";
+import { VACOMTheme } from "@/theme/theme";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
 import dayjs from 'dayjs';
@@ -22,13 +24,13 @@ interface IProgs {
     timeItem?: IData | null;
 }
 // thêm vào cho hết warning
-export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeItem }: IProgs) {
+export default function ParamReport({ onConfirm, paramKey, schemaConfig, timeItem }: IProgs) {
     const orgUnit = useDataApp((state) => state.orgUnit);
     const userLogin = useDataApp((state) => state.userLogin);
     const currentYear = useDataApp((state) => state.currentYear);
 
     const slideAnim = useRef(new Animated.Value(HEIGHT_WINDOW)).current;
-    const { colors } = useTheme();
+    const { colors } = useTheme<VACOMTheme>();
 
     const arrReplace: Record<string, any> = {
         '#DVCS_ID#': orgUnit,
@@ -204,14 +206,14 @@ export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeIte
                         <Button mode="contained" onPress={() => closePanel(true, paramKey0)}>Xác nhận</Button>
                     </View>
                 </View>
-                <View style={[styles.content]}>
-                    {loading ? <LoadingScreen /> : <SchemaUIEngine
+                <View style={[styles.content, { height: schemaEdit.height ?? "80%", backgroundColor: colors.vacom.backLayout }]}>
+                    {loading ? <LoadingScreen /> : <FormWrapper><SchemaUIEngine
                         schema={schemaEdit}
                         data={paramKey0}
                         onChangeItemData={setValue}
                         errors={errors}
                         dataSource={dataSource}
-                    />}
+                    /></FormWrapper>}
                 </View>
             </Animated.View>
         </View>

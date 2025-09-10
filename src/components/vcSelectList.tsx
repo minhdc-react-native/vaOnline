@@ -30,12 +30,13 @@ type IListProps = {
     itemView?: IRowsColsField,
     isError?: boolean;
     isNewEdit?: boolean;
+    notFistFilter?: boolean;
     checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 };
 
 const ViewComponent: React.FC<IListProps> = ({
     label, placeholder, data, value, onChange, fDisplay, typeDisplay = "value", disabled = false,
-    fId = "id", fValue = "value", clean = true, rightIcon, style, loading, tableWin, isError, isNewEdit = false, checkSelected, itemView
+    fId = "id", fValue = "value", clean = true, rightIcon, style, loading, tableWin, isError, isNewEdit = false, notFistFilter, checkSelected, itemView
 }) => {
     const colors = useTheme<VACOMTheme>().colors;
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -73,11 +74,16 @@ const ViewComponent: React.FC<IListProps> = ({
         if (value) {
             const selectedItem = data.find(item => item[fId] === value);
             setItemSelected(selectedItem || null);
-            setSearchText(value.toString());
         } else {
             setItemSelected(null);
         }
     }, [value, data]);
+
+    useEffect(() => {
+        if (notFistFilter) return;
+        setSearchText(value?.toString());
+    }, []);
+
     return (
         <>
             <Pressable
@@ -135,7 +141,7 @@ const ViewComponent: React.FC<IListProps> = ({
                     keyboardBlurBehavior="restore"
                     containerStyle={{ marginTop: 60 }}
                 >
-                    <HeaderView setSearchText={setSearchText} txtSearch={value?.toString()} label={label || placeholder} tableWin={tableWin} closeModal={closeModal} isNewEdit={isNewEdit} />
+                    <HeaderView setSearchText={setSearchText} txtSearch={notFistFilter ? '' : value?.toString()} label={label || placeholder} tableWin={tableWin} closeModal={closeModal} isNewEdit={isNewEdit} />
                     <BottomSheetFlatList
                         data={filteredList}
                         keyExtractor={(item: IData) => item[fId].toString()}

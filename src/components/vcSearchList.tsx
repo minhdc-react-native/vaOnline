@@ -23,27 +23,29 @@ const EmptyView: IRowsColsField = {
         }
     ]
 };
-
+const getUrlReference = (id: string) => `/api/System/GetDataByReferencesId?id=${id}&filtervalue=#filterValue#`
 const urlBase: Record<ITableSearch, string> = { // gắn api cho đỡ nhầm...
-    DMTHUE: `/api/System/GetDataByReferencesId?id=6bba44d6-6a47-4471-ad98-656ed502fc5a&filtervalue=#filterValue#`,
-    DMQS: `/api/System/GetDataByReferencesId?id=9c19a269-2c63-46df-8912-e4c9569fd46b&filtervalue=#filterValue#`,
-    DMDT: `/api/System/GetDataByReferencesId?id=86de5f41-4277-4a91-bf68-16acc89295c4&filtervalue=#filterValue#`,
-    DMCS: `/api/System/GetDataByReferencesId?id=a228db46-2754-4fa3-a2b4-6729d3f0c248&filtervalue=#filterValue#`,
-    DMKM: `/api/System/GetDataByReferencesId?id=49e80ac4-2b07-47ef-8297-6efb2074fbdd&filtervalue=#filterValue#`,
-    DMHDG: `/api/System/GetDataByReferencesId?id=67b663cb-d062-4057-83ff-cec81a60a996&filtervalue=#filterValue#`,
-    DMVV: `/api/System/GetDataByReferencesId?id=4fcca1d7-9011-4b4f-b9e8-721a546aa637&filtervalue=#filterValue#`,
-    DMMNGH: '/api/System/GetDataByReferencesId?id=0b22c919-a275-4d05-83bd-c34844d9ec67&filtervalue=#filterValue#',
-    DMMCN: '/api/System/GetDataByReferencesId?id=0600dd65-9cf4-4fd7-bf43-ff50a5578b42&filtervalue=#filterValue#',
-    DMTK: '/api/System/GetDataByReferencesId?id=0a93c38b-5f1f-422a-8039-a6cee1967af2&filtervalue=#filterValue#',
-    DMTTDB: '/api/System/GetDataByReferencesId?id=ad61024c-69cc-4d3b-9d5e-e5685db5bdce&filtervalue=#filterValue#',
-    DMDVT: '/api/System/GetDataByReferencesId?id=2beb4691-3bc8-40aa-a5ba-6170fef7a7c4&filtervalue=#filterValue#',
-    DMKHO: `/api/System/GetDataByReferencesId?id=189d7179-da87-40cc-a5b3-64f52cef8b86&filtervalue=#filterValue#`,
-    DMHV: `/api/System/GetDataByReferencesId?id=c0c79756-5702-4e39-840e-11c3fa759b81&filtervalue=#filterValue#`,
-    DMLH: `/api/System/GetDataByReferencesId?id=77b75702-c884-4752-bfe5-2170214945ba&filtervalue=#filterValue#`,
-    DMNG: `/api/System/GetDataByReferencesId?id=4f263d9d-a736-447b-a126-e338fc700f5d&filtervalue=#filterValue#`
+    CUSTOM: '???',
+    DMTHUE: getUrlReference('6bba44d6-6a47-4471-ad98-656ed502fc5a'),
+    DMQS: getUrlReference('9c19a269-2c63-46df-8912-e4c9569fd46b'),
+    DMDT: getUrlReference('86de5f41-4277-4a91-bf68-16acc89295c4'),
+    DMCS: getUrlReference('a228db46-2754-4fa3-a2b4-6729d3f0c248'),
+    DMKM: getUrlReference('49e80ac4-2b07-47ef-8297-6efb2074fbdd'),
+    DMHDG: getUrlReference('67b663cb-d062-4057-83ff-cec81a60a996'),
+    DMVV: getUrlReference('4fcca1d7-9011-4b4f-b9e8-721a546aa637'),
+    DMMNGH: getUrlReference('0b22c919-a275-4d05-83bd-c34844d9ec67'),
+    DMMCN: getUrlReference('0600dd65-9cf4-4fd7-bf43-ff50a5578b42'),
+    DMTK: getUrlReference('0a93c38b-5f1f-422a-8039-a6cee1967af2'),
+    DMTTDB: getUrlReference('ad61024c-69cc-4d3b-9d5e-e5685db5bdce'),
+    DMDVT: getUrlReference('2beb4691-3bc8-40aa-a5ba-6170fef7a7c4'),
+    DMKHO: getUrlReference('189d7179-da87-40cc-a5b3-64f52cef8b86'),
+    DMHV: getUrlReference('c0c79756-5702-4e39-840e-11c3fa759b81'),
+    DMLH: getUrlReference('77b75702-c884-4752-bfe5-2170214945ba'),
+    DMNG: getUrlReference('4f263d9d-a736-447b-a126-e338fc700f5d')
 }
 interface IProgs {
     tableSearch: ITableSearch,
+    idRef?: string;
     itemView?: IRowsColsField,
     label?: string;
     placeholder?: string;
@@ -58,11 +60,11 @@ interface IProgs {
     numCharSearch?: number,
     checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 }
-const ViewComponent: React.FC<IProgs> = ({ tableSearch, label, placeholder, value, fField, onChange, clean = true, rightIcon, style, isLoading, disabled, checkSelected, itemView, numCharSearch = 3 }: IProgs) => {
+const ViewComponent: React.FC<IProgs> = ({ tableSearch, idRef, label, placeholder, value, fField, onChange, clean = true, rightIcon, style, isLoading, disabled, checkSelected, itemView, numCharSearch = 3 }: IProgs) => {
 
     const url = useMemo(() => {
-        return urlBase[tableSearch];
-    }, [tableSearch]);
+        return tableSearch === "CUSTOM" ? getUrlReference(idRef ?? '') : urlBase[tableSearch];
+    }, [idRef, tableSearch]);
 
     const { colors } = useTheme<VACOMTheme>();
     const bottomSheetRef = useRef<BottomSheet>(null);

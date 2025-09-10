@@ -39,7 +39,49 @@ export const DataMenuAccounting: Record<string, Partial<Record<IKeyMenuWin, ICon
 
     },
     report: {
+        baoCaoDonVi: [
+            {
+                title: 'Báo cáo kế toán', titleE: 'Accounting report',
+                data: [
+                    {
+                        id: 'WIN00071', typeWin: "(report)", tableWin: "Empty", label: 'Chứng từ ghi sổ', labelE: 'Recording documents',
+                        icon: icon, row: 1, col: 1, typeView: { _typeView: 1 }
+                    }
+                ]
+            },
+            {
+                title: 'Báo cáo tài chính', titleE: 'Financial report',
+                data: [
 
+                ]
+            },
+            {
+                title: 'Báo cáo khác', titleE: 'Other reports',
+                data: [
+
+                ]
+            }
+        ],
+        baoCaoToanNganh: [
+            {
+                title: 'Báo cáo kế toán', titleE: 'Accounting report',
+                data: [
+
+                ]
+            },
+            {
+                title: 'Báo cáo tài chính', titleE: 'Financial report',
+                data: [
+
+                ]
+            },
+            {
+                title: 'Báo cáo khác', titleE: 'Other reports',
+                data: [
+
+                ]
+            }
+        ]
     },
     system: {
 
@@ -54,7 +96,7 @@ export const DataMenuAccounting: Record<string, Partial<Record<IKeyMenuWin, ICon
                 data: [
                     {
                         id: 'WIN00052', typeWin: "(winMaster)", tableWin: "DPHV", label: 'Hóa đơn bán hàng', labelE: 'Sale invoice',
-                        defaultValue: { MA_CT: 'PBH', DIEN_GIAI: 'Hóa đơn bán hàng' }, icon: icon, row: 1, col: 1, typeView: { _typeView: 1 }
+                        defaultValue: { MA_CT: 'PBH', DIEN_GIAI: 'Hóa đơn bán hàng' }, copyDetails: { CTHV: ['MA_KHO', 'TK_NO2'], PSTHUE: ['TK_NO'], PSCF: ['TK_CO'] }, icon: icon, row: 1, col: 1, typeView: { _typeView: 1 }
                     },
                 ]
             }
@@ -65,7 +107,18 @@ export const DataMenuAccounting: Record<string, Partial<Record<IKeyMenuWin, ICon
                 data: [
                     {
                         id: 'WIN00040', typeWin: "(winMaster)", tableWin: "DPKT", label: 'Phiếu kế toán khác', labelE: 'Other accounting slips',
-                        defaultValue: { MA_CT: 'PKT', DIEN_GIAI: 'Phiếu hạch toán' }, icon: icon, row: 1, col: 1, typeView: { _typeView: 1 }
+                        defaultValue: { MA_CT: 'PKT', DIEN_GIAI: 'Phiếu hạch toán' }, copyDetails: { CTKT: ['TK_NO', 'TK_CO'] }, icon: icon, row: 1, col: 1, typeView: { _typeView: 1 }
+                    },
+                ]
+            }
+        ],
+        congTacCuoiKy: [
+            {
+                title: 'Chức năng', titleE: 'Function',
+                data: [
+                    {
+                        id: 'WIN00237', typeWin: "(custom)", tableWin: "Empty", label: 'Kiểm tra bảo trì số liệu', labelE: 'Check maintenance data',
+                        icon: icon, row: 1, col: 1, typeView: { _typeView: 1 }
                     },
                 ]
             }

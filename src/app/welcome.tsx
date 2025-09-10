@@ -11,21 +11,22 @@ export default function WelcomeScreen() {
     return (
         <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 20, paddingBottom: 50 }}>
             {/* <TextCrm text='CRM' /> */}
-            <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: 50 }}>
+            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
                 <Image source={sloganVacom} style={styles.logo} />
                 {/* <Text variant='headlineMedium' style={[styles.textProduct, {
                     backgroundColor: colors.elevation.level2,
                     borderColor: colors.elevation.level5
                 }]}>Acounting</Text> */}
                 <TextZoomIn text='Ứng dụng quản lý kế toán Online' />
+            </View>
+            <View style={{ justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: 50 }}>
                 <LottieView
-                    source={require('@/assets/animations/login.json')}
+                    source={require('@/assets/animations/loginRed.json')}
                     autoPlay
                     loop
                     style={styles.lottie}
                 />
             </View>
-
             <Button mode='contained' style={{ width: "50%" }} onPress={() => router.replace("./(auth)/login")} ><Text variant='titleMedium' style={{ fontWeight: "bold", color: "#fff" }}>Đăng nhập</Text></Button>
         </SafeAreaView>
     );

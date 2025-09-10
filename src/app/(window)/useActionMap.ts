@@ -13,6 +13,14 @@ interface IShareFile {
     type?: 'text/xml' | 'application/pdf' | 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // type: 'application/vnd.ms-excel' xls
     isDelete?: boolean
 }
+export const shareFile = async ({ uri, title = "Chia sẻ file ...", type = "text/xml", isDelete = true }: IShareFile) => {
+    if (!uri) return;
+    Share.open({
+        url: uri,
+        type: type,
+        title: title,
+    }).finally(() => isDelete && RNFS.unlink(uri));
+};
 interface IProgs {
     handleRefresh: () => void,
     checkLayoutAction: (actionName: string, callBack: (values: Record<string, any>) => void, data?: Record<string, any>) => void
@@ -21,15 +29,6 @@ export const useActionMap = ({ handleRefresh, checkLayoutAction }: IProgs) => {
     const { show, hide } = useLoading();
     const { showToast } = useToast();
     const { showPopup } = usePopup();
-    const shareFile = async ({ uri, title = "Chia sẻ file ...", type = "text/xml", isDelete = true }: IShareFile) => {
-        if (!uri) return;
-        Share.open({
-            url: uri,
-            type: type,
-            title: title,
-        }).finally(() => isDelete && RNFS.unlink(uri));
-    };
-
     const handlePrint = useMemo(() => {
         return {
             printItem: (param?: Record<string, any>) => {

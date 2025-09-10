@@ -7,6 +7,7 @@ import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { defaultNumberNew, VcReferences } from "@/constants/vcData";
 import { useTranslation } from "@/context/TranslationContext";
 import { schemaWin, schemaWinEmpty } from "@/schema";
+import { getListItemView, ListItemView } from "@/schema/voucher/itemView";
 import { VACOMTheme } from "@/theme/theme";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
@@ -24,9 +25,6 @@ const backHandQuestion = { title: "Cảnh báo", message: "Dữ liệu đã thay
 const backHandQuestionE = { title: "Warning", message: "Data has changed, do you want to exit?" };
 
 interface IProgs {
-    // windowId: string;
-    // tableWin: ITableWin;
-    // typeWin?: '(window)' | '(winMaster)' | '(winTree)';
     itemMenuWin: IMenuWin
     pageSize?: number,
     loadingBegin?: boolean;
@@ -550,7 +548,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                     : [key, evalExpr(value)]
             )
         );
-        const copyFieldDetails = schemaWinDetail.copyDetails ? (Array.isArray(schemaWinDetail.copyDetails) ? schemaWinDetail.copyDetails : evalExpr(schemaWinDetail.copyDetails)) : [];
+
+        const copyFieldDetails = itemMenuWin.copyDetails?.[currentTab.TAB_TABLE] ?? [];
 
         let copyDetails: any = {};
         if (dataDetail && dataDetail.length > 0) {
@@ -741,8 +740,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 callBack: (res) => {
                     if (res && isNotEmpty(res[0])) {
                         const layout = res[0].LAYOUT_MOBILE;
-                        const fn = new Function("colors", layout);
-                        const result = fn(colors);
+                        const fn = new Function("colors", "getListItemView", "ListItemView", layout);
+                        const result = fn(colors, getListItemView, ListItemView);
                         setLayoutData(result);
                     }
                 }

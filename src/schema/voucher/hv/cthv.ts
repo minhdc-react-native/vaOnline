@@ -13,6 +13,13 @@ const expressionMa_hv = `{{
         ...(_isHt2 && NHOM_CT==='2' && { TK_CO: 'TK_HV' })
     }
 }}`;
+
+const expressionIfEmptyMa_hv = `{{
+    [
+        ...(_isHt2 && NHOM_CT==='2'?['TK_NO2']:[])
+    ]
+}}`;
+
 const cthv0: ISchemaWin = {
     itemAction: {
         type: "cols",
@@ -99,6 +106,7 @@ const cthv0: ISchemaWin = {
                         itemView: ListItemView.MA_HV,
                         requiredKeys: requiredKeysMa_hv,
                         expression: expressionMa_hv,
+                        expressionIfEmpty: expressionIfEmptyMa_hv,
                         fField: 'MA_HV',
                         label: "MA_HV",
                         bind: 'MA_HV',
@@ -404,8 +412,6 @@ const cthv0: ISchemaWin = {
 export const cthv: ISchemaWinValue = {
     config: cthv0,
     defaultNew: { DPHV_id: "{{id}}", NAM: '#NAM#' }, require: true,
-    // copyDetails: ['MA_KHO'],
-    copyDetails: "{{MA_CT!=='PDV'?['MA_KHO']:[]}}",
     zod: {
         MA_HV: { type: 'string', msgError: '...' },
         SO_LUONG: { type: 'number' },

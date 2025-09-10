@@ -1,8 +1,9 @@
+import LoadingScreen from "@/components/loadingScreen";
 import { useAuth } from "@/hooks/useAuth";
 import { getRemember, getToken } from "@/utils/vcStorage";
 import { Redirect } from "expo-router";
 import { useEffect } from "react";
-import { StyleSheet } from "react-native";
+import { View } from "react-native";
 
 export default function AppScreen() {
     const { isLoggedIn, login, setLoggedIn, biometricLogin } = useAuth();
@@ -23,15 +24,7 @@ export default function AppScreen() {
     }, []);
 
     if (isLoggedIn === null) {
-        return null
+        return <View style={{ flex: 1, paddingTop: 100 }}><LoadingScreen /></View>
     }
     return <Redirect href={isLoggedIn ? "/(auth)/login" : "/welcome"} />;
 }
-
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    }
-});

@@ -17,7 +17,8 @@ export default function VoucherAccounting() {
 
     const allRoutes = [
         { key: 'banHangPhaiThu', title: lang === 'vi' ? 'Bán hàng - Phải thu' : 'Sales - Receivable', keyMenuWin: 'banHangPhaiThu' },
-        { key: 'vonBangTien', title: lang === 'vi' ? 'Vốn bằng tiền' : 'Capital in cash', keyMenuWin: 'vonBangTien' }
+        { key: 'vonBangTien', title: lang === 'vi' ? 'Vốn bằng tiền' : 'Capital in cash', keyMenuWin: 'vonBangTien' },
+        { key: 'congTacCuoiKy', title: lang === 'vi' ? 'Công tác cuối kỳ' : 'Work at the end of the period', keyMenuWin: 'congTacCuoiKy' }
     ];
 
     const hasPermission = (keyMenuWin: IKeyMenuWin) => {
