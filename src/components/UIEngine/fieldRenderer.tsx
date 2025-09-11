@@ -136,7 +136,7 @@ const ViewComponent: React.FC<IProps> = ({
                 return child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true;
             }) ?? [];
             return (
-                <View key={key} style={[{ flexDirection: "row", gap: 10 }, field.style]}>
+                <View key={key} style={[{ flexDirection: "row", gap: 5 }, field.style]}>
                     {fieldsRows?.map((child, i) => (
                         <FieldRenderer
                             key={i}
@@ -151,7 +151,7 @@ const ViewComponent: React.FC<IProps> = ({
                 return child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true;
             }) ?? [];
             return (
-                <View key={key} style={[{ gap: 10 }, field.style]}>
+                <View key={key} style={[{ gap: 5 }, field.style]}>
                     {fieldsCols.map((child, i) => (
                         <FieldRenderer
                             key={i}
@@ -166,7 +166,7 @@ const ViewComponent: React.FC<IProps> = ({
                 return child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true;
             }) ?? [];
             return (
-                <Card style={[{ padding: 20, backgroundColor: colors.background }, field.style]} contentStyle={{ gap: 10 }}>
+                <Card style={[{ padding: 20, backgroundColor: colors.background }, field.style]} contentStyle={{ gap: 5 }}>
                     {fieldsCard.map((child, i) => (
                         <FieldRenderer
                             key={i}

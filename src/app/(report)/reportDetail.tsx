@@ -1,11 +1,8 @@
 import LoadingScreen from '@/components/loadingScreen';
-import VcSelectList from '@/components/vcSelectList';
-import { useTranslation } from '@/context/TranslationContext';
 import { useReport } from '@/hooks/useReport';
-import { getListItemView } from '@/schema/voucher/itemView';
 import { VACOMTheme } from '@/theme/theme';
 import { FontAwesome } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { useCallback, useMemo } from 'react';
 import { View } from 'react-native';
 import { Appbar, Divider, IconButton, SegmentedButtons, useTheme } from 'react-native-paper';
@@ -17,20 +14,19 @@ const currencies = [
     { value: '2', label: 'NT' },
     { value: '3', label: 'VNĐ & NT' }
 ]
-export default function ReportScreen() {
+interface IProg {
+    reportDefault: IReportItemDefault
+}
+export default function ReportDetail({ reportDefault }: IProg) {
     const { bottom } = useSafeAreaInsets();
-    const { menuWin } = useLocalSearchParams();
-    const itemMenuWin: IMenuWin = JSON.parse(menuWin?.toString());
-    const { _ } = useTranslation();
-    const { reports, menuRow, routerNumber, reportSchema, currentReport, setCurrentReport, loading, showParam, onCreateReport,
-        setShowParam, layoutFilter, dataFilter, timeItem, onFilter, vnd_nt, setVnd_nt, data, onRefresh, dataSource
-    } = useReport({ itemMenuWin });
+    const { reportSchema, routerNumber, loading, showParam, onCreateReport,
+        setShowParam, layoutFilter, dataFilter, timeItem, onFilter, menuRow, vnd_nt, setVnd_nt, data, onRefresh, dataSource
+    } = useReport({ reportDefault });
     const { colors } = useTheme<VACOMTheme>();
 
     const onConfirm = useCallback((paramKey?: Record<string, any> | undefined, timeItem?: IData | null) => {
         onFilter(paramKey, timeItem);
     }, [onFilter]);
-
     const renderFilter = useMemo(() => {
         if (!layoutFilter) return null;
         return (
@@ -41,11 +37,10 @@ export default function ReportScreen() {
     }, [dataFilter, dataSource, layoutFilter, onConfirm, timeItem]);
 
     return (
-        <View style={{ flex: 1, marginBottom: bottom }}>
+        <View style={{ flex: 1, paddingBottom: bottom }}>
             <Appbar.Header>
                 <Appbar.BackAction onPress={() => router.back()} />
-                <VcSelectList label={_('REPORT_NAME')} style={{ flex: 1 }} clean={false} data={reports} itemView={getListItemView('REPORT_ID', 'REPORT_NAME')}
-                    value={currentReport?.REPORT_ID} fId='REPORT_ID' fValue='REPORT_NAME' onChange={setCurrentReport} />
+                <Appbar.Content title={reportDefault.reportItem.REPORT_NAME} />
                 <Appbar.Action icon={'filter-outline'} onPress={() => setShowParam(true)} />
             </Appbar.Header>
             <View style={{ backgroundColor: colors.background }}>
@@ -58,7 +53,7 @@ export default function ReportScreen() {
                 </View>
             </View>
             <Divider />
-            {reportSchema ? <ReportTable routerNumber={routerNumber} data={data} menuRow={menuRow} vnd_nt={vnd_nt} reportSchema={reportSchema} filterKey={dataFilter} onRefresh={onRefresh} loading={loading} /> : <LoadingScreen />}
+            {reportSchema ? <ReportTable data={data} menuRow={menuRow} routerNumber={routerNumber} vnd_nt={vnd_nt} reportSchema={reportSchema} filterKey={dataFilter} onRefresh={onRefresh} loading={loading} /> : <LoadingScreen />}
             {showParam && layoutFilter && renderFilter}
         </View>
     );

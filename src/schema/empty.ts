@@ -13,13 +13,13 @@ const empty0: ISchemaWin = {
                 type: "text",
                 requiredKeys: ["code", "name", "label"],
                 visibleIf: "{{code!==undefined && name!==undefined}}",
-                label: "{{`${name} (${code})`}}",
+                label: "{{`${code} - ${name}`}}",
             },
             {
                 type: "text",
                 requiredKeys: ["code", "name", "label", "id", "value"],
                 visibleIf: "{{(code===undefined || name===undefined) && label===undefined}}",
-                label: "{{`${value} (${id})`}}",
+                label: "{{`${id} - ${value}`}}",
             },
             {
                 type: "text",

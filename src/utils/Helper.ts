@@ -105,7 +105,7 @@ export const Helper = {
         return (value !== null && value !== undefined && (!isZero && value !== 0));
     },
     rmTone(str: string): string {
-        return str
+        return (str ?? '').toString()
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "") // Xoá dấu thanh
             .replace(/đ/g, "d")              // Thay chữ đ

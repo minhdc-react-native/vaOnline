@@ -1,13 +1,11 @@
+import { VACOMTheme } from "@/theme/theme";
 import { Helper } from "@/utils/Helper";
-import { router } from "expo-router";
-import { useCallback, useMemo } from "react";
 import { Pressable, View } from "react-native";
 import { customText, useTheme } from "react-native-paper";
 const Text = customText<'customVariant'>();
 const ROW_HEIGHT = 25;
 const BORDER_WIDTH = 0.5;
 interface IProgs {
-    reportSchema: ISchemaReport;
     item: any,
     groupedColumns: IColumnReport[],
     paramSystem: IParamSystem | null,
@@ -15,72 +13,11 @@ interface IProgs {
     currentId?: any | null,
     filter: Record<string, any>
 }
-export const ReportTableItem = ({ reportSchema, item, groupedColumns, paramSystem, onPress, currentId, filter }: IProgs) => {
-    const { colors } = useTheme();
-    const isBold = item.bold === "C";
-    const evalExpr = useEvalExpr(item);
-    const schemaReport = useMemo(() => {
-        return {
-            item: reportSchema.itemList || { type: "cols", fields: [] },
-            action: reportSchema.onPressItem
-        }
-    }, [])
-
-    const functionMap = useMemo(() => {
-        return {
-            openDetail: (filterDetail: Record<string, any>, itemString: string) => {
-                router.navigate({
-                    pathname: "/(report)/screen/reportDetail",
-                    params: { itemString: itemString, defaultFilter: JSON.stringify(filterDetail) }
-                })
-            },
-            editVoucher: (docId: string, voucherCode: IVoucherCode) => {
-                if (docId && VOUCHER_ORDER.includes(voucherCode)) {
-                    router.navigate({
-                        // @ts-ignore:next-line
-                        pathname: `/(other)/orderDetail/${docId}`,
-                        params: { voucherCode: voucherCode }
-                    });
-                } else if (docId && VOUCHER_ACC.includes(voucherCode)) {
-                    router.navigate({
-                        // @ts-ignore:next-line
-                        pathname: `/(window)/screen/newEditScreen`,
-                        params: { id: docId, title: Helper.getTitleOrder(voucherCode), table: "voucher", voucherCode: voucherCode }
-                    })
-                }
-            }
-        }
-    }, [])
-    const onItemPress = useCallback(() => {
-        const pressWhen = schemaReport.action?.pressWhen;
-        if (pressWhen && !evalExpr(pressWhen)) return;
-        switch (schemaReport.action?.name) {
-            case "editVoucher":
-                const info = schemaReport.action;
-                functionMap.editVoucher(item[info.docId], item[info.voucherCode]);
-                break;
-            case "openDetail":
-                let filterDetail: any = {};
-                const cog = schemaReport.action.params;
-
-                const itemReport = schemaReport.action.itemReport;
-                cog.forEach(itemParam => {
-                    if (itemParam.type === 1) {
-                        filterDetail[itemParam.name] = filter[itemParam.value];
-                    } else {
-                        filterDetail[itemParam.name] = item[itemParam.value];
-                    }
-                });
-                functionMap.openDetail(filterDetail, JSON.stringify(itemReport));
-                break;
-            default:
-                break;
-        }
-    }, [item]);
-
+export const ReportTableItem = ({ item, groupedColumns, paramSystem, onPress, currentId, filter }: IProgs) => {
+    const { colors } = useTheme<VACOMTheme>();
+    const isBold = item.BOLD === "C";
     return (
         <Pressable style={{ flexDirection: 'row' }} onPress={() => {
-            onItemPress();
             onPress?.(item);
         }}>
             {groupedColumns.map((col, index) => {
@@ -92,7 +29,7 @@ export const ReportTableItem = ({ reportSchema, item, groupedColumns, paramSyste
                 const isRed = isNumber && itemValue < 0;
                 switch (col.format?.type) {
                     case "number":
-                        itemValue = Helper.formatAmount(itemValue, false, paramSystem[col.format?.roundNumber ?? "rAmount"]);
+                        itemValue = Helper.formatAmount(itemValue, false, paramSystem![col.format?.roundNumber ?? "rAmount"]);
                         break;
                     case "date":
                         itemValue = Helper.isEmpty(itemValue) ? '' : Helper.getFormattedDate(itemValue, "dd/MM/yyyy HH:mm:ss", true);
@@ -137,7 +74,7 @@ export const ReportTableItem = ({ reportSchema, item, groupedColumns, paramSyste
                                     const isRedChild = isNumberChild && itemValueChild < 0;
                                     switch (child.format?.type) {
                                         case "number":
-                                            itemValueChild = Helper.formatAmount(itemValueChild, false, paramSystem[child?.format?.roundNumber ?? "rAmount"]);
+                                            itemValueChild = Helper.formatAmount(itemValueChild, false, paramSystem![child?.format?.roundNumber ?? "rAmount"]);
                                             break;
                                         case "date":
                                             itemValueChild = Helper.isEmpty(itemValueChild) ? '' : Helper.getFormattedDate(itemValueChild, "dd/MM/yyyy HH:mm:ss", true);

@@ -226,6 +226,7 @@ const VcSelectListMulti = ({
                                 isNewEdit={isNewEdit}
                             />
                         )}
+                        showsVerticalScrollIndicator={false}
                         ItemSeparatorComponent={() => <Divider />}
                         keyboardShouldPersistTaps="always"
                         ListFooterComponent={() => <View style={{ height: 50 }} />}

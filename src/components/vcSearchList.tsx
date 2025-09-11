@@ -60,7 +60,7 @@ interface IProgs {
     numCharSearch?: number,
     checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 }
-const ViewComponent: React.FC<IProgs> = ({ tableSearch, idRef, label, placeholder, value, fField, onChange, clean = true, rightIcon, style, isLoading, disabled, checkSelected, itemView, numCharSearch = 3 }: IProgs) => {
+const ViewComponent: React.FC<IProgs> = ({ tableSearch, idRef, label, placeholder, value, fField, onChange, clean = true, rightIcon, style, isLoading, disabled, checkSelected, itemView, numCharSearch = 2 }: IProgs) => {
 
     const url = useMemo(() => {
         return tableSearch === "CUSTOM" ? getUrlReference(idRef ?? '') : urlBase[tableSearch];
@@ -165,13 +165,14 @@ const ViewComponent: React.FC<IProgs> = ({ tableSearch, idRef, label, placeholde
                     keyboardBlurBehavior="restore"
                     containerStyle={{ marginTop: 60 }}
                 >
-                    <HeaderView setSearchText={onChangeTextSearch} txtSearch={txtSearch} label={label || placeholder} />
+                    <HeaderView setSearchText={onChangeTextSearch} txtSearch={txtSearch} label={label || placeholder} numCharSearch={numCharSearch} />
                     {loading ? <View style={{ marginVertical: 50 }}><ActivityIndicator
                         size={30}
                         color={colors.primary}
 
                     /></View> : <BottomSheetFlatList
                         data={data}
+                        showsVerticalScrollIndicator={false}
                         keyExtractor={(item: Record<string, any>) => item.id}
                         renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected} isSelect={item[fField] === value} tableSearch={tableSearch} checkSelected={checkSelected} itemView={itemView} />}
                         ItemSeparatorComponent={() => <Divider />}
@@ -234,10 +235,11 @@ const ItemViewComponent: React.FC<IProps> = ({ item, onPress, isSelect, tableSea
 };
 const ItemView = React.memo(ItemViewComponent);
 
-const HeaderView = ({ setSearchText, txtSearch, label = "Chọn mã" }: {
+const HeaderView = ({ setSearchText, txtSearch, label = "Chọn mã", numCharSearch }: {
     setSearchText: (value: string) => void;
     label?: string;
     txtSearch: string;
+    numCharSearch: number,
 }) => {
     const [valueSearch, setValueSerach] = useState(txtSearch);
     const { colors } = useTheme();
@@ -266,7 +268,7 @@ const HeaderView = ({ setSearchText, txtSearch, label = "Chọn mã" }: {
                     style={{ flex: 1, height: 40 }}
                 />
             </View>
-            {(Helper.isEmpty(valueSearch) || valueSearch.length < 3) && <Text variant="bodySmall" style={{ textAlign: "center", color: colors.secondary, paddingVertical: 10 }}>Bạn phải tìm tối thiểu 3 ký tự!</Text>}
+            {(Helper.isEmpty(valueSearch) || valueSearch.length < 3) && <Text variant="bodySmall" style={{ textAlign: "center", color: colors.secondary, paddingVertical: 10 }}>{`Bạn phải tìm tối thiểu ${numCharSearch} ký tự!`}</Text>}
         </>
     );
 };

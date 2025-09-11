@@ -128,7 +128,7 @@ export function SchemaUIEngine({
         <FormContext.Provider value={ctxValue}>
             <View
                 style={[
-                    { flexDirection: schema.type === 'rows' ? 'row' : 'column', gap: 10 },
+                    { flexDirection: schema.type === 'rows' ? 'row' : 'column', gap: 5 },
                     schema.style,
                     schema.props?.style,
                     style,

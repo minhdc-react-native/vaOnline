@@ -136,6 +136,11 @@ export const useAuth = () => {
     };
 
     const login = async (data: Record<string, string>) => {
+        const _loginError = async () => {
+            await clearToken();
+            setLoggedIn(false);
+            router.replace('/(auth)/login');
+        };
         await api.post({
             link: `/api/Account/Login`,
             config: {
@@ -147,6 +152,7 @@ export const useAuth = () => {
             callBack: async (res) => {
                 if (res && res.error) {
                     showToast(res.error, { type: "error" });
+                    _loginError();
                     return;
                 }
                 await saveBiometric(data.pass);
@@ -177,8 +183,9 @@ export const useAuth = () => {
                 router.replace("/list-app");
             },
             setLoading: (loading) => setLoading(loading, false, 'Truy cập...'),
-            callError: (err) => {
+            callError: async (err) => {
                 console.log("error>>", JSON.stringify(err));
+                _loginError();
             }
         });
     }

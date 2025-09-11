@@ -36,7 +36,7 @@ type IListProps = {
 
 const ViewComponent: React.FC<IListProps> = ({
     label, placeholder, data, value, onChange, fDisplay, typeDisplay = "value", disabled = false,
-    fId = "id", fValue = "value", clean = true, rightIcon, style, loading, tableWin, isError, isNewEdit = false, notFistFilter, checkSelected, itemView
+    fId = "id", fValue = "value", clean = true, rightIcon, style, loading, tableWin, isError, isNewEdit = false, notFistFilter = true, checkSelected, itemView
 }) => {
     const colors = useTheme<VACOMTheme>().colors;
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -145,6 +145,7 @@ const ViewComponent: React.FC<IListProps> = ({
                     <BottomSheetFlatList
                         data={filteredList}
                         keyExtractor={(item: IData) => item[fId].toString()}
+                        showsVerticalScrollIndicator={false}
                         // ListHeaderComponent={<HeaderView setSearchText={setSearchText} label={label || placeholder} table={table} closeModal={closeModal} isNewEdit={isNewEdit} />}
                         renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected}
                             isSelect={item[fId] === itemSelected?.[fId]} itemView={itemView}

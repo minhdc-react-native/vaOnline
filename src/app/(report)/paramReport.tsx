@@ -1,5 +1,4 @@
 import FormWrapper from "@/components/formWrapper";
-import LoadingScreen from "@/components/loadingScreen";
 import { buildZodSchema } from "@/components/UIEngine/buildZodSchema";
 import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
@@ -8,23 +7,24 @@ import VcSelectList from "@/components/vcSelectList";
 import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { ListItemView } from "@/schema/voucher/itemView";
 import { VACOMTheme } from "@/theme/theme";
-import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
 import dayjs from 'dayjs';
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, Dimensions, Pressable, StyleSheet, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Dimensions, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { Button, customText, IconButton, useTheme } from "react-native-paper";
 import { IHandleActionConfig } from "../../schema";
 const Text = customText<'customVariant'>();
 const HEIGHT_WINDOW = Dimensions.get("window").height;
 interface IProgs {
     schemaConfig: IHandleActionConfig;
+    dataSource: Record<string, any[]>;
     onConfirm: (paramKey?: Record<string, any>, timeItem?: IData | null) => void;
     paramKey?: Record<string, any> | null;
     timeItem?: IData | null;
+    style?: StyleProp<ViewStyle>;
 }
 // thêm vào cho hết warning
-export default function ParamReport({ onConfirm, paramKey, schemaConfig, timeItem }: IProgs) {
+export default function ParamReport({ onConfirm, paramKey, schemaConfig, dataSource, timeItem, style }: IProgs) {
     const orgUnit = useDataApp((state) => state.orgUnit);
     const userLogin = useDataApp((state) => state.userLogin);
     const currentYear = useDataApp((state) => state.currentYear);
@@ -103,92 +103,14 @@ export default function ParamReport({ onConfirm, paramKey, schemaConfig, timeIte
         }).start(() => onSubmit(confirm, paramKey));
     };
 
-    const [dataSource, setDataSource] = useState<Record<string, any[]>>({});
-    const [tableRefresh, setTableRefresh] = useState<Record<string, { url: string, type?: string, dataPost?: Record<string, any>, key: string }>>({});
-    const [loading, setLoading] = useState(true);
-    const loadDataBegin = async () => {
-        const source: any = schemaConfig.dataSource ?? {};
-        const promises = Object.keys(source).map(async (key: any) => {
-            const configSource: any = source[key];
-            if (configSource?.data) {
-                setDataSource(prev => ({
-                    ...prev,
-                    [key]: source[key]?.data
-                }));
-            }
-            if (configSource?.url) {
-                const url = (configSource.url as string).replace('#DVCS_ID#', encodeURIComponent(orgUnit!));
-
-                const apiGetPost = configSource.type === "post" ? api.post : api.get;
-                await apiGetPost({
-                    link: url, data: configSource.dataPost,
-                    callBack: (res => {
-                        if (res) {
-                            setSource(res, source, key);
-                            if (configSource?.tableWin) {
-                                setTableRefresh(prev => ({
-                                    ...prev,
-                                    [configSource.tableWin]: { url: configSource.url, type: configSource.type, dataPost: configSource.dataPost, key: key }
-                                }));
-                            }
-                        }
-                    })
-                });
-            }
-        });
-        await Promise.all(promises);
-        setLoading(false);
-    };
-    const setSource = useCallback((res: IData[], source: any, key: string) => {
-        const configSource: any = source[key];
-        if (configSource.typeData === "tree") res = Helper.sortTreeFlat(res, configSource.fieldCode);
-        const fields: string[] = configSource.fields || Object.keys(res[0]);
-        const isColor = fields.indexOf("color") < 0 && typeof configSource.getColor === "function";
-        const result = res.map((item: any) => {
-            const obj = Object.fromEntries(
-                fields.map(f => [f, item[f]])
-            );
-            if (isColor) {
-                obj.color = configSource.getColor(item);
-            }
-            return obj;
-        });
-        setDataSource(prev => ({
-            ...prev,
-            [key]: result
-        }));
-    }, []);
-
-    const shouldRefresh = useDataApp((state) => state.shouldRefresh);
-    const setShouldRefresh = useDataApp((state) => state.setShouldRefresh);
-    useEffect(() => {
-        if (shouldRefresh && tableRefresh[shouldRefresh]) {
-            const source: any = schemaConfig.dataSource ?? {};
-            const apiConfig = tableRefresh[shouldRefresh];
-            const apiRefresh = apiConfig.type === "post" ? api.post : api.get;
-            apiRefresh({
-                link: apiConfig.url,
-                data: apiConfig.dataPost,
-                callBack: (res) => {
-                    setSource(res, source, apiConfig.key);
-                    setShouldRefresh(null);
-                }
-            });
-        }
-    }, [shouldRefresh]);
-
-    useEffect(() => {
-        loadDataBegin();
-    }, [])
-
     return (
-        <View style={[styles.backdrop, { backgroundColor: colors.backdrop }]}>
+        <View style={[styles.backdrop, { backgroundColor: colors.backdrop }, style]}>
             <Pressable onPress={() => closePanel(false)}>
                 <View style={{ height: HEIGHT_WINDOW - containHeight }} />
             </Pressable>
             <Animated.View style={[styles.panel, {
                 transform: [{ translateY: slideAnim }],
-                backgroundColor: colors.surface
+                backgroundColor: colors.surface,
             }]} onLayout={(e) => setHeight(e.nativeEvent.layout.height)}>
                 <View style={styles.header}>
                     <View style={styles.titleRow}>
@@ -206,14 +128,18 @@ export default function ParamReport({ onConfirm, paramKey, schemaConfig, timeIte
                         <Button mode="contained" onPress={() => closePanel(true, paramKey0)}>Xác nhận</Button>
                     </View>
                 </View>
-                <View style={[styles.content, { height: schemaEdit.height ?? "80%", backgroundColor: colors.vacom.backLayout }]}>
-                    {loading ? <LoadingScreen /> : <FormWrapper><SchemaUIEngine
-                        schema={schemaEdit}
-                        data={paramKey0}
-                        onChangeItemData={setValue}
-                        errors={errors}
-                        dataSource={dataSource}
-                    /></FormWrapper>}
+                <View style={[styles.content, { maxHeight: schemaEdit.height ?? "90%", backgroundColor: colors.vacom.backLayout }]}>
+                    <FormWrapper>
+                        <View style={{ height: 20 }} />
+                        <SchemaUIEngine
+                            schema={schemaEdit}
+                            data={paramKey0}
+                            onChangeItemData={setValue}
+                            errors={errors}
+                            dataSource={dataSource}
+                        />
+                        <View style={{ height: 20 }} />
+                    </FormWrapper>
                 </View>
             </Animated.View>
         </View>
@@ -232,7 +158,7 @@ const styles = StyleSheet.create({
     panel: {
         borderTopLeftRadius: 16,
         borderTopRightRadius: 16,
-        overflow: 'hidden',
+        overflow: 'hidden'
     },
     header: {
         borderBottomWidth: StyleSheet.hairlineWidth,
@@ -251,8 +177,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     content: {
-        padding: 20,
-        gap: 20,
+        paddingHorizontal: 20,
+        gap: 10,
         marginBottom: 50
     },
 });

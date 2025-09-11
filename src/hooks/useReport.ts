@@ -1,23 +1,27 @@
 import { shareFile } from "@/app/(window)/useActionMap";
 import { useLoading } from "@/components/dialog/loadingProvider";
 import { useToast } from "@/components/dialog/useToast";
-import { IField } from "@/components/UIEngine/types";
+import { IField, IRowsColsField } from "@/components/UIEngine/types";
 import { useTranslation } from "@/context/TranslationContext";
 import { IDataSource, IHandleActionConfig } from "@/schema";
+import { ItemViewByRefId } from "@/schema/voucher/itemView";
 import { api } from "@/utils/apiMethods";
+import { Helper } from "@/utils/Helper";
 import { router } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleProp, ViewStyle } from "react-native";
+import UUID from 'react-native-uuid';
 import { useDataApp } from "./zustand/useDataApp";
 
 const FROM_DATE = ['P_NGAY_CT1'];
 const TO_DATE = ['P_NGAY_CT2'];
 
 interface IProgs {
-    itemMenuWin: IMenuWin
+    itemMenuWin?: IMenuWin,
+    reportDefault?: IReportItemDefault
 }
-export const useReport = ({ itemMenuWin }: IProgs) => {
-    const [loading, setLoading] = useState(true);
+export const useReport = ({ itemMenuWin, reportDefault }: IProgs) => {
+    const [loading, setLoading] = useState(!reportDefault);
     const [reports, setReports] = useState<IData[]>([]);
     const [currentReport, setCurrentReport] = useState<IData | null>(null);
     const [showParam, setShowParam] = useState(false);
@@ -29,23 +33,6 @@ export const useReport = ({ itemMenuWin }: IProgs) => {
     const { _ } = useTranslation();
     const { show, hide } = useLoading();
     const { showToast } = useToast();
-    const getReports = useCallback(() => {
-        api.get({
-            link: `/api/Report/GetListByUser?windowId=${itemMenuWin.id}`,
-            callBack: (res: IData[]) => {
-                if (res.length > 0) {
-                    setReports(res)
-                } else {
-                    setLoading(false);
-                }
-
-            }
-        })
-    }, [itemMenuWin]);
-
-    useEffect(() => {
-        getReports();
-    }, []);
 
     useEffect(() => {
         if (reports.length > 0) {
@@ -56,8 +43,11 @@ export const useReport = ({ itemMenuWin }: IProgs) => {
     }, [reports]);
 
     const [data, setData] = useState<IData[]>([]);
+    const [menuRow, setMenuRow] = useState<IData[]>([]);
 
-    const [columns, setColumns] = useState<IData[]>([]);
+    const routerNumber = useRef(reportDefault?.routerNumber ?? 0);
+
+    const [reportSchema, setReportSchema] = useState<ISchemaReport | null>(null);
     const [vnd_nt, setVnd_nt] = useState<'1' | '2' | '3'>('1');
     const [dataFilter, setDataFilter] = useState<Record<string, any>>({});
     const [timeItem, setTimeItem] = useState<IData | null>();
@@ -66,24 +56,29 @@ export const useReport = ({ itemMenuWin }: IProgs) => {
     const filtered = useRef(false);
     const defaultFilter = useRef(dataReportFilter);
     defaultFilter.current = dataReportFilter;
-    const getConfigReport = useCallback(async () => {
-        if (!currentReport) return;
-        filtered.current = false;
-        setTimeItem(undefined);
-        await api.get({
-            link: `/api/Report/GetColumns?reportid=${currentReport.id}&menuid=`
-        });
-        await api.get({
-            link: `/api/Report/GetInfoQuery?infoWindowId=${currentReport.INFOWINDOW_ID}`,
-            callBack: (res) => {
-                const configFilter = mapLayoutFilter(res, orgUnit!, userLogin!, lang, defaultFilter.current, _);
-                setDataFilter(configFilter.values);
-                setLayoutFilter(configFilter.layoutView);
-            }
-        });
-        setLoading(false);
-        setShowParam(true);
-    }, [_, currentReport, lang, orgUnit, userLogin]);
+    const sourceKey = useRef<IDataSource>({});
+
+    const getReports = useCallback(() => {
+        if (itemMenuWin) {
+            api.get({
+                link: `/api/Report/GetListByUser?windowId=${itemMenuWin.id}`,
+                callBack: (res: IData[]) => {
+                    if (res.length > 0) {
+                        setReports(res)
+                    } else {
+                        setLoading(false);
+                    }
+                }
+            })
+        }
+        if (reportDefault) {
+            setReports([reportDefault.reportItem]);
+        }
+    }, [itemMenuWin, reportDefault]);
+
+    useEffect(() => {
+        getReports();
+    }, []);
 
     const onCreateReport = useCallback(async (type: 'json' | 'pdf' | 'excel', paramKey?: Record<string, any>) => {
         const dataPost = {
@@ -95,12 +90,12 @@ export const useReport = ({ itemMenuWin }: IProgs) => {
             vnd_nt: vnd_nt
         };
         if (type === "json") {
-            api.post({
+            await api.post({
                 link: `/api/System/CreateReport`,
                 data: dataPost,
                 callBack: (res) => {
                     filtered.current = true;
-                    setData(res)
+                    setData(res.map((row: IData) => ({ ...row, idRow: UUID.v4() })))
                 },
                 setLoading: setLoading
             });
@@ -109,13 +104,12 @@ export const useReport = ({ itemMenuWin }: IProgs) => {
                 showToast('Bạn chưa xác nhận bộ lọc', { type: "warning" });
                 return;
             }
-            show('Tải file ...');
             const file = await api.file.post({
                 link: `/api/System/CreateReport`,
                 data: dataPost,
-                fileName: currentReport!.REPORT_FILE
+                fileName: currentReport!.REPORT_FILE,
+                setLoading: setLoading
             });
-            hide();
             if (file) {
                 if (type === "pdf") {
                     router.navigate({ pathname: '/viewPdf', params: { title: currentReport!.REPORT_NAME, uriPdf: file.uri } });
@@ -124,12 +118,13 @@ export const useReport = ({ itemMenuWin }: IProgs) => {
                 }
             }
         }
-    }, [vnd_nt, show, hide, currentReport]);
+    }, [vnd_nt, currentReport, showToast]);
 
     const onFilter = useCallback((paramKey?: Record<string, any>, timeItem?: IData | null) => {
         setShowParam(false);
-        if (timeItem) setTimeItem(timeItem);
         if (paramKey) {
+            setData([]);
+            if (timeItem) setTimeItem(timeItem);
             setDataFilter(paramKey);
             if (layoutFilter?.isSelectTime?.from && layoutFilter?.isSelectTime?.to) {
                 setDataReportFilter({ NGAY_CT1: paramKey[layoutFilter.isSelectTime.from], NGAY_CT2: paramKey[layoutFilter.isSelectTime.to] });
@@ -138,20 +133,148 @@ export const useReport = ({ itemMenuWin }: IProgs) => {
         }
     }, [setDataReportFilter, onCreateReport, layoutFilter?.isSelectTime]);
 
+    const onRefresh = useCallback((filter?: Record<string, any>) => {
+        if (!filtered.current) {
+            showToast('Bạn chưa xác nhận bộ lọc', { type: "warning" });
+            return;
+        }
+        onFilter(filter || dataFilter);
+    }, [dataFilter, onFilter, showToast]);
+
+    const [dataSource, setDataSource] = useState<Record<string, any[]>>({});
+    const [tableRefresh, setTableRefresh] = useState<Record<string, { url: string, type?: string, dataPost?: Record<string, any>, key: string }>>({});
+    const setSource = useCallback((res: IData[], source: any, key: string) => {
+        const configSource: any = source[key];
+        if (configSource.typeData === "tree") res = Helper.sortTreeFlat(res, configSource.fieldCode);
+        const fields: string[] = configSource.fields || Object.keys(res[0]);
+        const isColor = fields.indexOf("color") < 0 && typeof configSource.getColor === "function";
+        const result = res.map((item: any) => {
+            const obj = Object.fromEntries(
+                fields.map(f => [f, item[f]])
+            );
+            if (isColor) {
+                obj.color = configSource.getColor(item);
+            }
+            return obj;
+        });
+        setDataSource(prev => ({
+            ...prev,
+            [key]: result
+        }));
+    }, []);
+
+    const loadDataBegin = useCallback(async () => {
+        const source = sourceKey.current;
+        const promises = Object.keys(source).map(async (key: any) => {
+            const configSource: any = source[key];
+            if (configSource?.data) {
+                setDataSource(prev => ({
+                    ...prev,
+                    [key]: source[key]?.data
+                }));
+            }
+            if (configSource?.url) {
+                const url = (configSource.url as string).replace('#DVCS_ID#', encodeURIComponent(orgUnit!));
+
+                const apiGetPost = configSource.type === "post" ? api.post : api.get;
+                await apiGetPost({
+                    link: url, data: configSource.dataPost,
+                    callBack: (res => {
+                        if (res) {
+                            setSource(res, source, key);
+                            if (configSource?.tableWin) {
+                                setTableRefresh(prev => ({
+                                    ...prev,
+                                    [configSource.tableWin]: { url: configSource.url, type: configSource.type, dataPost: configSource.dataPost, key: key }
+                                }));
+                            }
+                        }
+                    })
+                });
+            }
+        });
+        await Promise.all(promises);
+        setLoading(false);
+    }, [orgUnit, setSource]);
+
+    const getConfigReport = useCallback(async () => {
+        if (!currentReport) return;
+        filtered.current = false;
+        setTimeItem(undefined);
+        setReportSchema(null);
+        setData([]);
+        await api.get({
+            link: `/api/Report/GetColumns?reportid=${currentReport.id}&menuid=`,
+            callBack: (res) => {
+                const columns = mapColumnTable(res);
+                setReportSchema({ columnsTable: columns, onPressItem: undefined });
+            }
+        });
+        await api.get({
+            link: `/api/Report/GetInfoQuery?infoWindowId=${currentReport.INFOWINDOW_ID}`,
+            callBack: async (res) => {
+                const configFilter = mapLayoutFilter(res, orgUnit!, userLogin!, lang, defaultFilter.current, _);
+                sourceKey.current = configFilter.dataSource;
+                await loadDataBegin();
+                setLayoutFilter(configFilter.layoutView);
+                if (!reportDefault) {
+                    setDataFilter(configFilter.values);
+                    setShowParam(true);
+                } else {
+                    const filter = { ...configFilter.values, ...reportDefault.dataFilter };
+                    setDataFilter(filter);
+                    filtered.current = true;
+                    onRefresh(filter)
+                }
+            }
+        });
+        const url = encodeURIComponent(`SELECT id,REPORT_ID,MENU_ID,PARAMETERS,VISIBLE_WHEN,ICON icon,ICON_COLOR icon_color,CAPTION as value FROM VC_MENUROW WHERE VC_REPORT_id='${currentReport.id}' ORDER BY MENU_ID`);
+        await api.get({
+            link: `/api/System/ExecuteQuery?sql=${url}`,
+            callBack: (res: IData[]) => setMenuRow(res.filter(menu => menu.REPORT_ID))
+        });
+
+        if (!reportDefault) setLoading(false);
+    }, [_, currentReport, lang, orgUnit, userLogin, loadDataBegin]);
+
+    const shouldRefresh = useDataApp((state) => state.shouldRefresh);
+    const setShouldRefresh = useDataApp((state) => state.setShouldRefresh);
+
+    useEffect(() => {
+        if (shouldRefresh && tableRefresh[shouldRefresh]) {
+            const source = sourceKey.current;
+            const apiConfig = tableRefresh[shouldRefresh];
+            const apiRefresh = apiConfig.type === "post" ? api.post : api.get;
+            apiRefresh({
+                link: apiConfig.url,
+                data: apiConfig.dataPost,
+                callBack: (res) => {
+                    setSource(res, source, apiConfig.key);
+                    setShouldRefresh(null);
+                }
+            });
+        }
+    }, [setShouldRefresh, setSource, shouldRefresh, tableRefresh]);
+
     useEffect(() => {
         setLoading(true);
         getConfigReport();
     }, [getConfigReport]);
-
     return {
         loading,
         reports,
+        reportSchema,
         currentReport,
         showParam,
         layoutFilter,
         dataFilter,
         timeItem,
         vnd_nt,
+        data,
+        dataSource,
+        menuRow,
+        routerNumber: routerNumber.current,
+        onRefresh,
         setVnd_nt,
         setLoading,
         getConfigReport,
@@ -162,8 +285,72 @@ export const useReport = ({ itemMenuWin }: IProgs) => {
         onCreateReport
     }
 }
-
-
+const mapColumnTable = (arr: IData[]): Record<'1' | '2' | '3', IColumnReport[]> => {
+    return {
+        '1': groupByColspan(arr.filter(f => f.HIDDEN !== 'C' && (f.VND_NT ?? '1,2,3').includes('1'))),
+        '2': groupByColspan(arr.filter(f => f.HIDDEN !== 'C' && (f.VND_NT ?? '1,2,3').includes('2'))),
+        '3': groupByColspan(arr.filter(f => f.HIDDEN !== 'C')),
+    }
+};
+// layout column
+const TYPE_NUMBER = ['VC_TIEN', 'VC_DONGIA', 'VC_SOLUONG', 'VC_PT', 'decimal'];
+const TYPE_DATE = ['VC_DATE', 'VC_DATETIME', 'datetime']
+const getFormat = (type: string | null): "string" | "number" | "date" => {
+    if (!type) return "string";
+    return TYPE_NUMBER.includes(type) ? "number" : (TYPE_DATE.includes(type) ? "date" : "string");
+}
+const MapRoundNumber: Record<string, IRoundNumber> = {
+    '#SO_LUONG#': 'rQuantity',
+    '#GIA#': 'rPrice',
+    '#GIA_NT#': 'rPriceNt',
+    '#TIEN#': 'rAmount',
+    '#TIEN_NT#': 'rAmountNt',
+    '#PT#': 'rPercentage',
+    '#TY_GIA#': 'rExchangeRate',
+    '#TY_LE#': 'rRate'
+}
+const getColumn = (item: IData) => {
+    const { HEADER, REPORTCOLUMN_FIELD, REPORTCOLUMN_NAME, COLUMN_TYPE, REPORTCOLUMN_FOMAT, REPORTCOLUMN_WIDTH } = item;
+    const header = HEADER ? JSON.parse(HEADER) : null;
+    const field = REPORTCOLUMN_FIELD.toUpperCase().replace('_HTML', '');
+    const name = Array.isArray(header) && header.length > 1 ? (header[1].text || REPORTCOLUMN_NAME) : REPORTCOLUMN_NAME;
+    const formatType = getFormat(COLUMN_TYPE);
+    const keyRoundNumber: IRoundNumber = MapRoundNumber[REPORTCOLUMN_FOMAT ?? '#TIEN#'];
+    return {
+        id: field,
+        title: name,
+        width: REPORTCOLUMN_WIDTH,
+        format: {
+            type: formatType,
+            roundNumber: formatType === "number" ? keyRoundNumber : undefined
+        }
+    };
+}
+function groupByColspan(arr: IData[]): IColumnReport[] {
+    const res: IColumnReport[] = [];
+    let i = 0;
+    while (i < arr.length) {
+        const item = arr[i];
+        const header = item.HEADER ? JSON.parse(item.HEADER) : null;
+        const colspan = Array.isArray(header) && header.length > 0 ? (header[0]?.colspan ?? 0) : 0;
+        const column = getColumn(item);
+        if (colspan >= 2) {
+            const end = Math.min(arr.length, i + colspan);
+            const children: IColumnReport[] = [];
+            for (let j = i; j < end; j++) {
+                const columnChild = getColumn(arr[j]);
+                children.push({ ...columnChild });
+            }
+            res.push({ title: header[0].text, children });
+            i = end;
+        } else {
+            res.push(column);
+            i++;
+        }
+    }
+    return res;
+}
+// layout filter
 const getUrlReference = (id: string) => `/api/System/GetDataByReferencesId?id=${id}`;
 
 const pick = ({ id, ROW, COL, NAME, TYPE_EDITOR, CAPTION, REF_ID }: IData) =>
@@ -195,7 +382,7 @@ const mapLayoutFilter = (dataFilter: IData[], orgUnit: string, userLogin: string
             if (TO_DATE.includes((item.NAME as string).toUpperCase())) isSelectTime.to = item.NAME;
 
             if (['gridcombo', 'combo', 'multiselect', 'treesuggest', 'richselect'].includes(item.TYPE_EDITOR)) {
-                dataSource[item.NAME] = { url: getUrlReference(item.REF_ID) };
+                dataSource[item.REF_ID] = { url: getUrlReference(item.REF_ID) };
             }
 
             if ([...FROM_DATE, ...TO_DATE].includes((item.NAME as string).toUpperCase())) zod[item.NAME] = { type: "string" };
@@ -221,13 +408,14 @@ const mapLayoutFilter = (dataFilter: IData[], orgUnit: string, userLogin: string
         values: values,
         view: {
             type: "cols",
+            style: { gap: 5 },
             fields: layout
         },
-        dataSource: dataSource,
+        // dataSource: dataSource,
         isSelectTime: isSelectTime.check ? { from: isSelectTime.from, to: isSelectTime.to } : undefined,
         zod: zod
     }
-    return { layoutView, values, isSelectTime };
+    return { layoutView, values, isSelectTime, dataSource };
 }
 // map view
 const TypeEditor = {
@@ -239,6 +427,9 @@ const TypeEditor = {
     gridsuggest: 'gridsuggest',
     dateedit: 'dateedit',
     multiselect: 'multiselect'
+}
+const getItemViewByRefId = (refId: string): IRowsColsField | undefined => {
+    return ItemViewByRefId[refId];
 }
 const getConfigView = (item: IData, _: (key?: string) => string, style?: StyleProp<ViewStyle>): IField => {
     switch (item.TYPE_EDITOR) {
@@ -254,6 +445,8 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 type: "selectList",
                 tableWin: "Empty",
                 fValue: 'id',
+                itemView: getItemViewByRefId(item.REF_ID),
+                keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,
                 style: style
@@ -263,6 +456,8 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 type: "selectList",
                 tableWin: "Empty",
                 fValue: 'id',
+                itemView: getItemViewByRefId(item.REF_ID),
+                keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,
                 style: style
@@ -271,6 +466,8 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
             return {
                 type: "selectList",
                 tableWin: "Empty",
+                itemView: getItemViewByRefId(item.REF_ID),
+                keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,
                 style: style
@@ -280,6 +477,8 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 type: "selectList",
                 tableWin: "Empty",
                 fValue: 'id',
+                itemView: getItemViewByRefId(item.REF_ID),
+                keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,
                 style: style
@@ -290,6 +489,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 tableSearch: "CUSTOM",
                 idRef: item.REF_ID,
                 fField: 'id',
+                itemView: getItemViewByRefId(item.REF_ID),
                 label: _(item.CAPTION),
                 bind: item.NAME,
                 style: style
@@ -306,6 +506,8 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 type: "selectListMulti",
                 tableWin: "Empty",
                 fValue: 'id',
+                itemView: getItemViewByRefId(item.REF_ID),
+                keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,
                 style: style

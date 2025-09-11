@@ -60,6 +60,16 @@ export const ListItemView: Record<string, IRowsColsField> = {
             }
         ]
     },
+    ID: {
+        type: "cols",
+        fields: [
+            {
+                type: "text",
+                requiredKeys: ['id'],
+                label: "{{id}}"
+            }
+        ]
+    },
     VALUE: {
         type: "cols",
         fields: [
@@ -81,3 +91,13 @@ export const ListItemView: Record<string, IRowsColsField> = {
         ]
     },
 }
+
+export const ItemViewByRefId: Record<string, IRowsColsField> = {
+    'a9fc0e77-6206-412b-bf68-7a6af3ed371d': ListItemView.ID, // người dùng
+    '87f42b27-6df4-4295-b8f9-87d824eedbdd': ListItemView.VALUE,
+    '01e14b5c-6e30-4b31-ae1d-4abbf7ed49d2': getListItemView('id', 'TEN_CT'), // chứng từ
+    '86de5f41-4277-4a91-bf68-16acc89295c4': getListItemView('MA_DT', 'TEN_DT'), // đối tượng
+    '98665935-a3db-487e-8bc5-2a63515972b5': getListItemView('id', 'TEN_NT'), // ngoại tệ
+    '08790464-f168-49e6-97ea-2cb670e2139d': getListItemView('id', 'TEN_BP'), // bộ phận
+    '4fcca1d7-9011-4b4f-b9e8-721a546aa637': getListItemView('id', 'TEN_VV'), // vụ việc
+};

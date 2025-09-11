@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
-import Share from 'react-native-share';
-import { IconButton, Text, useTheme } from 'react-native-paper';
-import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import RNFS from 'react-native-fs';
-import Pdf from 'react-native-pdf';
 import { VACOMTheme } from '@/theme/theme';
 import { MaterialIcons } from "@expo/vector-icons";
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
+import React, { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+import RNFS from 'react-native-fs';
+import { IconButton, Text, useTheme } from 'react-native-paper';
+import Pdf from 'react-native-pdf';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Share from 'react-native-share';
 
 const ViewerPdf = () => {
     const { title, uriPdf } = useLocalSearchParams();
@@ -22,7 +22,6 @@ const ViewerPdf = () => {
             title: 'Chia sẻ file...',
         }).finally(() => { });
     };
-
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', () => {
             uri && RNFS.unlink(uri);
