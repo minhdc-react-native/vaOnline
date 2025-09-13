@@ -74,6 +74,32 @@ const pscf0: ISchemaWin = {
         fields: [
             {
                 type: "rows",
+                style: { alignItems: "center" },
+                fields: [
+                    {
+                        type: "selectList",
+                        tableWin: "Empty",
+                        idRef: '33291373-09c3-4c08-bec8-c3a724b42f15',
+                        requiredKeys: ['_loaiPhi'],
+                        visibleIf: "{{_loaiPhi}}",
+                        label: "LOAI_PHI",
+                        bind: 'LOAI_PHI',
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "search",
+                        tableSearch: "DMDT",
+                        itemView: ListItemView.MA_DT,
+                        expression: { TEN_DT: 'TEN_DT' },
+                        fField: 'MA_DT',
+                        label: "MA_DT",
+                        bind: 'MA_DT',
+                        style: { flex: 1 }
+                    },
+                ]
+            },
+            {
+                type: "rows",
                 fields: [
                     {
                         type: "selectList",
@@ -148,23 +174,6 @@ const pscf0: ISchemaWin = {
                             },
                         ]
                     },
-                ]
-            },
-            {
-                type: "rows",
-                style: { alignItems: "center" },
-                fields: [
-                    {
-                        type: "search",
-                        tableSearch: "DMDT",
-                        itemView: ListItemView.MA_DT,
-                        expression: { TEN_DT: 'TEN_DT' },
-                        fField: 'MA_DT',
-                        label: "MA_DT",
-                        bind: 'MA_DT',
-                        style: { flex: 1 }
-                    },
-                    { type: "empty", style: { flex: 1 } }
                 ]
             },
             {

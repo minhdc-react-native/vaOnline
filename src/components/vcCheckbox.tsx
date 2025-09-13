@@ -5,8 +5,8 @@ import { Switch, Text, useTheme } from "react-native-paper";
 import { VariantProp } from "react-native-paper/lib/typescript/components/Typography/types";
 interface IProgs {
     label?: string;
-    value?: boolean | 'C' | 'K',
-    onChange: (value: boolean | 'C' | 'K') => void,
+    value?: boolean | 'C' | 'K' | 0 | 1,
+    onChange: (value: boolean | 'C' | 'K' | 0 | 1) => void,
     align?: "left" | "right",
     type?: "checkbox" | 'switch',
     variant?: VariantProp<never> | undefined,
@@ -19,12 +19,19 @@ interface IProgs {
 const VcCheckBox = ({ label, value = false, onChange, textStyle, style, variant, align = "left", type = "checkbox", color, disabled, isOptionIcon }: IProgs) => {
     const { colors } = useTheme();
     const scale = Platform.OS === "ios" ? 0.5 : 1;
-    const fixValue = typeof value == "boolean" ? value : value === "C";
+    const fixValue = typeof value === "boolean" ? value : (typeof value === "string" ? value === "C" : value === 1);
     const onChangeValue = () => {
-        if (typeof value === "boolean") {
-            onChange(!value);
-        } else {
-            onChange(value === "C" ? 'K' : 'C');
+        const isType = typeof value;
+        switch (isType) {
+            case "string":
+                onChange(value === "C" ? 'K' : 'C');
+                break;
+            case "number":
+                onChange(value === 1 ? 1 : 0);
+                break;
+            default:
+                onChange(!value);
+                break;
         }
     }
     return (

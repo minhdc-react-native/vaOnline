@@ -5,8 +5,8 @@ import { useTranslation } from "@/context/TranslationContext";
 import { useWinPage } from "@/hooks/useWinPage";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
-import { Button, Card } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View } from "react-native";
+import { Appbar, Button, Card } from "react-native-paper";
 
 const NewEditWin = () => {
     const { sItemMenuWin, id, title, sDataMaster, sAction } = useLocalSearchParams();
@@ -16,7 +16,7 @@ const NewEditWin = () => {
     const itemMenuWin: IMenuWin = JSON.parse(sItemMenuWin.toString());
     const { _ } = useTranslation();
     const {
-        colors, schemaUI, resetItem,
+        colors, schemaUI, resetItem, configExpression,
         itemData, dataSource, onChangeItemData, handleAction, onBack, errors
     } = useWinPage({
         itemMenuWin: itemMenuWin
@@ -38,10 +38,12 @@ const NewEditWin = () => {
         return unsubscribe;
     }, [navigation]);
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
-            <VcHeaderWin title={titleWin} edit={edit} onPressAction={onPressAction} onBack={onBack} isEdit={actionNewEdit.edit} />
+        <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
+            <Appbar.Header>
+                <VcHeaderWin title={titleWin} edit={edit} onPressAction={onPressAction} onBack={onBack} isEdit={actionNewEdit.edit} />
+            </Appbar.Header>
             <FormWrapper style={{ padding: 10 }}>
-                {edit ? <SchemaUIEngine schema={schemaUI.config.itemEdit} data={itemData}
+                {edit ? <SchemaUIEngine schema={schemaUI.config.itemEdit} data={itemData} configExpression={configExpression}
                     onChangeItemData={onChangeItemData} errors={errors} dataSource={dataSource} /> :
                     <Card mode="contained" style={{ backgroundColor: colors.background, paddingVertical: 10, paddingHorizontal: 20 }}>
                         <SchemaUIEngine schema={schemaUI.config.itemShow} data={itemData} dataSource={dataSource} />
@@ -59,7 +61,7 @@ const NewEditWin = () => {
                             </Button>}
                     </Card>}
             </FormWrapper>
-        </SafeAreaView>
+        </View>
     )
 };
 export default NewEditWin;

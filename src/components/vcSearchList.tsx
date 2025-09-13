@@ -1,4 +1,5 @@
 import { schemaItemSearch } from "@/schema";
+import { ItemViewByRefId } from "@/schema/voucher/itemView";
 import { VACOMTheme } from "@/theme/theme";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
@@ -65,6 +66,8 @@ const ViewComponent: React.FC<IProgs> = ({ tableSearch, idRef, label, placeholde
     const url = useMemo(() => {
         return tableSearch === "CUSTOM" ? getUrlReference(idRef ?? '') : urlBase[tableSearch];
     }, [idRef, tableSearch]);
+
+    itemView = idRef ? (ItemViewByRefId[idRef] ?? itemView) : itemView;
 
     const { colors } = useTheme<VACOMTheme>();
     const bottomSheetRef = useRef<BottomSheet>(null);

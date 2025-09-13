@@ -6,7 +6,6 @@ const REMEMBER = 'remember';
 const SELECT_YEAR = 'select_year';
 const ORG_UNIT = 'org_unit';
 const SUB_DOMAIN = 'sub_domain';
-const LANGUAGE = 'language';
 
 export const saveSubDomain = async (subDomain: string) => {
     try {

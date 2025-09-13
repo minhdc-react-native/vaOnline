@@ -12,9 +12,9 @@ interface IProgsGroupButton {
     onPress: (item: IMenuWin) => void,
     icon?: React.ReactNode;
     expanded?: boolean;
-    disable?: boolean
+    disabled?: boolean
 }
-export const VcGroupButton = ({ title, data, onPress, icon, expanded = true, disable }: IProgsGroupButton) => {
+export const VcGroupButton = ({ title, data, onPress, icon, expanded = true, disabled }: IProgsGroupButton) => {
     const { colors } = useTheme();
     const lang = useDataApp((state) => state.lang);
     const rowsMap: any = {};
@@ -30,7 +30,7 @@ export const VcGroupButton = ({ title, data, onPress, icon, expanded = true, dis
     const sortedRows = Object.keys(rowsMap).sort((a, b) => Number(a) - Number(b));
 
     return (
-        <ExpandableView title={title} defaultExpanded={expanded} icon={icon} disable={disable}>
+        <ExpandableView title={title} defaultExpanded={expanded} icon={icon} disabled={disabled}>
             <View style={styles.container}>
                 {sortedRows.map(rowNum => {
                     // Sắp xếp các item trong row theo col
@@ -38,7 +38,7 @@ export const VcGroupButton = ({ title, data, onPress, icon, expanded = true, dis
                     return (
                         <View key={keyMap[rowNum]} style={styles.row}>
                             {rowItems.map((item: IMenuWin, index: number) => {
-                                if (item.id.startsWith("line-")) return (<DashedLine key={item.id} />);
+                                if (item.id.startsWith("LINE-")) return (<DashedLine key={item.id} />);
                                 const IconComponent = item.icon ? ICON_REGISTRY[item.icon.type] : null;
                                 return (
                                     <ButtonSetting

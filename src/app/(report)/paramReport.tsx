@@ -54,8 +54,13 @@ export default function ParamReport({ onConfirm, paramKey, schemaConfig, dataSou
     const [filterTime, setTime] = useState<IData | null>(timeItem || null);
     const setFilterTime = (item: IData | null) => {
         setTime(item);
-        const dateRange = Helper.getDateRange(item?.id.toString() ?? "");
-        let changeValue = { [isSelectTime?.from ?? "from"]: dateRange.fromDate ?? "", [isSelectTime?.to ?? "to"]: dateRange.toDate ?? "" };
+        const dateRange = Helper.getDateRange(item?.id.toString() ?? "", Number(currentYear));
+        let changeValue = {
+            [isSelectTime?.from ?? "from"]: dateRange.fromDate ?? "",
+            [isSelectTime?.to ?? "to"]: dateRange.toDate ?? "",
+            [isSelectTime?.from0 ?? "from0"]: dateRange.fromDate0 ?? "",
+            [isSelectTime?.to0 ?? "to0"]: dateRange.toDate0 ?? ""
+        };
         if (isSelectTime?.expression) {
             Object.keys(isSelectTime.expression).map(key => {
                 changeValue[key as any] = item?.[isSelectTime.expression ? isSelectTime.expression?.[key] : key];
@@ -102,7 +107,6 @@ export default function ParamReport({ onConfirm, paramKey, schemaConfig, dataSou
             useNativeDriver: true,
         }).start(() => onSubmit(confirm, paramKey));
     };
-
     return (
         <View style={[styles.backdrop, { backgroundColor: colors.backdrop }, style]}>
             <Pressable onPress={() => closePanel(false)}>
@@ -124,7 +128,7 @@ export default function ParamReport({ onConfirm, paramKey, schemaConfig, dataSou
                             clean={true}
                             onChange={(item) => setFilterTime(item)}
                             notFistFilter={true}
-                        /> : <Text style={styles.title}>{schemaConfig.title || 'Tham số'}</Text>}
+                        /> : <Text numberOfLines={1} style={styles.title}>{schemaConfig.title || 'Tham số'}</Text>}
                         <Button mode="contained" onPress={() => closePanel(true, paramKey0)}>Xác nhận</Button>
                     </View>
                 </View>

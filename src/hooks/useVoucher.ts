@@ -362,7 +362,10 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
                 'T_TNK_NT', 'T_TNK', 'T_TDB_NT', 'T_TDB', 'T_CP_NT', 'T_CP', 'T_TCP_NT0', 'T_TCP0', 'T_TCP_NT1', 'T_TCP1'
             ]
         );
-        const tTien_tt = {
+        const tTien_tt = dataMaster!.MA_CT === 'PCP' ? {
+            T_TIEN_TT_NT: totalCtHv.T_CP_NT,
+            T_TIEN_TT: totalCtHv.T_CP
+        } : {
             T_TIEN_TT_NT: totalCtHv.T_TIEN_HANG_NT - totalCtHv.T_TGG_NT - totalCtHv.T_TCK_NT + totalCtHv.T_TDB_NT + totalCtHv.T_TCP_NT1 + totalCtHv.T_TNK_NT,
             T_TIEN_TT: totalCtHv.T_TIEN_HANG - totalCtHv.T_TGG - totalCtHv.T_TCK + totalCtHv.T_TDB + totalCtHv.T_TCP1 + totalCtHv.T_TNK
         }

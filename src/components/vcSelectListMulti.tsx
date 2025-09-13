@@ -1,4 +1,5 @@
 import { schemaWin, schemaWinEmpty } from "@/schema";
+import { ItemViewByRefId } from "@/schema/voucher/itemView";
 import { VACOMTheme } from "@/theme/theme";
 import { Helper } from "@/utils/Helper";
 import { EvilIcons, FontAwesome6 } from "@expo/vector-icons";
@@ -42,6 +43,7 @@ interface IProgs {
     style?: StyleProp<ViewStyle>;
     loading?: boolean;
     tableWin?: ITableWin;
+    idRef?: string;
     itemView?: IRowsColsField,
     isError?: boolean;
     isNewEdit?: boolean;
@@ -66,6 +68,7 @@ const VcSelectListMulti = ({
     isNewEdit = false,
     separator = ",",
     disabled,
+    idRef,
     itemView
 }: IProgs) => {
     const colors = useTheme<VACOMTheme>().colors;
@@ -88,7 +91,7 @@ const VcSelectListMulti = ({
         Keyboard.dismiss();
         bottomSheetRef.current?.snapToIndex(2);
     };
-
+    itemView = idRef ? (ItemViewByRefId[idRef] ?? itemView) : itemView;
     const addItemSelected = (item: IData) => {
         const exist = itemSelected.find((i) => i[fId] === item[fId]);
         if (!exist) {

@@ -16,8 +16,8 @@ export default function VoucherAccounting() {
     const lang = useDataApp((state) => state.lang);
 
     const allRoutes = [
-        { key: 'banHangPhaiThu', title: lang === 'vi' ? 'Bán hàng - Phải thu' : 'Sales - Receivable', keyMenuWin: 'banHangPhaiThu' },
-        { key: 'vonBangTien', title: lang === 'vi' ? 'Vốn bằng tiền' : 'Capital in cash', keyMenuWin: 'vonBangTien' },
+        { key: 'goodDocuments', title: lang === 'vi' ? 'Chứng từ hàng hoá' : 'Goods documents', keyMenuWin: 'goodDocuments' },
+        { key: 'accountingDocuments', title: lang === 'vi' ? 'Chứng từ kế toán' : 'Accounting documents', keyMenuWin: 'accountingDocuments' },
         { key: 'congTacCuoiKy', title: lang === 'vi' ? 'Công tác cuối kỳ' : 'Work at the end of the period', keyMenuWin: 'congTacCuoiKy' }
     ];
 

@@ -11,8 +11,8 @@ import { useWinPage } from "@/hooks/useWinPage";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
-import { Card, Divider, FAB, IconButton } from "react-native-paper";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { Appbar, Divider, FAB, IconButton } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { ItemWinList } from "./items/itemWinList";
 import { ItemWinListAction } from "./items/itemWinListAction";
@@ -27,26 +27,30 @@ interface IProgs {
     }
 }
 const NewEditWinMaster = ({ menu }: IProgs) => {
-    const { sItemMenuWin, id, title } = useLocalSearchParams();
+    const { sItemMenuWin, id, title, isEdit } = useLocalSearchParams();
     const titleWin = menu?.title || title?.toString();
     const itemMenuWin: IMenuWin = JSON.parse(sItemMenuWin.toString());
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
     const { _ } = useTranslation();
     const {
-        colors, schemaUI, resetItem, handleAction, setIsChange,
-        itemData, dataSource, onChangeItemData, onBack, detail
+        colors, schemaUI, resetItem, handleAction, setIsChange, configExpression,
+        itemData, dataSource, onChangeItemData, onBack, detail, getDataById, resetTableWin
     } = useWinPage({
         itemMenuWin: itemMenuWin
     });
+
     const [showEditMaster, setShowEditMaster] = useState<boolean>(id === undefined && schemaUI.action?.showEditMaster !== false);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', () => {
             resetItem(itemMenuWin.tableWin); // xoá dữ liệu khi không dùng đến...
+            if (!!isEdit) {
+                resetTableWin(itemMenuWin.tableWin);
+            }
         });
         return unsubscribe;
-    }, [itemMenuWin.tableWin, navigation, resetItem]);
+    }, [isEdit, itemMenuWin.tableWin, navigation, resetItem, resetTableWin]);
 
     const actionMap = useMemo(() => {
         return {
@@ -64,8 +68,27 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
     }, [onChangeItemData]);
 
     useEffect(() => {
-        detail.loadDetail(id?.toString());
+        const getData = async () => {
+            if (!!isEdit) {
+                await getDataById(id?.toString());
+            } else {
+                detail.loadDetail(id?.toString());
+            }
+        }
+        getData();
     }, []);
+
+    useEffect(() => {
+        if (!!isEdit && itemData && detail.loadingDetail) {
+            detail.loadDetail(id?.toString());
+        }
+    }, [itemData]);
+
+    useEffect(() => {
+        if (!!isEdit && !detail.currentTab) {
+            detail.setCurrentTab(detail.tabs[0]);
+        }
+    }, [detail, isEdit]);
 
     const { showToast, changeOther, onScanned } = useVoucher(itemMenuWin.tableWin, itemMenuWin.defaultValue?.MA_CT, detail.currentTab, undefined, detail.handleActionDetail.new);
 
@@ -87,69 +110,73 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
             detail.changeOtherDetail.current = true;
             setIsChange(true)
         });
-    }, [MA_KHO, onScanned, showToast]);
+    }, [MA_KHO, detail.changeOtherDetail, groupCode, onScanned, setIsChange, showToast]);
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
-            <VcHeaderWin edit={true} title={titleWin} onBack={onBack} onPressAction={handleAction.save} />
-            <Card mode="contained" style={{ backgroundColor: colors.background, paddingVertical: 10, paddingHorizontal: 20 }}>
-                <SchemaUIEngine schema={schemaUI.config.itemShow} data={itemData} dataSource={dataSource} onChangeItemData={onChangeItemData} />
-                {schemaUI.action?.showEditMaster !== false && <IconButton style={{ position: "absolute", bottom: -15, right: -10, backgroundColor: colors.backdrop }} icon={'pencil'} iconColor={colors.background} onPress={() => setShowEditMaster(true)} />}
-            </Card>
-            {detail.tabs.length > 0 && <VcTabBar style={{ borderRadius: 0, borderWidth: 0 }} value={detail.currentTab?.id ?? ''} data={detail.tabs} onPress={(tab: any) => detail.setCurrentTab(tab)} />}
-            <Divider />
-            {detail.currentTab.TAB_TABLE === "CTHV" &&
-                <>
-                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, backgroundColor: colors.background }}>
-                        <VcCheckBox label={_('GOP_MA')} type="switch" value={groupCode} onChange={(value) => setGroupCode(typeof value === "boolean" ? value : value === "C")} />
-                        <VcSearchList style={{ flex: 1 }} label={_('MA_KHO')} tableSearch="DMKHO" fField="MA_KHO" value={MA_KHO} onChange={(item) => setMA_KHO(item?.id)} />
-                        <VcButtonScanner onScanned={onScanBarCode} />
-                    </View>
-                    <Divider />
-                </>
-            }
-            <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
-                {detail.loadingDetail ? <LoadingScreen /> : <SwipeListView
-                    data={detail.dataDetail ?? []}
-                    style={{ paddingTop: 5 }}
-                    keyExtractor={(item: IData, index) => (item.id ?? '') + index.toString()}
-                    renderItem={({ item, index }) => <ItemWinList item={item} schemaView={detail.schemaWinDetail.config.itemList}
-                        onLayout={detail.handleLayoutDetail} onPress={(id) => detail.handleActionDetail.select(index)} dataSource={dataSource} isHideIcon={detail.numberActionDetail === 0} />}
-                    renderHiddenItem={({ item }) => <ItemWinListAction item={item} actionMap={actionMap}
-                        schemaView={detail.schemaWinDetail.config.itemAction} height={detail.rowHeightDetails[item.id ?? '']} />}
-                    rightOpenValue={-70 * detail.numberActionDetail}
-                    disableLeftSwipe={detail.numberActionDetail === 0}
-                    disableRightSwipe
-                    showsVerticalScrollIndicator={false}
-                    initialNumToRender={20}
-                    maxToRenderPerBatch={20}
-                    windowSize={10}
+        <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
+            {(!itemData || detail.loadingDetail) ? <LoadingScreen style={{ marginTop: 100 }} /> : <>
+                <Appbar.Header>
+                    <VcHeaderWin edit={true} title={titleWin} onBack={onBack} onPressAction={handleAction.save} />
+                </Appbar.Header>
+                <Divider />
+                <View style={{ backgroundColor: colors.background, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 0 }}>
+                    <SchemaUIEngine schema={schemaUI.config.itemShow} data={itemData} configExpression={configExpression} dataSource={dataSource} onChangeItemData={onChangeItemData} />
+                    {schemaUI.action?.showEditMaster !== false && <IconButton style={{ position: "absolute", bottom: 0, right: 10, backgroundColor: colors.backdrop }} icon={'pencil'} iconColor={colors.background} onPress={() => setShowEditMaster(true)} />}
+                </View>
+                {detail.tabs.length > 0 && <VcTabBar style={{ borderRadius: 0, borderWidth: 0 }} value={detail.currentTab?.id ?? ''} data={detail.tabs} onPress={(tab: any) => detail.setCurrentTab(tab)} />}
+                <Divider />
+                {detail.currentTab?.TAB_TABLE === "CTHV" &&
+                    <>
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, backgroundColor: colors.background }}>
+                            <VcCheckBox label={_('GOP_MA')} type="switch" value={groupCode} onChange={(value) => setGroupCode(typeof value === "boolean" ? value : value === "C")} />
+                            <VcSearchList style={{ flex: 1 }} label={_('MA_KHO')} tableSearch="DMKHO" fField="MA_KHO" value={MA_KHO} onChange={(item) => setMA_KHO(item?.id)} />
+                            <VcButtonScanner onScanned={onScanBarCode} />
+                        </View>
+                        <Divider />
+                    </>
+                }
+                <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
+                    <SwipeListView
+                        data={detail.dataDetail ?? []}
+                        style={{ paddingTop: 5 }}
+                        keyExtractor={(item: IData, index) => (item.id ?? '') + index.toString()}
+                        renderItem={({ item, index }) => <ItemWinList item={item} schemaView={detail.schemaWinDetail.config.itemList}
+                            onLayout={detail.handleLayoutDetail} onPress={(id) => detail.handleActionDetail.select(index)} dataSource={dataSource} isHideIcon={detail.numberActionDetail === 0} />}
+                        renderHiddenItem={({ item }) => <ItemWinListAction item={item} actionMap={actionMap}
+                            schemaView={detail.schemaWinDetail.config.itemAction} height={detail.rowHeightDetails[item.id ?? '']} />}
+                        rightOpenValue={-70 * detail.numberActionDetail}
+                        disableLeftSwipe={detail.numberActionDetail === 0}
+                        disableRightSwipe
+                        showsVerticalScrollIndicator={false}
+                        initialNumToRender={20}
+                        maxToRenderPerBatch={20}
+                        windowSize={10}
+                    />
+                </View>
+                {(detail.schemaWinDetail.action?.new !== false) && <FAB
+                    icon="plus"
+                    style={{
+                        width: 55,
+                        height: 55,
+                        borderRadius: 55,
+                        bottom: insets.bottom + 20,
+                        right: 20,
+                        position: 'absolute',
+                    }}
+                    onPress={detail.handleActionDetail.new}
+                    variant='primary'
                 />}
-            </View>
-            {(detail.schemaWinDetail.action?.new !== false) && <FAB
-                icon="plus"
-                style={{
-                    width: 55,
-                    height: 55,
-                    borderRadius: 55,
-                    bottom: insets.bottom + 20,
-                    right: 20,
-                    position: 'absolute',
-                }}
-                onPress={detail.handleActionDetail.new}
-                variant='primary'
-            />}
-            {detail.showNewEdit && <NewEditWinMulti title={_(detail.currentTab?.TAB_NAME)}
-                refreshSourceDvtCb={detail.refreshSourceDvtCb}
-                data={detail.itemDetail} schemaUi={detail.schemaWinDetail} changeOtherDetail={detail.changeOtherDetail}
-                tableWin={itemMenuWin.tableWin} voucherCode={itemMenuWin.defaultValue?.MA_CT} currentTab={detail.currentTab}
-                dataSource={dataSource} onSave={detail.handleActionDetail.update} titleButton={_('COMPLETE')} />}
+                {detail.showNewEdit && <NewEditWinMulti title={_(detail.currentTab?.TAB_NAME)}
+                    refreshSourceDvtCb={detail.refreshSourceDvtCb} configExpression={detail.configExpression}
+                    data={detail.itemDetail} schemaUi={detail.schemaWinDetail} changeOtherDetail={detail.changeOtherDetail}
+                    tableWin={itemMenuWin.tableWin} voucherCode={itemMenuWin.defaultValue?.MA_CT} currentTab={detail.currentTab}
+                    dataSource={dataSource} onSave={detail.handleActionDetail.update} titleButton={_('COMPLETE')} />}
 
-            {showEditMaster && <NewEditWinMulti title={titleWin}
-                tableWin={itemMenuWin.tableWin} data={itemData ?? null} schemaUi={schemaUI}
-                dataSource={dataSource} onSave={onSaveMaster} titleButton={_('COMPLETE')} />}
-
-        </SafeAreaView>
+                {showEditMaster && <NewEditWinMulti title={titleWin} configExpression={configExpression}
+                    tableWin={itemMenuWin.tableWin} data={itemData ?? null} schemaUi={schemaUI}
+                    dataSource={dataSource} onSave={onSaveMaster} titleButton={_('COMPLETE')} />}
+            </>}
+        </View>
     )
 };
 export default NewEditWinMaster;

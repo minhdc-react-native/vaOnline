@@ -2,16 +2,18 @@ import { useLoading } from '@/components/dialog/loadingProvider';
 import { useToast } from '@/components/dialog/useToast';
 import { useTranslation } from '@/context/TranslationContext';
 import { useDataApp } from '@/hooks/zustand/useDataApp';
+import { api } from '@/utils/apiMethods';
 import { FontAwesome } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     Animated,
+    Pressable,
     StyleSheet,
-    View,
+    View
 } from 'react-native';
 import { RefreshControl } from 'react-native-gesture-handler';
-import { Divider, Menu, useTheme } from 'react-native-paper';
+import { Divider, Menu, Text, useTheme } from 'react-native-paper';
 import {
     DataProvider,
     LayoutProvider,
@@ -19,7 +21,6 @@ import {
 } from 'recyclerlistview';
 import { ReportTableHeader } from './reportTableHeader';
 import { ReportTableItem } from './reportTableItem';
-
 const flattenGroupedColumns = (columns: IColumnReport[]) => {
     const result: IColumnReport[] = [];
 
@@ -48,6 +49,7 @@ interface IProgs<T> {
 }
 export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, reportSchema, data, filterKey, onRefresh, loading }: IProgs<T>) => {
     const paramSystem = useDataApp((state) => state.paramSystem);
+    const orgUnit = useDataApp((state) => state.orgUnit);
     const { show, hide } = useLoading();
     const { colors } = useTheme();
     const scrollX = useRef(new Animated.Value(0)).current;
@@ -74,10 +76,30 @@ export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, re
         setCurrentId(itemTable.idRow)
         openMenu(itemTable.idRow);
     }, []);
-    const onPressMenu = useCallback((menu: IData, item: IData) => {
+    const onPressMenu = useCallback(async (menu: IData, item: IData) => {
         closeMenu(item.idRow);
         if (menu.id === 'EDIT_VOUCHER') {
-            showToast('Chức năng này chưa thực hiện', { type: "info" })
+            const url = encodeURIComponent(`SELECT TOP 1 a.WINDOW_ID,a.WINDOW_NAME,b.DP FROM VC_WINDOW a INNER JOIN DMCT b ON a.MA_CT=b.MA_CT AND b.DVCS_ID=N'${orgUnit}' WHERE a.ma_ct='${item.MA_CT}'`);
+            await api.get({
+                link: `/api/System/ExecuteQuery?sql=${url}`,
+                callBack: (res: IData[]) => {
+                    if (res && res.length > 0) {
+                        const itemWin = res[0];
+                        const itemMenuWin: IMenuWin = {
+                            id: itemWin.WINDOW_ID, typeWin: "(winMaster)", tableWin: itemWin.DP === "HV" ? 'DPHV' : 'DPKT',
+                            label: itemWin.WINDOW_NAME, labelE: itemWin.WINDOW_NAME,
+                            row: 1, col: 1, typeView: { _typeView: 1 },
+                            defaultValue: { MA_CT: item.MA_CT }
+                        };
+                        router.navigate({
+                            pathname: `/(window)/newEditWinMaster`,
+                            params: {
+                                sItemMenuWin: JSON.stringify(itemMenuWin), id: item.DOC_ID, title: _(itemWin.WINDOW_NAME), isEdit: 'C'
+                            }
+                        });
+                    }
+                }
+            });
         } else {
             const param: any[] = menu.PARAMETERS.split(';');
             let filter: Record<string, any> = {};
@@ -102,8 +124,10 @@ export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, re
         }
     }, [routerNumber, filterKey]);
     const rowRenderer = useCallback((__: string | number, item: T) => {
-        const fnVisible = new Function('parentRow', item.VISIBLE_WHEN || 'return true');
-        const newMenu = menuRow.filter(menu => fnVisible(menu));
+        const newMenu = menuRow.filter(menu => {
+            const fnVisible = new Function('parentRow', menu.VISIBLE_WHEN || 'return true');
+            return fnVisible(item);
+        });
         const isVoucher = isNotEmpty(item.MA_CT) && isNotEmpty(item.DOC_ID);
         return ((newMenu.length > 0 || isVoucher) ? <Menu
             mode='elevated'
@@ -114,24 +138,32 @@ export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, re
                 <ReportTableItem item={item} groupedColumns={groupedColumns[vnd_nt]} filter={filterKey}
                     paramSystem={paramSystem} onPress={onPressRow} currentId={currentId} />
             }>
-            {isVoucher && <Menu.Item leadingIcon={() => <FontAwesome name={'edit'} size={24} color={colors.secondary} />} onPress={() => onPressMenu({ id: 'EDIT_VOUCHER' }, item)} title={_('EDIT_VOUCHER')} />}
-            {newMenu.length > 0 && <Divider />}
+            {isVoucher && <Pressable style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, paddingHorizontal: 10 }]} onPress={() => onPressMenu({ id: 'EDIT_VOUCHER' }, item)}>
+                <View style={{ flexDirection: "row", gap: 5, paddingVertical: 5 }}>
+                    <FontAwesome name={'edit'} size={20} color={colors.secondary} />
+                    <Text numberOfLines={1}>{_('EDIT_VOUCHER')}</Text>
+                </View>
+            </Pressable>}
+            {isVoucher && newMenu.length > 0 && <Divider />}
             {newMenu.map(menu => {
                 return (
-                    <Menu.Item key={menu.id} leadingIcon={() => <FontAwesome name={menu.icon || 'table'} size={24} color={menu.icon_color || colors.secondary} />} onPress={() => onPressMenu(menu, item)} title={menu.value} />
+                    <Pressable key={menu.id} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, paddingHorizontal: 10 }]} onPress={() => onPressMenu(menu, item)}>
+                        <View style={{ flexDirection: "row", gap: 5, paddingVertical: 5 }}>
+                            <FontAwesome name={menu.icon || 'hand-o-right'} size={20} color={menu.icon_color || colors.secondary} />
+                            <Text numberOfLines={1}>{menu.value}</Text>
+                        </View>
+                    </Pressable>
                 )
             })}
         </Menu> : <ReportTableItem item={item} groupedColumns={groupedColumns[vnd_nt]} filter={filterKey}
             paramSystem={paramSystem} onPress={onPressRow} currentId={currentId} />);
 
-    }, [visible, menuRow, groupedColumns, vnd_nt, filterKey, paramSystem, currentId, onPressRow, onPressMenu, colors]);
+    }, [visible, menuRow, groupedColumns, vnd_nt, filterKey, paramSystem, currentId, onPressRow, onPressMenu, colors, _]);
 
     useEffect(() => {
         // eslint-disable-next-line no-unused-expressions
         loading ? show('Đang tải dữ liệu...') : hide();
     }, [loading, show, hide]);
-
-
 
     return (
         <View style={styles.container}>

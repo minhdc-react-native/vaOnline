@@ -92,6 +92,9 @@ export const VcReferences: IDataSource = {
     DMTTDB: { url: `/api/System/GetDataByReferencesId?id=ad61024c-69cc-4d3b-9d5e-e5685db5bdce` },
     DMSX: { url: `/api/System/GetDataByReferencesId?id=4f4a3acd-c873-45aa-9d1b-098cea801f65` },
     DVT_CB: { url: `/api/System/GetDataByReferencesId?id=81ac9446-6c9f-410e-af92-a724a142cafc&filtervalue=null&extrafilter=#ExtraFilter#` },
+    DMNN: { url: `/api/System/GetDataByReferencesId?id=f54efa39-7871-4f8d-b59a-8257befd61a2` },
+    DMLF: { url: `/api/System/GetDataByReferencesId?id=33291373-09c3-4c08-bec8-c3a724b42f15` },
+    DMDVT: { url: `/api/System/GetDataByReferencesId?id=2beb4691-3bc8-40aa-a5ba-6170fef7a7c4` },
 }
 export interface IConfigDateMenuWin {
     title: string,

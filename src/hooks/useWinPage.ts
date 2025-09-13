@@ -6,7 +6,7 @@ import { useEvalExpr } from "@/components/UIEngine/hooks/useEvalExpr";
 import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { defaultNumberNew, VcReferences } from "@/constants/vcData";
 import { useTranslation } from "@/context/TranslationContext";
-import { schemaWin, schemaWinEmpty } from "@/schema";
+import { IZod, schemaWin, schemaWinEmpty } from "@/schema";
 import { getListItemView, ListItemView } from "@/schema/voucher/itemView";
 import { VACOMTheme } from "@/theme/theme";
 import { api } from "@/utils/apiMethods";
@@ -21,9 +21,29 @@ import UUID from 'react-native-uuid';
 import { useDataItemWin } from "./useDataItem";
 import { useVoucher } from "./useVoucher";
 import { useDataApp } from "./zustand/useDataApp";
+
+const FIELD_MAP = {
+    SO_TK: "_soTk",
+    LOAI_TK: "_loaiTk",
+    IS_CP0: "_isCp0",
+    MA_DT_BT: "_maDtBt",
+    T_TNK: "_tTnk",
+    T_TDB: "_tTdb",
+    T_TCK: "_tTck",
+    MA_KHO: "_maKho",
+    MA_KHO_DC: "_maKhoDc",
+    MA_HV_DC: "_maHvDc",
+    TK_NO: "_tkNo",
+    TK_NO2: "_tkNo2",
+    T_NK: "_tNk",
+    T_CK: "_tCk",
+    T_DB: "_tDb",
+    LOAI_PHI: "_loaiPhi"
+} as const;
+
 const backHandQuestion = { title: "Cảnh báo", message: "Dữ liệu đã thay đổi, bạn có muốn thoát không?" };
 const backHandQuestionE = { title: "Warning", message: "Data has changed, do you want to exit?" };
-
+const TYPE_NUMBER = ['VC_SOLUONG', 'VC_DONGIA', 'VC_TIEN', 'VC_INT', 'VC_MONTH', 'VC_DAY', 'VC_PT', 'VC_SMALLINT', 'VC_TINYINT', 'VC_TYGIA'];
 interface IProgs {
     itemMenuWin: IMenuWin
     pageSize?: number,
@@ -32,7 +52,7 @@ interface IProgs {
 export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }: IProgs) => {
 
     const { id: windowId, tableWin, typeWin } = itemMenuWin;
-    const { isHt2, tangSoCt } = useVoucher(tableWin, itemMenuWin.defaultValue?.MA_CT);
+    const { tangSoCt } = useVoucher(tableWin, itemMenuWin.defaultValue?.MA_CT);
     const { colors } = useTheme<VACOMTheme>();
     const [rowHeights, setRowHeights] = useState<Record<string, DimensionValue>>({});
     const handleLayout = (itemId: string, event: LayoutChangeEvent) => {
@@ -43,8 +63,6 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         }));
     };
     const stateLoading = useRef({ refresh: false, loadMore: false, loading: loadingBegin });
-
-    const defaultTk = useDataApp((state) => state.paramSystem?.TK);
 
     const shouldRefresh = useDataApp((state) => state.shouldRefresh);
     const setShouldRefresh = useDataApp((state) => state.setShouldRefresh);
@@ -96,9 +114,11 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     const [params, setParams] = useState<IParamWin>();
 
     const schemaUI = useMemo(() => {
+        const tabMaster = winConfig?.window.Tabs[0];
         const defaultSchema = schemaWin[tableWin] ?? schemaWinEmpty;
-        return Helper.deepMerge(defaultSchema, layoutData?.[tableWin]);
-    }, [layoutData, tableWin]);
+        const zod = { ...layoutData?.[tableWin]?.zod, ...tabMaster?.ZOD };
+        return Helper.deepMerge(defaultSchema, { ...layoutData?.[tableWin], zod });
+    }, [layoutData, tableWin, winConfig?.window.Tabs]);
 
     const getFilterRows = useCallback((values: Record<string, any>) => {
         return values;
@@ -126,8 +146,77 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             showFilter: schemaUI.config.filterConfig ? true : false
         };
     }, [schemaUI]);
+    const getConfigTab = useCallback((tab: IData) => {
+        const groups: Record<string, string[]> = {
+            DPKT: ["_soTk", "_loaiTk"],
+            CTKT: ["_isCp0", "_maDtBt", "_tkNo"],
+            DPHV: ["_tTnk", "_tTdb", "_tTck"],
+            CTHV: ["_maKho", "_maKhoDc", "_maHvDc", "_tkNo", "_tkNo2", "_tNk", "_tCk", "_tDb"],
+            PSCF: ["_loaiPhi"]
+        };
 
-    const extractWinConfig = (dataConfig: any): IWinConfig => {
+        const _getGroup = (display: any, groupName: string) => {
+            const keys = groups[groupName] || [];
+            return keys.reduce((acc, key) => {
+                acc[key] = display[key];
+                return acc;
+            }, {} as any);
+        };
+
+        const FIELD_DISPLAY = Object.keys(FIELD_MAP);
+
+        // Object display với key _camelCase
+        let display: any = {
+            // DPKT
+            _soTk: false, _loaiTk: false,
+            // CTKT
+            _isCp0: false, _maDtBt: false,
+            // DPHV
+            _tTnk: false, _tTdb: false, _tTck: false,
+            // CTHV
+            _maKho: false, _maKhoDc: false, _maHvDc: false, _tkNo2: false, _tNk: false, _tCk: false, _tDb: false,
+            // PSCF
+            _loaiPhi: false
+        };
+        let result: any = {
+            EXPRESSION: {},
+            EXPRESSION_If_EMPTY: {},
+            DEFAULT_VALUE: {},
+            CAPTION: {}
+        };
+        let zod: IZod = {};
+        const fields: IData[] = tab.Fields;
+        fields.map(f => {
+
+            if (isNotEmpty(f.VALID_RULE) && ['isNotEmpty', 'isFieldCode'].includes(f.VALID_RULE)) zod[f.COLUMN_NAME] = { type: TYPE_NUMBER.includes(f.COLUMN_TYPE) ? 'number' : 'string' };
+
+            if (FIELD_DISPLAY.includes(f.COLUMN_NAME)) display[(FIELD_MAP as any)[f.COLUMN_NAME]] = !f.HIDDEN;
+
+            if (isNotEmpty(f.DEFAULT_VALUE) && (f.DEFAULT_VALUE as string).startsWith('@Default=')) {
+                const valueDefault = (f.DEFAULT_VALUE as string).replace('@Default=', '').trim();
+                result.DEFAULT_VALUE[f.COLUMN_NAME] = (TYPE_NUMBER.includes(f.COLUMN_TYPE) ? Number(valueDefault) : valueDefault);
+            }
+            if (isNotEmpty(f.CAPTION)) {
+                result.CAPTION[f.COLUMN_NAME] = f.CAPTION;
+            }
+            if (isNotEmpty(f.FIELD_EXPRESSION)) {
+                const param: any[] = f.FIELD_EXPRESSION.split(';');
+                let filter: Record<string, any> = {};
+                let notReplace: string[] = [];
+                param.forEach(p => {
+                    const [fValue, fParam, isNotReplace] = p.replace(/[{}]/g, "").split(":");
+                    filter[fParam] = fValue;
+                    if (isNotReplace !== undefined) {
+                        notReplace.push(fParam);
+                    }
+                });
+                result.EXPRESSION[f.COLUMN_NAME] = filter;
+                if (notReplace.length > 0) result.EXPRESSION_If_EMPTY[f.COLUMN_NAME] = notReplace;
+            }
+        });
+        return { config: result, display: _getGroup(display, tab.TAB_TABLE), zod };
+    }, []);
+    const extractWinConfig = useCallback((dataConfig: any): IWinConfig => {
         setParams({
             page: 1,
             count: typeWin === "(winTree)" ? 99999 : pageSize,
@@ -138,15 +227,21 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             window_id: windowId
         });
         const tabsWin: any[] = [...dataConfig.Tabs].filter((tab: any) => tab.HIDE_EDIT !== 'C').slice(1);
-        const newTabs = tabsWin.map((tab) => ({
-            id: tab.TAB_ID,
-            value: _(tab.TAB_NAME),
-            TAB_ID: tab.TAB_ID,
-            TAB_NAME: tab.TAB_NAME,
-            FOREIGN_KEY: tab.FOREIGN_KEY,
-            TAB_TABLE: tab.TAB_TABLE,
-            PERMISSION: { NEW: !!tab.INSERT_STORE_PROCEDURE, EDIT: !!tab.UPDATE_STORE_PROCEDURE, DELETE: !!tab.DELETE_STORE_PROCEDURE }
-        }));
+        const newTabs = tabsWin.map((tab) => {
+            const configTab = getConfigTab(tab);
+            return {
+                id: tab.TAB_ID,
+                value: _(tab.TAB_NAME),
+                TAB_ID: tab.TAB_ID,
+                TAB_NAME: tab.TAB_NAME,
+                FOREIGN_KEY: tab.FOREIGN_KEY,
+                TAB_TABLE: tab.TAB_TABLE,
+                PERMISSION: { NEW: !!tab.INSERT_STORE_PROCEDURE, EDIT: !!tab.UPDATE_STORE_PROCEDURE, DELETE: !!tab.DELETE_STORE_PROCEDURE },
+                DISPLAY: configTab.display,
+                ZOD: configTab.zod,
+                ...configTab.config
+            }
+        });
         setDataTags(tableWin, newTabs);
         const dmct = dataConfig.DATA_EXTRA.find((f: any) => f.id === 'dmct');
         return {
@@ -159,22 +254,29 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 WINDOW_NAME: dataConfig.WINDOW_NAME ?? "",
                 VC_INFOWINDOW_ID: dataConfig.VC_INFOWINDOW_ID,
                 Tabs: dataConfig.Tabs.filter((tab: any) => tab.HIDE_EDIT !== 'C')
-                    .map((tab: any): ITabWin => ({
-                        id: tab.id ?? "",
-                        value: tab.TAB_NAME ?? "",
-                        TAB_ID: tab.TAB_ID ?? "",
-                        TAB_TABLE: tab.TAB_TABLE ?? "",
-                        FOREIGN_KEY: tab.FOREIGN_KEY ?? "",
-                        TAB_NAME: tab.TAB_NAME ?? "",
-                        PERMISSION: {
-                            NEW: !Helper.isEmpty(tab.INSERT_STORE_PROCEDURE),
-                            EDIT: !Helper.isEmpty(tab.UPDATE_STORE_PROCEDURE),
-                            DELETE: !Helper.isEmpty(tab.DELETE_STORE_PROCEDURE)
+                    .map((tab: any): ITabWin => {
+                        const configTab = getConfigTab(tab);
+                        return {
+                            id: tab.id ?? "",
+                            value: tab.TAB_NAME ?? "",
+                            TAB_ID: tab.TAB_ID ?? "",
+                            TAB_TABLE: tab.TAB_TABLE ?? "",
+                            FOREIGN_KEY: tab.FOREIGN_KEY ?? "",
+                            TAB_NAME: tab.TAB_NAME ?? "",
+                            PERMISSION: {
+                                NEW: !Helper.isEmpty(tab.INSERT_STORE_PROCEDURE),
+                                EDIT: !Helper.isEmpty(tab.UPDATE_STORE_PROCEDURE),
+                                DELETE: !Helper.isEmpty(tab.DELETE_STORE_PROCEDURE)
+                            },
+                            DISPLAY: configTab.display,
+                            ZOD: configTab.zod,
+                            ...configTab.config
                         }
-                    }))
+                    })
             }
         };
-    }
+    }, [_, getConfigTab, pageSize, setDataTags, tableWin, typeWin, windowId])
+
     const tabs = useMemo(() => {
         return dataTags[tableWin] ?? [];
     }, [tableWin, dataTags]);
@@ -305,22 +407,19 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             )
         );
 
-        const Tk_ht = isHt2 ? defaultTk?.TK_PTHU : (['PNH', 'PNK', 'PNX'].includes(winConfig?.window.MA_CT ?? '') ? defaultTk?.TK_PTRA : '');
-
         const defaultValue = {
             ...itemMenuWin.defaultValue ?? {},
-            ...winConfig?.window.NHOM_CT && { NHOM_CT: winConfig?.window.NHOM_CT, TK_HT: Tk_ht }
+            ...winConfig?.window.NHOM_CT && { NHOM_CT: winConfig?.window.NHOM_CT }
         };
+        const tabMaster = winConfig?.window.Tabs[0];
 
         const typeView = itemMenuWin.typeView ?? {};
-
-        const itemNew: IData = { id: UUID.v4(), _isNew: true, DVCS_ID: orgUnit, ...newDefault, ...defaultValue, ...typeView };
+        const defaultValueConfig = tabMaster?.DEFAULT_VALUE ?? {};
+        const itemNew: IData = { id: UUID.v4(), _isNew: true, DVCS_ID: orgUnit, ...newDefault, ...defaultValue, ...typeView, ...defaultValueConfig, ...tabMaster?.DISPLAY };
         // nếu là chứng từ
         const soCt = await tangSoCt(itemNew);
         setEditMode('new');
         setItemData(tableWin, { ...itemNew, ...soCt });
-
-        const tabMaster = winConfig?.window.Tabs[0];
         const action = schemaUI.action ? { ...schemaUI.action, edit: tabMaster?.PERMISSION.EDIT, new: tabMaster?.PERMISSION.NEW } : { edit: true, new: true };
 
         router.navigate({
@@ -332,30 +431,27 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         });
     }, [winConfig]);
 
-    const onEdit = useCallback((item: IData) => {
+    const onEdit = useCallback((item: IData, isEdit: boolean = false) => {
         setEditMode('edit');
-
-        const Tk_ht = isHt2 ? defaultTk?.TK_PTHU : (['PNH', 'PNK', 'PNX'].includes(winConfig?.window.MA_CT ?? '') ? defaultTk?.TK_PTRA : '');
-
+        const tabMaster = winConfig?.window.Tabs[0];
         const typeView = {
             ...itemMenuWin.typeView ?? {},
-            ...winConfig?.window.NHOM_CT && { TK_HT: Tk_ht }
+            ...tabMaster?.DISPLAY
         };
-
         setItemData(tableWin, { ...item, ...typeView });
 
-        const tabMaster = winConfig?.window.Tabs[0];
+        if (!isEdit) {
+            const action = schemaUI.action ? { ...schemaUI.action, edit: tabMaster?.PERMISSION.EDIT, new: tabMaster?.PERMISSION.NEW } : { edit: true, new: true };
 
-        const action = schemaUI.action ? { ...schemaUI.action, edit: tabMaster?.PERMISSION.EDIT, new: tabMaster?.PERMISSION.NEW } : { edit: true, new: true };
-
-        const dataMaster = schemaUI.dataMaster ? Object.fromEntries(schemaUI.dataMaster.map(f => [f, item[f]])) : {};
-        router.navigate({
-            pathname: `/(window)/newEditWin${typeWin !== "(winMaster)" ? '' : 'Master'}`,
-            params: {
-                sItemMenuWin: JSON.stringify(itemMenuWin), id: item.id, title: _(winConfig?.window?.WINDOW_NAME),
-                sDataMaster: JSON.stringify(dataMaster), sAction: JSON.stringify(action)
-            }
-        });
+            const dataMaster = schemaUI.dataMaster ? Object.fromEntries(schemaUI.dataMaster.map(f => [f, item[f]])) : {};
+            router.navigate({
+                pathname: `/(window)/newEditWin${typeWin !== "(winMaster)" ? '' : 'Master'}`,
+                params: {
+                    sItemMenuWin: JSON.stringify(itemMenuWin), id: item.id, title: _(winConfig?.window?.WINDOW_NAME),
+                    sDataMaster: JSON.stringify(dataMaster), sAction: JSON.stringify(action)
+                }
+            });
+        }
     }, [winConfig]);
 
     const onSave = useCallback(async () => {
@@ -368,6 +464,10 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 }, 5000); //sau 10.000 ms = 10 giây sẽ tự xoá các error message...
             }
             if (tableWin === "DPHV") {
+                if (Number(itemData.T_TNK) !== 0 && (!isNotEmpty(itemData.TK_NO_NK) || !isNotEmpty(itemData.TK_CO_NK))) {
+                    showToast('Bạn cần hạch toán thuế nhập khẩu', { type: "warning" });
+                    return false;
+                }
                 if (Number(itemData.T_TDB) !== 0 && (!isNotEmpty(itemData.TK_NO_DB) || !isNotEmpty(itemData.TK_CO_DB))) {
                     showToast('Bạn cần hạch toán thuế TTĐB', { type: "warning" });
                     return false;
@@ -379,9 +479,16 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
 
         const details: any[] = [];
         if (typeWin === "(winMaster)" && tabs.length > 0) {
-
+            let fixTabRequire: Partial<Record<ITableWin, boolean>> = {};
+            if (itemData.MA_CT === 'VAT') {
+                fixTabRequire['CTHV'] = false
+                fixTabRequire['PSTHUE'] = true
+            };
+            if (itemData.MA_CT === 'PCP') {
+                fixTabRequire['PSCF'] = true
+            };
             for (const tab of tabs) {
-                const isRequire = schemaWin[tab.TAB_TABLE]?.require;
+                const isRequire = fixTabRequire[tab.TAB_TABLE] !== undefined ? fixTabRequire[tab.TAB_TABLE] : schemaWin[tab.TAB_TABLE]?.require;
                 const dataDetail = dataItemDetail[tableWin] ? dataItemDetail[tableWin][tab.TAB_TABLE] : [];
                 if (isRequire && dataDetail.length === 0) {
                     showToast(`${isLangVi ? 'Bạn chưa nhập chi tiết' : 'You have not entered details'} [${_(tab.TAB_NAME)}]!`, { type: "warning" });
@@ -473,7 +580,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         delete: onDelete
     };
 
-    const loadDetail = async (id?: string) => {
+    const loadDetail = useCallback(async (id?: string) => {
         const itemData = dataItems[tableWin]!;
         const addDetails = schemaUI.addDetails ? Object.fromEntries(schemaUI.addDetails.map(f => [f, itemData[f]])) : {};
         const typeView = itemMenuWin.typeView ?? {};
@@ -485,7 +592,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                         res = res.map((item, index) => ({
                             ...item,
                             ...addDetails,
-                            ...typeView
+                            ...typeView,
+                            ...currentTab?.DISPLAY,
                         }));
                         setDataItemDetail(tableWin, tab.TAB_TABLE, res);
                     }
@@ -497,12 +605,11 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         setLoadingDetail(true);
         await Promise.all(promises);
         setLoadingDetail(false);
-    };
-
-
+    }, [dataItems, itemMenuWin.id, itemMenuWin.typeView, schemaUI.addDetails, setDataItemDetail, tableWin, tabs, currentTab]);
     const schemaWinDetail = useMemo(() => {
         const defaultSchema = schemaWin[currentTab?.TAB_TABLE ?? "Empty"] ?? schemaWinEmpty;
-        return Helper.deepMerge(defaultSchema, layoutData?.[currentTab?.TAB_TABLE]);
+        const zod = { ...layoutData?.[currentTab?.TAB_TABLE]?.zod, ...currentTab?.ZOD };
+        return Helper.deepMerge(defaultSchema, { ...layoutData?.[currentTab?.TAB_TABLE], zod });
     }, [currentTab, layoutData]);
 
     const numberActionDetail: number = useMemo(() => {
@@ -563,35 +670,40 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             acc[f] = 0;
             return acc;
         }, {} as Record<string, number>);
+
+        const defaultValueConfig = currentTab?.DEFAULT_VALUE ?? {};
+
         if (addDetailMore !== undefined) {
             return {
                 id: UUID.v4(),
                 DVCS_ID: orgUnit,
                 _isNew: true,
-                _isHt2: isHt2,
                 ...initNumber,
                 ...newDefault,
                 ...typeView,
                 ...addDetails,
                 ...copyDetails,
-                ...addDetailMore
+                ...addDetailMore,
+                ...defaultValueConfig,
+                ...currentTab?.DISPLAY
             };
         } else {
             setItemDetail({
                 id: UUID.v4(),
                 DVCS_ID: orgUnit,
                 _isNew: true,
-                _isHt2: isHt2,
                 ...initNumber,
                 ...newDefault,
                 ...typeView,
                 ...addDetails,
-                ...copyDetails
+                ...copyDetails,
+                ...defaultValueConfig,
+                ...currentTab?.DISPLAY
             });
             setShowNewEdit(true);
             return null;
         }
-    }, [currentYear, dataDetail, dataItems, evalExpr, isHt2, itemMenuWin.typeView, orgUnit, schemaUI.addDetails, schemaWinDetail.defaultNew, tableWin, userLogin]);
+    }, [currentYear, currentTab, dataDetail, dataItems, evalExpr, itemMenuWin.typeView, orgUnit, schemaUI.addDetails, schemaWinDetail.defaultNew, tableWin, userLogin]);
 
     const refreshSourceDvtCb = useCallback((MA_HV: string) => {
         const url = VcReferences.DVT_CB.url?.replace('#ExtraFilter#', encodeURIComponent(`MA_HV=N'${MA_HV}'`));
@@ -602,6 +714,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     }, [setDataSource, tableWin]);
 
     const onSelectDetail = useCallback((index: number) => {
+
         const isEdit = schemaWinDetail.action?.edit !== false;
         if (!isEdit) return;
         typeNewEdit.current = 'edit';
@@ -610,9 +723,9 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         const itemData = dataItems[tableWin]!;
         const addDetails = schemaUI.addDetails ? Object.fromEntries(schemaUI.addDetails.map(f => [f, itemData[f]])) : {};
         if (currentTab.TAB_TABLE === "CTHV") refreshSourceDvtCb(itemDetail.MA_HV ?? '***');
-        setItemDetail({ ...itemDetail, ...addDetails, _isHt2: isHt2 });
+        setItemDetail({ ...itemDetail, ...addDetails, ...currentTab?.DISPLAY });
         setShowNewEdit(true);
-    }, [refreshSourceDvtCb, currentTab?.TAB_TABLE, dataItemDetail, dataItems, isHt2, schemaUI.addDetails, schemaWinDetail.action?.edit, tableWin]);
+    }, [refreshSourceDvtCb, currentTab, dataItemDetail, dataItems, schemaUI.addDetails, schemaWinDetail.action?.edit, tableWin]);
 
     const onChangeDetail = useCallback((valueChange: IData) => {
         setIsChange(true);
@@ -658,6 +771,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
 
     const loadDataBegin = async () => {
         let source: any = schemaWin[tableWin]?.dataSource ?? {};
+
         // tabs.forEach((tab) => {
         //     const _source = schemaWin[tab.TAB_TABLE]?.dataSource ?? {};
         //     source = { ...source, ..._source };
@@ -691,6 +805,10 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     };
 
     const setSource = useCallback((res: IData[], source: any, key: string) => {
+        if (res.length === 0) {
+            setDataSource(tableWin, key, []);
+            return;
+        };
         const configSource: any = VcReferences[source[key]];
         if (configSource.typeData === "tree") res = Helper.sortTreeFlat(res, configSource.fieldCode);
         const fields: string[] = configSource.fields || Object.keys(res[0]);
@@ -747,11 +865,11 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 }
             });
         } catch (error) { }
-
         await api.get({
             link: `/api/System/GetAllByWindowNo?window_id=${windowId}`,
             callBack: (res) => setWinConfig(extractWinConfig(res[0])),
         });
+
         await api.post({
             link: `/api/System/MauIn`,
             data: {
@@ -764,7 +882,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         hide();
     }, []);
 
-    const onBack = () => {
+    const onBack = useCallback(() => {
         if (isChange) {
             showPopup({
                 title: isLangVi ? backHandQuestion.title : backHandQuestionE.title,
@@ -778,8 +896,20 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         } else {
             router.back();
         }
-    }
+    }, [showPopup, isChange, isLangVi, _]);
 
+    const getDataById = useCallback(async (id: string) => {
+        await getConfigWin();
+        await api.get({
+            link: `/api/System/GetDataById?window_id=${itemMenuWin.id}&id=${id}`,
+            callBack: (res: IData[]) => {
+                if (res && res.length > 0) {
+                    setData(res);
+                    onEdit(res[0], true);
+                };
+            }
+        });
+    }, [itemMenuWin.id, onEdit, getConfigWin]);
     return {
         colors,
         params,
@@ -800,6 +930,11 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         permissions: winConfig?.window.Tabs[0]?.PERMISSION,
         printSamples,
         tabMulti,
+        configExpression: {
+            expression: winConfig?.window.Tabs[0].EXPRESSION,
+            expressionIfEmpty: winConfig?.window.Tabs[0].EXPRESSION_If_EMPTY,
+            caption: winConfig?.window.Tabs[0].CAPTION
+        },
         setIsChange,
         setFilterRows,
         setTextSearch,
@@ -811,6 +946,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         setParams,
         handleRefresh,
         handleLoadMore,
+        getDataById,
         detail: {
             tabs,
             loadingDetail,
@@ -819,6 +955,11 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             changeOtherDetail,
             dataDetail,
             currentTab,
+            configExpression: {
+                expression: currentTab?.EXPRESSION,
+                expressionIfEmpty: currentTab?.EXPRESSION_If_EMPTY,
+                caption: currentTab?.CAPTION
+            },
             refreshSourceDvtCb,
             setCurrentTab,
             itemDetail,

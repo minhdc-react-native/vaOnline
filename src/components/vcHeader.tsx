@@ -72,7 +72,7 @@ export const VcHeader = ({ title, numRow, placeholder, titleView, backgroundColo
                         onChangeText={(value) => onChangeTextSearch(value)}
                         mode="outlined"
                         placeholder={placeholder || "Tìm kiếm"}
-                        style={{ height: 52, flex: 1 }}
+                        style={{ height: 65, flex: 1 }}
                         outlineStyle={{ borderWidth: 0 }}
                     /> :
                     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingRight: onSearch ? 10 : 0, flex: 1 }}>

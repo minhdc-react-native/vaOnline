@@ -1,10 +1,9 @@
 import { shareFile } from "@/app/(window)/useActionMap";
 import { useLoading } from "@/components/dialog/loadingProvider";
 import { useToast } from "@/components/dialog/useToast";
-import { IField, IRowsColsField } from "@/components/UIEngine/types";
+import { IField } from "@/components/UIEngine/types";
 import { useTranslation } from "@/context/TranslationContext";
 import { IDataSource, IHandleActionConfig } from "@/schema";
-import { ItemViewByRefId } from "@/schema/voucher/itemView";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
 import { router } from "expo-router";
@@ -13,8 +12,11 @@ import { StyleProp, ViewStyle } from "react-native";
 import UUID from 'react-native-uuid';
 import { useDataApp } from "./zustand/useDataApp";
 
-const FROM_DATE = ['P_NGAY_CT1'];
-const TO_DATE = ['P_NGAY_CT2'];
+const FROM_DATE = ['P_NGAY_CT1', 'P_NGAY1'];
+const TO_DATE = ['P_NGAY_CT2', 'P_NGAY2'];
+
+const FROM_DATE0 = ['P_NGAY_CT01', 'P_NGAY01'];
+const TO_DATE0 = ['P_NGAY_CT02', 'P_NGAY02'];
 
 interface IProgs {
     itemMenuWin?: IMenuWin,
@@ -143,9 +145,12 @@ export const useReport = ({ itemMenuWin, reportDefault }: IProgs) => {
 
     const [dataSource, setDataSource] = useState<Record<string, any[]>>({});
     const [tableRefresh, setTableRefresh] = useState<Record<string, { url: string, type?: string, dataPost?: Record<string, any>, key: string }>>({});
-    const setSource = useCallback((res: IData[], source: any, key: string) => {
+    const setSource = useCallback((res: IData[] | string[], source: any, key: string) => {
         const configSource: any = source[key];
-        if (configSource.typeData === "tree") res = Helper.sortTreeFlat(res, configSource.fieldCode);
+
+        if (res.length > 0 && typeof res[0] === "string") res = (res as string[]).map(r => ({ id: r as string, value: r as string }));
+
+        if (configSource.typeData === "tree") res = Helper.sortTreeFlat((res as IData[]), configSource.fieldCode);
         const fields: string[] = configSource.fields || Object.keys(res[0]);
         const isColor = fields.indexOf("color") < 0 && typeof configSource.getColor === "function";
         const result = res.map((item: any) => {
@@ -313,7 +318,7 @@ const getColumn = (item: IData) => {
     const { HEADER, REPORTCOLUMN_FIELD, REPORTCOLUMN_NAME, COLUMN_TYPE, REPORTCOLUMN_FOMAT, REPORTCOLUMN_WIDTH } = item;
     const header = HEADER ? JSON.parse(HEADER) : null;
     const field = REPORTCOLUMN_FIELD.toUpperCase().replace('_HTML', '');
-    const name = Array.isArray(header) && header.length > 1 ? (header[1].text || REPORTCOLUMN_NAME) : REPORTCOLUMN_NAME;
+    const name = Array.isArray(header) && header.length > 1 ? (header[1]?.text || REPORTCOLUMN_NAME) : REPORTCOLUMN_NAME;
     const formatType = getFormat(COLUMN_TYPE);
     const keyRoundNumber: IRoundNumber = MapRoundNumber[REPORTCOLUMN_FOMAT ?? '#TIEN#'];
     return {
@@ -341,7 +346,7 @@ function groupByColspan(arr: IData[]): IColumnReport[] {
                 const columnChild = getColumn(arr[j]);
                 children.push({ ...columnChild });
             }
-            res.push({ title: header[0].text, children });
+            res.push({ title: header[0]?.text, children });
             i = end;
         } else {
             res.push(column);
@@ -365,7 +370,7 @@ const mapLayoutFilter = (dataFilter: IData[], orgUnit: string, userLogin: string
         ...dataReportFilter
     };
     let paramHidden: any = [];
-    let isSelectTime: any = { check: false, from: null, to: null };
+    let isSelectTime: any = { check: false, from: null, to: null, from0: null, to0: null };
     let zod: Record<string, {
         type: "string" | "number";
         msgError?: string;
@@ -374,26 +379,29 @@ const mapLayoutFilter = (dataFilter: IData[], orgUnit: string, userLogin: string
     let dataSource: IDataSource = {};
 
     const values = dataFilter.reduce((acc, item) => {
-        if (item.NAME !== 'p_list_time') {
+        const isNotListTime = (item.NAME as string).toUpperCase() !== 'P_LIST_TIME';
+        if (isNotListTime) {
             const defaultValue = (item.DEFAULTVALUE ?? '').replace('@Default=', '');
-            acc[item.NAME] = arrReplace[defaultValue] !== undefined ? arrReplace[defaultValue] : defaultValue;
+            acc[item.NAME] = arrReplace[defaultValue] !== undefined ? arrReplace[defaultValue] : (item.TYPE_EDITOR === "checkbox" ? Number(defaultValue) : defaultValue);
             if (item.HIDDEN === "C") paramHidden.push(item.NAME);
+
             if (FROM_DATE.includes((item.NAME as string).toUpperCase())) isSelectTime.from = item.NAME;
             if (TO_DATE.includes((item.NAME as string).toUpperCase())) isSelectTime.to = item.NAME;
+            if (FROM_DATE0.includes((item.NAME as string).toUpperCase())) isSelectTime.from0 = item.NAME;
+            if (TO_DATE0.includes((item.NAME as string).toUpperCase())) isSelectTime.to0 = item.NAME;
 
             if (['gridcombo', 'combo', 'multiselect', 'treesuggest', 'richselect'].includes(item.TYPE_EDITOR)) {
                 dataSource[item.REF_ID] = { url: getUrlReference(item.REF_ID) };
             }
 
-            if ([...FROM_DATE, ...TO_DATE].includes((item.NAME as string).toUpperCase())) zod[item.NAME] = { type: "string" };
+            if ([...FROM_DATE, ...TO_DATE, ...FROM_DATE0, ...TO_DATE0].includes((item.NAME as string).toUpperCase())) zod[item.NAME] = { type: "string" };
 
         } else {
             isSelectTime.check = true;
         }
         return acc;
     }, {} as Record<string, any>);
-
-    const newDataFilter = dataFilter.filter(f => f.HIDDEN !== "C" && f.NAME !== 'p_list_time').reduce((acc, item) => {
+    const newDataFilter = dataFilter.filter(f => f.HIDDEN !== "C" && (f.NAME as string).toUpperCase() !== 'P_LIST_TIME').reduce((acc, item) => {
         if (!acc[item.ROW]) acc[item.ROW] = [];
         acc[item.ROW].push(pick(item));
         return acc;
@@ -412,7 +420,7 @@ const mapLayoutFilter = (dataFilter: IData[], orgUnit: string, userLogin: string
             fields: layout
         },
         // dataSource: dataSource,
-        isSelectTime: isSelectTime.check ? { from: isSelectTime.from, to: isSelectTime.to } : undefined,
+        isSelectTime: isSelectTime.check ? { from: isSelectTime.from, to: isSelectTime.to, from0: isSelectTime.from0, to0: isSelectTime.to0 } : undefined,
         zod: zod
     }
     return { layoutView, values, isSelectTime, dataSource };
@@ -426,11 +434,11 @@ const TypeEditor = {
     richselect: 'richselect',
     gridsuggest: 'gridsuggest',
     dateedit: 'dateedit',
-    multiselect: 'multiselect'
+    multiselect: 'multiselect',
+    checkbox: 'checkbox',
+    radio: 'radio'
 }
-const getItemViewByRefId = (refId: string): IRowsColsField | undefined => {
-    return ItemViewByRefId[refId];
-}
+
 const getConfigView = (item: IData, _: (key?: string) => string, style?: StyleProp<ViewStyle>): IField => {
     switch (item.TYPE_EDITOR) {
         case TypeEditor.text:
@@ -445,7 +453,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 type: "selectList",
                 tableWin: "Empty",
                 fValue: 'id',
-                itemView: getItemViewByRefId(item.REF_ID),
+                idRef: item.REF_ID,
                 keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,
@@ -456,7 +464,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 type: "selectList",
                 tableWin: "Empty",
                 fValue: 'id',
-                itemView: getItemViewByRefId(item.REF_ID),
+                idRef: item.REF_ID,
                 keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,
@@ -466,7 +474,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
             return {
                 type: "selectList",
                 tableWin: "Empty",
-                itemView: getItemViewByRefId(item.REF_ID),
+                idRef: item.REF_ID,
                 keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,
@@ -477,7 +485,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 type: "selectList",
                 tableWin: "Empty",
                 fValue: 'id',
-                itemView: getItemViewByRefId(item.REF_ID),
+                idRef: item.REF_ID,
                 keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,
@@ -489,7 +497,6 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 tableSearch: "CUSTOM",
                 idRef: item.REF_ID,
                 fField: 'id',
-                itemView: getItemViewByRefId(item.REF_ID),
                 label: _(item.CAPTION),
                 bind: item.NAME,
                 style: style
@@ -506,10 +513,26 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 type: "selectListMulti",
                 tableWin: "Empty",
                 fValue: 'id',
-                itemView: getItemViewByRefId(item.REF_ID),
+                idRef: item.REF_ID,
                 keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,
+                style: style
+            };
+        case TypeEditor.checkbox:
+            return {
+                type: "checkbox",
+                label: _(item.CAPTION),
+                align: "right",
+                bind: item.NAME,
+                style: style
+            };
+        case TypeEditor.radio:
+            return {
+                type: "option",
+                label: _(item.CAPTION),
+                bind: item.NAME,
+                keySource: item.REF_ID,
                 style: style
             };
         default:

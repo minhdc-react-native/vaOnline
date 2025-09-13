@@ -24,7 +24,7 @@ import { dpkt } from "./voucher/kt/dpkt";
 import { psthue } from "./voucher/psthue";
 import { year } from "./year";
 const colors = theme.colors;
-
+export type IIsSelectTime = { from: string, to: string, from0?: string, to0?: string, expression?: Record<string, string>, data?: any[] };
 export type IActionFilter = {
     title?: string;
     dataSource?: IDataSource,
@@ -36,8 +36,8 @@ export type IActionFilter = {
     hideFilter?: string[];
     valueDisplay?: Record<string, string>;
     view: IRowsColsField,
-    isSelectTime?: { from: string, to: string, expression?: Record<string, string>, data?: any[] },
-    zod?: Record<string, { type: 'string' | 'number', msgError?: string }>,
+    isSelectTime?: IIsSelectTime,
+    zod?: IZod,
 };
 
 // type IDataSource = Record<string, { data?: any[], api?: { url: string, tableWin?: ITableWin, type?: 'get' | 'post', data?: Record<string, any>, fields?: string[] } }>;
@@ -54,8 +54,8 @@ export type IHandleActionConfig = {
     values: Record<string, any>,
     valueMap?: Record<string, string>,
     view: IRowsColsField,
-    zod?: Record<string, { type: 'string' | 'number', msgError?: string }>,
-    isSelectTime?: { from: string, to: string, expression?: Record<string, string>, data?: any[] }
+    zod?: IZod,
+    isSelectTime?: IIsSelectTime
 };
 
 export type IHandleAction = Record<string, IHandleActionConfig | ((dataSource: Record<string, any[]>) => IHandleActionConfig)>
@@ -68,6 +68,7 @@ export interface ISchemaWin {
     filterConfig?: IActionFilter,
     tabs?: ITabWin[]
 }
+export type IZod = Record<string, { type: 'string' | 'number', requiredIf?: string | string[], msgError?: string }>;
 
 export interface ISchemaWinValue {
     config: ISchemaWin,
@@ -77,7 +78,7 @@ export interface ISchemaWinValue {
     defaultNew: Record<string, any>,
     dataMaster?: string[],
     addDetails?: string[],
-    zod?: Record<string, { type: 'string' | 'number', requiredIf?: string | string[], msgError?: string }>
+    zod?: IZod
 }
 
 export const schemaWin: Partial<Record<ITableWin, ISchemaWinValue>> = {

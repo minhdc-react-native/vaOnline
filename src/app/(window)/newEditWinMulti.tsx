@@ -4,7 +4,7 @@ import LoadingScreen from "@/components/loadingScreen";
 import { buildZodSchema } from "@/components/UIEngine/buildZodSchema";
 import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
-import { IRowsColsField } from "@/components/UIEngine/types";
+import { IConfigExpression, IRowsColsField } from "@/components/UIEngine/types";
 import { useTranslation } from "@/context/TranslationContext";
 import { useVoucher } from "@/hooks/useVoucher";
 import { useDataApp } from "@/hooks/zustand/useDataApp";
@@ -31,9 +31,10 @@ interface IProps {
     onSave: (data?: IData) => void;
     data: IData | null;
     dataSource?: Record<string, any[]>;
+    configExpression?: IConfigExpression;
 }
 
-const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, schemaUi, changeOtherDetail, tableWin, voucherCode, currentTab, refreshSourceDvtCb, dataSource }) => {
+const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, configExpression, schemaUi, changeOtherDetail, tableWin, voucherCode, currentTab, refreshSourceDvtCb, dataSource }) => {
     const slideAnim = useRef(new Animated.Value(HEIGHT_WINDOW)).current;
     const { colors } = useTheme<VACOMTheme>();
     const { showPopup } = usePopup();
@@ -144,6 +145,7 @@ const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, sch
                     <FormWrapper>
                         <SchemaUIEngine
                             schema={schemaEdit}
+                            configExpression={configExpression}
                             data={dataItem ?? undefined}
                             onChangeItemData={setValue}
                             errors={errors}

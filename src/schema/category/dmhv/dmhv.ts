@@ -134,148 +134,213 @@ const dmhv0: ISchemaWin = {
                 bind: "TEN_HV"
             },
             {
-                type: "rows",
+                type: "cols",
+                requiredKeys: ['_typeView'],
+                visibleIf: "{{_typeView===1}}",
                 fields: [
                     {
-                        type: "input",
-                        label: "QUY_CACH",
-                        bind: "QUY_CACH",
-                        style: { flex: 1 }
+                        type: "rows",
+                        fields: [
+                            {
+                                type: "input",
+                                label: "QUY_CACH",
+                                bind: "QUY_CACH",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "selectList",
+                                clean: false,
+                                tableWin: "Empty",
+                                label: "LOAI_HV",
+                                bind: "LOAI_HV",
+                                style: { flex: 1 }
+                            }
+                        ]
                     },
                     {
-                        type: "selectList",
-                        clean: false,
-                        tableWin: "Empty",
-                        label: "LOAI_HV",
-                        bind: "LOAI_HV",
-                        style: { flex: 1 }
-                    }
+                        type: "rows",
+                        fields: [
+                            {
+                                type: "checkbox",
+                                align: "right",
+                                label: "THEO_LO",
+                                bind: "THEO_LO",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "checkbox",
+                                align: "right",
+                                label: "THEO_NG",
+                                bind: "THEO_NG",
+                                style: { flex: 1 }
+                            }
+                        ]
+                    },
+                    {
+                        type: "rows",
+                        fields: [
+                            {
+                                type: "number",
+                                label: "PT_THUE",
+                                bind: "PT_THUE",
+                                format: "rPercentage",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "inputBarcode",
+                                label: "BARCODE",
+                                bind: "BARCODE",
+                                style: { flex: 1 }
+                            }
+                        ]
+                    },
+                    {
+                        type: "rows",
+                        fields: [
+                            {
+                                type: "search",
+                                clean: false,
+                                tableSearch: "DMTK",
+                                fField: 'id',
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
+                                label: "TK_HV",
+                                bind: "TK_HV",
+                                keySource: "TK",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "search",
+                                clean: false,
+                                tableSearch: "DMTK",
+                                fField: 'id',
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
+                                label: "TK_GV",
+                                bind: "TK_GV",
+                                keySource: "TK",
+                                style: { flex: 1 }
+                            },
+                        ]
+                    },
+                    {
+                        type: "rows",
+                        fields: [
+                            {
+                                type: "search",
+                                clean: false,
+                                tableSearch: "DMTK",
+                                fField: 'id',
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
+                                label: "TK_DTHU",
+                                bind: "TK_DTHU",
+                                keySource: "TK",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "search",
+                                clean: false,
+                                tableSearch: "DMTK",
+                                fField: 'id',
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
+                                label: "TK_HBBTL",
+                                bind: "TK_HBBTL",
+                                keySource: "TK",
+                                style: { flex: 1 }
+                            },
+                        ]
+                    },
+                    {
+                        type: "rows",
+                        fields: [
+                            {
+                                type: "search",
+                                clean: false,
+                                tableSearch: "DMTK",
+                                fField: 'id',
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
+                                label: "TK_CK",
+                                bind: "TK_CK",
+                                keySource: "TK",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "selectList",
+                                tableWin: "Empty",
+                                label: "MA_SX",
+                                bind: "MA_SX",
+                                itemView: {
+                                    type: "cols",
+                                    fields: [
+                                        {
+                                            type: 'text',
+                                            requiredKeys: ['MA_SX', 'TEN_SX'],
+                                            label: "{{`${MA_SX} - ${TEN_SX}`}}"
+                                        }
+                                    ]
+                                },
+                                style: { flex: 1 }
+                            },
+                        ]
+                    },
                 ]
             },
             {
-                type: "rows",
+                type: "cols",
+                requiredKeys: ['_typeView'],
+                visibleIf: "{{_typeView===2}}",
                 fields: [
                     {
-                        type: "checkbox",
-                        align: "right",
-                        label: "THEO_LO",
-                        bind: "THEO_LO",
-                        style: { flex: 1 }
+                        type: "rows",
+                        fields: [
+                            {
+                                type: "selectList",
+                                clean: false,
+                                tableWin: "Empty",
+                                idRef: '189d7179-da87-40cc-a5b3-64f52cef8b86',
+                                label: "MA_KHO",
+                                bind: "MA_KHO",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "selectList",
+                                clean: false,
+                                tableWin: "Empty",
+                                label: "LOAI_HV",
+                                bind: "LOAI_HV",
+                                style: { flex: 1 }
+                            }
+                        ]
                     },
                     {
-                        type: "checkbox",
-                        align: "right",
-                        label: "THEO_NG",
-                        bind: "THEO_NG",
-                        style: { flex: 1 }
-                    }
-                ]
-            },
-            {
-                type: "rows",
-                fields: [
-                    {
-                        type: "number",
-                        label: "PT_THUE",
-                        bind: "PT_THUE",
-                        format: "rPercentage",
-                        style: { flex: 1 }
-                    },
-                    {
-                        type: "inputBarcode",
-                        label: "BARCODE",
-                        bind: "BARCODE",
-                        style: { flex: 1 }
-                    }
-                ]
-            },
-            {
-                type: "rows",
-                fields: [
-                    {
-                        type: "selectList",
-                        clean: false,
-                        tableWin: "Empty",
-                        fDisplay: { fValue: "id" },
-                        checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
-                        label: "TK_HV",
-                        bind: "TK_HV",
-                        keySource: "TK",
-                        style: { flex: 1 }
+                        type: "rows",
+                        fields: [
+                            {
+                                type: "number",
+                                label: "PT_THUE",
+                                bind: "PT_THUE",
+                                format: "rPercentage",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "number",
+                                label: "PT_TNCN",
+                                bind: "PT_TNCN",
+                                format: "rPercentage",
+                                style: { flex: 1 }
+                            }
+                        ]
                     },
                     {
                         type: "selectList",
                         clean: false,
                         tableWin: "Empty",
-                        fDisplay: { fValue: "id" },
-                        checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
-                        label: "TK_GV",
-                        bind: "TK_GV",
-                        keySource: "TK",
+                        idRef: 'f54efa39-7871-4f8d-b59a-8257befd61a2',
+                        label: "MA_NN",
+                        bind: "MA_NN",
                         style: { flex: 1 }
                     },
                 ]
             },
-            {
-                type: "rows",
-                fields: [
-                    {
-                        type: "selectList",
-                        clean: false,
-                        tableWin: "Empty",
-                        fDisplay: { fValue: "id" },
-                        checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
-                        label: "TK_DTHU",
-                        bind: "TK_DTHU",
-                        keySource: "TK",
-                        style: { flex: 1 }
-                    },
-                    {
-                        type: "selectList",
-                        clean: false,
-                        tableWin: "Empty",
-                        fDisplay: { fValue: "id" },
-                        checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
-                        label: "TK_HBBTL",
-                        bind: "TK_HBBTL",
-                        keySource: "TK",
-                        style: { flex: 1 }
-                    },
-                ]
-            },
-            {
-                type: "rows",
-                fields: [
-                    {
-                        type: "selectList",
-                        clean: false,
-                        tableWin: "Empty",
-                        fDisplay: { fValue: "id" },
-                        checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
-                        label: "TK_CK",
-                        bind: "TK_CK",
-                        keySource: "TK",
-                        style: { flex: 1 }
-                    },
-                    {
-                        type: "selectList",
-                        tableWin: "Empty",
-                        label: "MA_SX",
-                        bind: "MA_SX",
-                        itemView: {
-                            type: "cols",
-                            fields: [
-                                {
-                                    type: 'text',
-                                    requiredKeys: ['MA_SX', 'TEN_SX'],
-                                    label: "{{`${MA_SX} - ${TEN_SX}`}}"
-                                }
-                            ]
-                        },
-                        style: { flex: 1 }
-                    },
-                ]
-            },
+
         ]
     }
 }
@@ -284,9 +349,10 @@ export const dmhv: ISchemaWinValue = {
     dataSource: {
         MA_NH_HV: 'DMNHHV',
         LOAI_HV: 'LOAI_HV',
-        MA_TTDB: 'DMTTDB',
         MA_SX: 'DMSX',
-        TK: 'DMTK'
+        TK: 'DMTK',
+        MA_NN: 'DMNN',
+        MA_KHO: 'DMKHO'
     },
     config: dmhv0,
     fieldSearch: 'TEN_HV',

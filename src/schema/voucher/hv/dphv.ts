@@ -3,6 +3,7 @@ import { ISchemaWin, ISchemaWinValue } from "@/schema";
 import { theme } from "@/theme/theme";
 import { ListItemView } from "../itemView";
 const colors = theme.colors;
+const IS_INVOICE = "'PBH','PDV','BH8'";
 const dphv0: ISchemaWin = {
     filterConfig: {
         title: 'Lọc chứng từ',
@@ -68,10 +69,76 @@ const dphv0: ISchemaWin = {
         }
     },
     itemAction: {
-        type: "rows",
+        type: "cols",
         fields: [
             {
-                type: "cols",
+                type: "rows",
+                requiredKeys: ['MA_CT'],
+                visibleIf: `{{[${IS_INVOICE}].includes(MA_CT)}}`,
+                style: { flex: 1, gap: 0 },
+                fields: [
+                    {
+                        type: "cols",
+                        style: { gap: 0, flex: 1 },
+                        fields: [
+                            {
+                                type: "actionList",
+                                style: { backgroundColor: "red" },
+                                actionName: "deleteItem",
+                                typeButton: "btnLeft",
+                                fields: [
+                                    {
+                                        type: "icon",
+                                        iconType: "I",
+                                        name: "trash",
+                                        color: "#fff"
+                                    }
+                                ]
+                            },
+                            {
+                                type: "actionList",
+                                style: { backgroundColor: "blue" },
+                                actionName: "printItem",
+                                typeButton: "btnLeft",
+                                fields: [
+                                    {
+                                        type: "icon",
+                                        iconType: "I",
+                                        name: "print",
+                                        color: "#fff"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        type: "actionList",
+                        style: { backgroundColor: "green" },
+                        actionName: "exportInvoice",
+                        typeButton: "btnRight",
+                        fields: [
+                            {
+                                type: "cols",
+                                style: { justifyContent: "center", alignItems: "center" },
+                                fields: [
+                                    { type: "text", label: 'NĐ123', textStyle: { color: colors.background } },
+                                    {
+                                        type: "icon",
+                                        iconType: "F",
+                                        name: "file-text",
+                                        color: "#fff"
+                                    }
+                                ]
+                            }
+
+                        ]
+                    },
+                ]
+            },
+            {
+                type: "rows",
+                requiredKeys: ['MA_CT'],
+                visibleIf: `{{![${IS_INVOICE}].includes(MA_CT)}}`,
                 style: { gap: 0, flex: 1 },
                 fields: [
                     {
@@ -92,7 +159,7 @@ const dphv0: ISchemaWin = {
                         type: "actionList",
                         style: { backgroundColor: "blue" },
                         actionName: "printItem",
-                        typeButton: "btnLeft",
+                        typeButton: "btnRight",
                         fields: [
                             {
                                 type: "icon",
@@ -103,29 +170,7 @@ const dphv0: ISchemaWin = {
                         ]
                     }
                 ]
-            },
-            {
-                type: "actionList",
-                style: { backgroundColor: "green" },
-                actionName: "exportInvoice",
-                typeButton: "btnRight",
-                fields: [
-                    {
-                        type: "cols",
-                        style: { justifyContent: "center", alignItems: "center" },
-                        fields: [
-                            { type: "text", label: 'NĐ123', textStyle: { color: colors.background } },
-                            {
-                                type: "icon",
-                                iconType: "F",
-                                name: "file-text",
-                                color: "#fff"
-                            }
-                        ]
-                    }
-
-                ]
-            },
+            }
         ]
     },
     itemList: {
@@ -309,6 +354,52 @@ const dphv0: ISchemaWin = {
                         type: "selectList",
                         tableWin: "Empty",
                         clean: false,
+                        label: "STATUS",
+                        bind: "STATUS",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "search",
+                        tableSearch: "DMDT",
+                        fField: 'MA_DT',
+                        expression: { TEN_DT0: 'TEN_DT', DIA_CHI: 'DIA_CHI', ONG_BA: 'DAI_DIEN' },
+                        itemView: ListItemView.MA_DT,
+                        label: "MA_DT0",
+                        bind: "MA_DT0",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                fields: [
+                    {
+                        type: "search",
+                        tableSearch: "CUSTOM",
+                        fField: 'MA_BP',
+                        idRef: '08790464-f168-49e6-97ea-2cb670e2139d',
+                        label: "MA_BP",
+                        bind: "MA_BP",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "search",
+                        tableSearch: "CUSTOM",
+                        fField: 'MA_HT',
+                        idRef: '1754a128-e296-49c7-9865-6c6ef183073d',
+                        label: "MA_HT",
+                        bind: "MA_HT",
+                        style: { flex: 1 }
+                    },
+                ]
+            },
+            {
+                type: "rows",
+                fields: [
+                    {
+                        type: "selectList",
+                        tableWin: "Empty",
+                        clean: false,
                         label: "MA_NT",
                         bind: "MA_NT",
                         expression: { TY_GIA: 'TY_GIA' },
@@ -342,29 +433,6 @@ const dphv0: ISchemaWin = {
                 ]
             },
             {
-                type: "rows",
-                fields: [
-                    {
-                        type: "search",
-                        tableSearch: "DMDT",
-                        fField: 'MA_DT',
-                        expression: { TEN_DT0: 'TEN_DT', DIA_CHI: 'DIA_CHI', ONG_BA: 'DAI_DIEN' },
-                        itemView: ListItemView.MA_DT,
-                        label: "MA_DT0",
-                        bind: "MA_DT0",
-                        style: { flex: 1 }
-                    },
-                    {
-                        type: "selectList",
-                        tableWin: "Empty",
-                        clean: false,
-                        label: "STATUS",
-                        bind: "STATUS",
-                        style: { flex: 1 }
-                    }
-                ]
-            },
-            {
                 type: "input",
                 label: "TEN_DT0",
                 typeInput: "multi",
@@ -379,15 +447,51 @@ const dphv0: ISchemaWin = {
             {
                 type: "expand",
                 title: "Thông tin bổ xung...",
+                requiredKeys: ["_tTnk", "_tTdb", "_tTck"],
+                visibleIf: "{{_tTnk || _tTdb || _tTck}}",
                 fields: [
                     {
                         type: "rows",
+                        requiredKeys: ["_tTnk"],
+                        visibleIf: "{{_tTnk}}",
                         fields: [
                             {
-                                type: "selectList",
+                                type: "search",
+                                tableSearch: "CUSTOM",
                                 clean: false,
-                                tableWin: "Empty",
-                                fDisplay: { fValue: "id" },
+                                idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                                fField: 'id',
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
+                                label: "TK_NO_NK",
+                                bind: "TK_NO_NK",
+                                keySource: "TK",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "search",
+                                tableSearch: "CUSTOM",
+                                clean: false,
+                                idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                                fField: 'id',
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
+                                label: "TK_CO_NK",
+                                bind: "TK_CO_NK",
+                                keySource: "TK",
+                                style: { flex: 1 }
+                            },
+                        ]
+                    },
+                    {
+                        type: "rows",
+                        requiredKeys: ["_tTdb"],
+                        visibleIf: "{{_tTdb}}",
+                        fields: [
+                            {
+                                type: "search",
+                                tableSearch: "CUSTOM",
+                                clean: false,
+                                idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                                fField: 'id',
                                 checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                                 label: "TK_NO_DB",
                                 bind: "TK_NO_DB",
@@ -395,10 +499,11 @@ const dphv0: ISchemaWin = {
                                 style: { flex: 1 }
                             },
                             {
-                                type: "selectList",
+                                type: "search",
+                                tableSearch: "CUSTOM",
                                 clean: false,
-                                tableWin: "Empty",
-                                fDisplay: { fValue: "id" },
+                                idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                                fField: 'id',
                                 checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                                 label: "TK_CO_DB",
                                 bind: "TK_CO_DB",
@@ -409,12 +514,15 @@ const dphv0: ISchemaWin = {
                     },
                     {
                         type: "rows",
+                        requiredKeys: ["_tTck"],
+                        visibleIf: "{{_tTck}}",
                         fields: [
                             {
-                                type: "selectList",
+                                type: "search",
+                                tableSearch: "CUSTOM",
                                 clean: false,
-                                tableWin: "Empty",
-                                fDisplay: { fValue: "id" },
+                                idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                                fField: 'id',
                                 checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                                 label: "TK_NO_CK",
                                 bind: "TK_NO_CK",
@@ -422,10 +530,11 @@ const dphv0: ISchemaWin = {
                                 style: { flex: 1 }
                             },
                             {
-                                type: "selectList",
+                                type: "search",
+                                tableSearch: "CUSTOM",
                                 clean: false,
-                                tableWin: "Empty",
-                                fDisplay: { fValue: "id" },
+                                idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                                fField: 'id',
                                 checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                                 label: "TK_CO_CK",
                                 bind: "TK_CO_CK",
@@ -446,7 +555,9 @@ export const dphv: ISchemaWinValue = {
         MA_NT: 'DMNT',
         STATUS: 'STATUS',
         DMNHOMHD: 'DMNHOMHD',
-        DVT_CB: 'DVT_CB'
+        DVT: 'DMDVT',
+        DVT_CB: 'DVT_CB',
+        LOAI_PHI: 'DMLF'
     },
     config: dphv0,
     fieldSearch: 'INFO_FILTER COLLATE SQL_Latin1_General_CP1_CI_AI', isRmTone: true,

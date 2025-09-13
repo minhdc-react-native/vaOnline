@@ -147,6 +147,7 @@ export type ISelectListField = IFieldBase & {
     style?: StyleProp<ViewStyle>;
     loading?: boolean,
     tableWin: ITableWin;
+    idRef?: string;
     itemView?: IRowsColsField,
     isNewEdit?: boolean;
     notFistFilter?: boolean;
@@ -164,6 +165,7 @@ export type ISelectListMultiField = IFieldBase & {
     style?: StyleProp<ViewStyle>;
     loading?: boolean,
     tableWin: ITableWin;
+    idRef?: string;
     itemView?: IRowsColsField,
     isNewEdit?: boolean
 };
@@ -262,6 +264,11 @@ export type IField =
     | IButton
     | IRating
 
+export type IConfigExpression = {
+    expression?: Record<string, Record<string, string>>,
+    expressionIfEmpty?: Record<string, string[]>;
+    caption?: Record<string, string>;
+};
 export type ISchemaUIProps = {
     schema: IRowsColsField;
     data?: Record<string, any>;
@@ -270,7 +277,8 @@ export type ISchemaUIProps = {
     onChangeItemData?: (change: Record<string, any>) => void,
     actionMap?: Record<string, (param?: any) => void>;
     errors?: Record<string, string>,
-    dataActionMap?: any
+    dataActionMap?: any;
+    configExpression?: IConfigExpression;
 };
 
 export type ISource = Record<string, {

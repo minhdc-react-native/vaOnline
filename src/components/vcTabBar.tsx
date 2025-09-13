@@ -9,6 +9,7 @@ interface IProgs {
     style?: StyleProp<ViewStyle>;
 }
 export const VcTabBar = ({ value, data, onPress, style }: IProgs) => {
+
     const { colors } = useTheme();
     const tabLayouts = useRef<{ [key: string]: { x: number; width: number } }>({});
     const scrollRef = useRef<ScrollView>(null);
@@ -31,7 +32,7 @@ export const VcTabBar = ({ value, data, onPress, style }: IProgs) => {
             const item = data.find(i => i.id === value)
             if (item) setScroll(item);
         }
-    }, [widthView, value]);
+    }, [value]);
 
     return (
         <View style={[{ height: 50, backgroundColor: colors.background, borderRadius: 20, borderWidth: 0.5, borderColor: colors.backdrop }, style]} onLayout={(event: LayoutChangeEvent) => {

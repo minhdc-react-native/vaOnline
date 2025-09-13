@@ -4,8 +4,8 @@ import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RefreshControl, View } from "react-native";
-import { ActivityIndicator, FAB } from "react-native-paper";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { ActivityIndicator, Appbar, FAB } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { IHandleActionConfig } from "../../schema";
 import { layoutHandleAction } from "../../schema/layoutHandleAction";
@@ -73,10 +73,6 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
             setShouldRefresh(null);
         }
     }, [shouldRefresh]);
-
-    const ViewMap = useMemo(() => {
-        return !menuWin0 ? SafeAreaView : View;
-    }, []);
 
     const checkLayoutAction = useCallback((actionName: string, callBack: (values: Record<string, any>) => void, data?: Record<string, any>) => {
         if (layoutHandleAction[actionName]) {
@@ -162,16 +158,18 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
     }, [navigation]);
 
     return (
-        <ViewMap style={{ flex: 1 }}>
-            <VcHeader title={lang === 'vi' ? itemMenuWin.label : itemMenuWin.labelE} numRow={infoData.total} onSearch={setTextSearch}
-                showSearch={showFilter.showSearch}
-                showFilter={showFilter.showFilter} onFilter={onFilter}
-                valuesTypeFilter={schemaUI.config.filterConfig?.valuesType}
-                valuesFilter={currentValue.current ?? undefined} onCleanFilterValue={onCleanFilterValue}
-                valueDisplay={schemaUI.config.filterConfig?.valueDisplay}
-                valueIgnoreFilter={schemaUI.config.filterConfig?.valueIgnoreFilter}
-                hideFilter={schemaUI.config.filterConfig?.hideFilter}
-                isFastView={menuWin0 !== undefined} />
+        <View style={{ flex: 1 }}>
+            <Appbar.Header>
+                <VcHeader title={lang === 'vi' ? itemMenuWin.label : itemMenuWin.labelE} numRow={infoData.total} onSearch={setTextSearch}
+                    showSearch={showFilter.showSearch}
+                    showFilter={showFilter.showFilter} onFilter={onFilter}
+                    valuesTypeFilter={schemaUI.config.filterConfig?.valuesType}
+                    valuesFilter={currentValue.current ?? undefined} onCleanFilterValue={onCleanFilterValue}
+                    valueDisplay={schemaUI.config.filterConfig?.valueDisplay}
+                    valueIgnoreFilter={schemaUI.config.filterConfig?.valueIgnoreFilter}
+                    hideFilter={schemaUI.config.filterConfig?.hideFilter}
+                    isFastView={menuWin0 !== undefined} />
+            </Appbar.Header>
             <SwipeListView
                 data={data}
                 style={{ backgroundColor: colors.vacom.backLayout, paddingTop: 5 }}
@@ -215,7 +213,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
             {showParam && layoutAction && <ParamScreen onConfirm={runActionWithParam} schemaConfig={layoutAction}
                 paramKey={typeParam.current === 'filter' ? currentValue.current : undefined}
                 timeItem={typeParam.current === 'filter' ? currentValue.current?.timeItem : undefined} />}
-        </ViewMap>
+        </View>
     );
 }
 export default WindowScreen;

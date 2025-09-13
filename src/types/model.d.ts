@@ -52,7 +52,13 @@ declare global {
         TAB_TABLE: ITableWin;
         TAB_NAME: string;
         FOREIGN_KEY: string;
-        PERMISSION: { NEW: boolean, EDIT: boolean, DELETE: boolean }
+        PERMISSION: { NEW: boolean, EDIT: boolean, DELETE: boolean },
+        ZOD?: IZod,
+        DISPLAY: Record<string, boolean>;
+        EXPRESSION?: Record<string, Record<string, string>>;
+        EXPRESSION_If_EMPTY?: Record<string, string[]>;
+        DEFAULT_VALUE?: Record<string, any>;
+        CAPTION?: Record<string, string>;
     }
     interface IWinConfig {
         window: {
@@ -95,7 +101,7 @@ declare global {
         'DMTHUE' | 'DMQS' | 'DMHV' | 'DMKHO' | 'DMLH' | 'DMNG';
 
     type IKeyMenuWin = 'acCatalogBalance' | 'acCatalogBank' | 'acCatalogGood' | 'acCatalogOther' | 'acCatalogPartner' |
-        'banHangPhaiThu' | 'vonBangTien' | 'congTacCuoiKy' |
+        'goodDocuments' | 'accountingDocuments' | 'congTacCuoiKy' |
         'baoCaoDonVi' | 'baoCaoToanNganh'
 
     var isNotEmpty: (value: any) => boolean;

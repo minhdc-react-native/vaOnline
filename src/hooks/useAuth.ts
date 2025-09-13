@@ -40,7 +40,7 @@ function filterDataMenu(
 
                             const newArr = arr.map(section => ({
                                 ...section,
-                                data: section.data.filter(item => ids.includes(item.id))
+                                data: section.data.filter(item => (item.id.startsWith("LINE-") || ids.includes(item.id)))
                             }));
 
                             // Bỏ các section không có data

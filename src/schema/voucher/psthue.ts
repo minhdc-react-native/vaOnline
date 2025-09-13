@@ -141,10 +141,11 @@ const psthue0: ISchemaWin = {
                 type: "rows",
                 fields: [
                     {
-                        type: "selectList",
+                        type: "search",
+                        tableSearch: "CUSTOM",
                         clean: false,
-                        tableWin: "Empty",
-                        fDisplay: { fValue: "id" },
+                        idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                        fField: 'id',
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_NO",
                         bind: "TK_NO",
@@ -152,10 +153,11 @@ const psthue0: ISchemaWin = {
                         style: { flex: 1 }
                     },
                     {
-                        type: "selectList",
+                        type: "search",
+                        tableSearch: "CUSTOM",
                         clean: false,
-                        tableWin: "Empty",
-                        fDisplay: { fValue: "id" },
+                        idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                        fField: 'id',
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_CO",
                         bind: "TK_CO",

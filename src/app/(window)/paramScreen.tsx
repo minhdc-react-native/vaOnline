@@ -52,8 +52,13 @@ export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeIte
     const [filterTime, setTime] = useState<IData | null>(timeItem || null);
     const setFilterTime = (item: IData | null) => {
         setTime(item);
-        const dateRange = Helper.getDateRange(item?.id.toString() ?? "");
-        let changeValue = { [isSelectTime?.from ?? "from"]: dateRange.fromDate ?? "", [isSelectTime?.to ?? "to"]: dateRange.toDate ?? "" };
+        const dateRange = Helper.getDateRange(item?.id.toString() ?? "", Number(currentYear));
+        let changeValue = {
+            [isSelectTime?.from ?? "from"]: dateRange.fromDate ?? "",
+            [isSelectTime?.to ?? "to"]: dateRange.toDate ?? "",
+            [isSelectTime?.from0 ?? "from0"]: dateRange.fromDate0 ?? "",
+            [isSelectTime?.to0 ?? "to0"]: dateRange.toDate0 ?? ""
+        };
         if (isSelectTime?.expression) {
             Object.keys(isSelectTime.expression).map(key => {
                 changeValue[key as any] = item?.[isSelectTime.expression ? isSelectTime.expression?.[key] : key];
@@ -200,7 +205,7 @@ export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeIte
                             clean={true}
                             onChange={(item) => setFilterTime(item)}
                             notFistFilter={true}
-                        /> : <Text style={styles.title}>{schemaConfig.title || 'Tham số'}</Text>}
+                        /> : <Text style={styles.title} numberOfLines={1}>{schemaConfig.title || 'Tham số'}</Text>}
                         <Button mode="contained" onPress={() => closePanel(true, paramKey0)}>Xác nhận</Button>
                     </View>
                 </View>

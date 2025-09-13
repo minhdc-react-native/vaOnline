@@ -35,7 +35,12 @@ const filterTime = [
     { value: '7 ngày qua', id: '7days' },
     { value: 'Tháng này', id: 'thismonth' },
     { value: 'Tháng trước', id: 'lastmonth' },
-
+    // ===== 4 quý =====
+    { value: 'Quý 1', id: 'quarter_1' },
+    { value: 'Quý 2', id: 'quarter_2' },
+    { value: 'Quý 3', id: 'quarter_3' },
+    { value: 'Quý 4', id: 'quarter_4' },
+    { value: 'Năm nay', id: 'year' },
     // ===== 12 tháng =====
     { value: 'Tháng 1', id: 'month_1' },
     { value: 'Tháng 2', id: 'month_2' },
@@ -50,11 +55,7 @@ const filterTime = [
     { value: 'Tháng 11', id: 'month_11' },
     { value: 'Tháng 12', id: 'month_12' },
 
-    // ===== 4 quý =====
-    { value: 'Quý 1', id: 'quarter_1' },
-    { value: 'Quý 2', id: 'quarter_2' },
-    { value: 'Quý 3', id: 'quarter_3' },
-    { value: 'Quý 4', id: 'quarter_4' },
+
 ];
 
 export const Helper = {
@@ -176,10 +177,12 @@ export const Helper = {
     },
     filterTimeMonthQuarter: filterTimeMonthQuarter,
     filterTime: filterTime,
-    getDateRange: (filterValue: string) => {
+    getDateRange: (filterValue: string, year?: number) => {
         const today = dayjs.utc();
-        let fromDate;
-        let toDate;
+        const baseYear = year ?? today.year(); // nếu không truyền thì lấy năm hiện tại
+        let fromDate: dayjs.Dayjs | null = null;
+        let toDate: dayjs.Dayjs | null = null;
+
         switch (filterValue) {
             case 'today':
                 fromDate = today.startOf('day');
@@ -190,60 +193,92 @@ export const Helper = {
                 toDate = today.subtract(1, 'day').endOf('day');
                 break;
             case '7days':
-                fromDate = today.subtract(6, 'day').startOf('day'); // 6 ngày trước + hôm nay = 7 ngày
+                fromDate = today.subtract(6, 'day').startOf('day');
                 toDate = today.endOf('day');
                 break;
             case 'thismonth':
-                fromDate = today.startOf('month');
-                toDate = today.endOf('month');
+                fromDate = dayjs.utc().startOf('month');
+                toDate = dayjs.utc().endOf('month');
                 break;
             case 'lastmonth':
-                fromDate = today.subtract(1, 'month').startOf('month');
-                toDate = today.subtract(1, 'month').endOf('month');
+                fromDate = dayjs.utc().subtract(1, 'month').startOf('month');
+                toDate = dayjs.utc().subtract(1, 'month').endOf('month');
                 break;
             // ===== 12 tháng =====
             case 'month_1': case 'month_2': case 'month_3':
             case 'month_4': case 'month_5': case 'month_6':
             case 'month_7': case 'month_8': case 'month_9':
             case 'month_10': case 'month_11': case 'month_12': {
-                const month = parseInt(filterValue.split('_')[1], 10) - 1; // tháng trong dayjs tính từ 0
-                fromDate = today.month(month).startOf('month');
-                toDate = today.month(month).endOf('month');
+                const month = parseInt(filterValue.split('_')[1], 10) - 1; // 0-based
+                fromDate = dayjs.utc().year(baseYear).month(month).startOf('month');
+                toDate = dayjs.utc().year(baseYear).month(month).endOf('month');
                 break;
             }
-
             // ===== 4 quý =====
             case 'quarter_1':
-                fromDate = today.month(0).startOf('month');  // Jan
-                toDate = today.month(2).endOf('month');      // Mar
+                fromDate = dayjs.utc().year(baseYear).month(0).startOf('month');   // Jan
+                toDate = dayjs.utc().year(baseYear).month(2).endOf('month');       // Mar
                 break;
             case 'quarter_2':
-                fromDate = today.month(3).startOf('month');  // Apr
-                toDate = today.month(5).endOf('month');      // Jun
+                fromDate = dayjs.utc().year(baseYear).month(3).startOf('month');   // Apr
+                toDate = dayjs.utc().year(baseYear).month(5).endOf('month');       // Jun
                 break;
             case 'quarter_3':
-                fromDate = today.month(6).startOf('month');  // Jul
-                toDate = today.month(8).endOf('month');      // Sep
+                fromDate = dayjs.utc().year(baseYear).month(6).startOf('month');   // Jul
+                toDate = dayjs.utc().year(baseYear).month(8).endOf('month');       // Sep
                 break;
             case 'quarter_4':
-                fromDate = today.month(9).startOf('month');  // Oct
-                toDate = today.month(11).endOf('month');     // Dec
+                fromDate = dayjs.utc().year(baseYear).month(9).startOf('month');   // Oct
+                toDate = dayjs.utc().year(baseYear).month(11).endOf('month');      // Dec
+                break;
+            case 'year':
+                fromDate = dayjs.utc().year(baseYear).startOf('year');
+                toDate = dayjs.utc().year(baseYear).endOf('year');
                 break;
             case 'custom':
-                // custom thì thường bạn sẽ cho user chọn tay, nên để null
                 fromDate = null;
                 toDate = null;
                 break;
             default:
-                fromDate = null;//today.startOf('day');
-                toDate = null; //today.endOf('day');
+                fromDate = null;
+                toDate = null;
+        }
+
+        // ================== Xác định kỳ trước ==================
+        let fromDate0: dayjs.Dayjs | null = null;
+        let toDate0: dayjs.Dayjs | null = null;
+
+        if (fromDate && toDate) {
+            const diffMonths = toDate.diff(fromDate, 'month') + 1;
+            const diffYears = toDate.diff(fromDate, 'year') + 1;
+
+            if (diffMonths === 1) {
+                // 1 tháng -> kỳ trước là tháng trước
+                fromDate0 = fromDate.subtract(1, 'month').startOf('month');
+                toDate0 = fromDate.subtract(1, 'month').endOf('month');
+            } else if (diffMonths === 3) {
+                // quý -> kỳ trước là quý trước
+                fromDate0 = fromDate.subtract(3, 'month').startOf('month');
+                toDate0 = fromDate.subtract(1, 'month').endOf('month');
+            } else if (diffYears === 1) {
+                // năm -> kỳ trước là năm trước
+                fromDate0 = fromDate.subtract(1, 'year').startOf('year');
+                toDate0 = fromDate.subtract(1, 'year').endOf('year');
+            } else {
+                // còn lại: cùng kỳ năm ngoái
+                fromDate0 = fromDate.subtract(1, 'year');
+                toDate0 = toDate.subtract(1, 'year');
+            }
         }
 
         return {
             fromDate: fromDate ? fromDate.format("YYYY-MM-DD HH:mm:ss") : null,
-            toDate: toDate ? toDate.format("YYYY-MM-DD HH:mm:ss") : null
+            toDate: toDate ? toDate.format("YYYY-MM-DD HH:mm:ss") : null,
+            fromDate0: fromDate0 ? fromDate0.format("YYYY-MM-DD HH:mm:ss") : null,
+            toDate0: toDate0 ? toDate0.format("YYYY-MM-DD HH:mm:ss") : null,
         };
     },
+
     getFormattedDate: (strDate?: string, format: 'dd/MM/yyyy HH:mm:ss' | 'yyyy-MM-dd HH:mm:ss' = 'dd/MM/yyyy HH:mm:ss', removeTime = false) => {
         if (!strDate) return '';
         const date = strDate ? new Date(strDate) : new Date();

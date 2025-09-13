@@ -1,5 +1,6 @@
 import { useTranslation } from "@/context/TranslationContext";
 import { schemaWin, schemaWinEmpty } from "@/schema";
+import { ItemViewByRefId } from "@/schema/voucher/itemView";
 import { VACOMTheme } from "@/theme/theme";
 import { Helper } from "@/utils/Helper";
 import { EvilIcons, FontAwesome } from "@expo/vector-icons";
@@ -27,6 +28,7 @@ type IListProps = {
     style?: StyleProp<ViewStyle>;
     loading?: boolean,
     tableWin?: ITableWin,
+    idRef?: string;
     itemView?: IRowsColsField,
     isError?: boolean;
     isNewEdit?: boolean;
@@ -36,8 +38,9 @@ type IListProps = {
 
 const ViewComponent: React.FC<IListProps> = ({
     label, placeholder, data, value, onChange, fDisplay, typeDisplay = "value", disabled = false,
-    fId = "id", fValue = "value", clean = true, rightIcon, style, loading, tableWin, isError, isNewEdit = false, notFistFilter = true, checkSelected, itemView
+    fId = "id", fValue = "value", clean = true, rightIcon, style, loading, tableWin, isError, isNewEdit = false, notFistFilter = true, checkSelected, idRef, itemView
 }) => {
+    itemView = idRef ? (ItemViewByRefId[idRef] ?? itemView) : itemView;
     const colors = useTheme<VACOMTheme>().colors;
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['50%', '70%', '90%'], []);

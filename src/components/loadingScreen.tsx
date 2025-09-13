@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import ContentLoader, { Circle, Rect } from "react-content-loader/native";
-import { View } from "react-native";
+import { StyleProp, View, ViewStyle } from "react-native";
 import { useTheme } from "react-native-paper";
-
-export default function LoadingScreen() {
+interface IProg {
+    style?: StyleProp<ViewStyle>
+}
+export default function LoadingScreen({ style }: IProg) {
     const { colors } = useTheme();
     const [size, setSize] = useState({ width: 0, height: 0 });
 
     return (
         <View
-            style={{ marginTop: 50, marginHorizontal: 20 }}
+            style={[{ marginTop: 50, marginHorizontal: 20 }, style]}
             onLayout={(e) => {
                 const { width, height } = e.nativeEvent.layout;
                 setSize({ width, height: height || 200 }); // fallback height

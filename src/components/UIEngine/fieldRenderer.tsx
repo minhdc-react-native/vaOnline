@@ -44,6 +44,7 @@ const ViewComponent: React.FC<IProps> = ({
     const key = `${field.bind || field.type}-${index}`;
     // Dùng placeholder value + setter
     const formState = useContextSelector(FormContext, (ctx) => ctx!.formState);
+    const configExpression = useContextSelector(FormContext, (ctx) => ctx!.configExpression);
     const onChangeItemData = useContextSelector(FormContext, (ctx) => ctx!.onChangeItemData);
     const evalExpr = useContextSelector(FormContext, (ctx) => ctx!.evalExpr);
     const handleAction = useContextSelector(FormContext, (ctx) => ctx!.handleAction);
@@ -58,14 +59,17 @@ const ViewComponent: React.FC<IProps> = ({
         if (field.typeInput === "taxCode" && value && value.length >= 10) {
             if (prevValue.current !== value) { // chỉ chạy khi thay đổi giá trị.
                 prevValue.current = value;
-                const expression: Record<string, string> = typeof field.expression === "string" ?
-                    evalExpr(field.expression, field.requiredKeys) : field.expression;
-                const expressionIfEmpty = field.expressionIfEmpty ? (Array.isArray(field.expressionIfEmpty) ? field.expressionIfEmpty : evalExpr(field.expressionIfEmpty, field.requiredKeys)) : [];
+                const fixExpression = configExpression?.expression?.[field.bind!] || field.expression;
+                const fixExpressionIfEmpty = configExpression?.expressionIfEmpty?.[field.bind!] || field.expressionIfEmpty;
+
+                const expression: Record<string, string> = typeof fixExpression === "string" ?
+                    evalExpr(fixExpression, field.requiredKeys) : fixExpression;
+                const expressionIfEmpty = fixExpressionIfEmpty ? (Array.isArray(fixExpressionIfEmpty) ? fixExpressionIfEmpty : evalExpr(fixExpressionIfEmpty, field.requiredKeys)) : [];
 
                 onBlurTaxCode(value, expressionIfEmpty, expression)
             };
         }
-    }, [value, field, handleAction, onBlurTaxCode, evalExpr]);
+    }, [value, field, handleAction, onBlurTaxCode, evalExpr, configExpression]);
 
     const { colors } = useTheme<VACOMTheme>();
     const { showToast } = useToast();
@@ -84,39 +88,45 @@ const ViewComponent: React.FC<IProps> = ({
 
     const onSelectSearch = useCallback((item: Record<string, any> | null) => {
         if (field.type !== "search") return;
-        const expression: Record<string, string> = typeof field.expression === "string" ?
-            evalExpr(field.expression, field.requiredKeys) : field.expression;
+        const fixExpression = configExpression?.expression?.[field.bind!] || field.expression;
+        const fixExpressionIfEmpty = configExpression?.expressionIfEmpty?.[field.bind!] || field.expressionIfEmpty;
 
-        const expressionIfEmpty = field.expressionIfEmpty ? (Array.isArray(field.expressionIfEmpty) ? field.expressionIfEmpty : evalExpr(field.expressionIfEmpty, field.requiredKeys)) : [];
+        const expression: Record<string, string> = typeof fixExpression === "string" ?
+            evalExpr(fixExpression, field.requiredKeys) : fixExpression;
+
+        const expressionIfEmpty = fixExpressionIfEmpty ? (Array.isArray(fixExpressionIfEmpty) ? fixExpressionIfEmpty : evalExpr(fixExpressionIfEmpty, field.requiredKeys)) : [];
 
         let valueChange: any = { [field.bind!]: (item?.[field.fField] ?? "") };
         if (expression && item) {
             Object.keys(expression).map(key => {
-                if (!expressionIfEmpty.includes(key) || !isNotEmpty(data.current[key])) {
-                    valueChange[key] = item[expression ? expression[key] : key] ?? expression[key];
+                if (item[expression[key]] && (!expressionIfEmpty.includes(key) || !isNotEmpty(data.current[key]))) {
+                    valueChange[key] = item[expression[key]];
                 }
             });
         }
         setValues(valueChange);
-    }, [field, setValues, evalExpr]);
+    }, [field, setValues, evalExpr, configExpression]);
 
     const onSelectList = useCallback((item: IData | null) => {
         if (field.type !== "selectList") return;
-        const expression: Record<string, string> = typeof field.expression === "string" ?
-            evalExpr(field.expression, field.requiredKeys) : field.expression;
+        const fixExpression = configExpression?.expression?.[field.bind!] || field.expression;
+        const fixExpressionIfEmpty = configExpression?.expressionIfEmpty?.[field.bind!] || field.expressionIfEmpty;
 
-        const expressionIfEmpty = field.expressionIfEmpty ? (Array.isArray(field.expressionIfEmpty) ? field.expressionIfEmpty : evalExpr(field.expressionIfEmpty, field.requiredKeys)) : [];
+        const expression: Record<string, string> = typeof fixExpression === "string" ?
+            evalExpr(fixExpression, field.requiredKeys) : fixExpression;
+
+        const expressionIfEmpty = fixExpressionIfEmpty ? (Array.isArray(fixExpressionIfEmpty) ? fixExpressionIfEmpty : evalExpr(fixExpressionIfEmpty, field.requiredKeys)) : [];
 
         let valueChange: any = { [field.bind!]: item?.[field.fId ?? "id"] };
         if (expression && item) {
             Object.keys(expression).map(key => {
-                if (!expressionIfEmpty.includes(key) || !isNotEmpty(data.current[key])) {
-                    valueChange[key] = item[expression ? expression[key] : key];
+                if (item[expression[key]] && (!expressionIfEmpty.includes(key) || !isNotEmpty(data.current[key]))) {
+                    valueChange[key] = item[expression[key]];
                 }
             });
         }
         setValues(valueChange);
-    }, [field, setValues, evalExpr]);
+    }, [field, setValues, evalExpr, configExpression]);
 
     const onPressButton = useCallback(() => {
         if (field.type !== "button") return;
@@ -129,6 +139,12 @@ const ViewComponent: React.FC<IProps> = ({
         },
         [disabled, setValue]
     );
+
+    const label = useMemo(() => {
+        const fixLabel = configExpression?.caption?.[field.bind || ''] || (field as any).label;
+        return fixLabel ? evalExpr(fixLabel, field.requiredKeys) : undefined;
+    }, [field, configExpression, evalExpr]);
+
     switch (field.type) {
         case 'rows':
 
@@ -222,35 +238,31 @@ const ViewComponent: React.FC<IProps> = ({
             return <IconComponent key={key} name={field.name} size={field.size ?? 20} color={field.color} />;
 
         case 'number':
-            const labelNumber = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={field.style}>
-                    <VcNum disabled={disabled} label={_(labelNumber)} typeFormat={field.format} key={key} value={value} onChange={setValue} />
+                    <VcNum disabled={disabled} label={_(label)} typeFormat={field.format} key={key} value={value} onChange={setValue} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'date':
-            const labelDate = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[field.style]}>
-                    <VcDatePicker disabled={disabled} label={_(labelDate)} key={key} value={value} onChange={setValue} />
+                    <VcDatePicker disabled={disabled} label={_(label)} key={key} value={value} onChange={setValue} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case "time":
-            const labelTime = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[field.style]}>
-                    <VcTimePicker disabled={disabled} label={_(labelTime)} key={key} value={value} onChange={setValue} />
+                    <VcTimePicker disabled={disabled} label={_(label)} key={key} value={value} onChange={setValue} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'input':
-            const labelInput = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <InputField
                     value={value}
-                    label={labelInput}
+                    label={label}
                     disabled={disabled}
                     setValue={setValue}
                     handleBlur={handleBlur}
@@ -265,11 +277,10 @@ const ViewComponent: React.FC<IProps> = ({
                 />
             );
         case 'inputBarcode':
-            const labelInputBarcode = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <InputBarcode
                     value={value}
-                    label={labelInputBarcode}
+                    label={label}
                     disabled={disabled}
                     setValue={setValue}
                     handleBlur={handleBlur}
@@ -278,10 +289,9 @@ const ViewComponent: React.FC<IProps> = ({
                 />
             );
         case 'select':
-            const labelSelect = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[{ flexDirection: "row", alignItems: "center", gap: 5 }, field.style]}>
-                    {labelSelect !== undefined && <Text style={[{ fontWeight: 'bold' }, field.labelStyle]}>{_(labelSelect)}</Text>}
+                    {label !== undefined && <Text style={[{ fontWeight: 'bold' }, field.labelStyle]}>{_(label)}</Text>}
                     <View style={{ flex: 1 }}>
                         <SegmentedButtons density="small" key={key} buttons={dataSource[field.keySource || field.bind!] ?? []} value={value} onValueChange={onChangeWidthDisabled} />
                         <ErrorTooltip field={field} errors={errors} />
@@ -289,40 +299,36 @@ const ViewComponent: React.FC<IProps> = ({
                 </View>
             );
         case 'search':
-            const labelSearch = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
-                    <VcSearchList value={value} disabled={disabled} label={_(labelSearch)} clean={field.clean} itemView={field.itemView} numCharSearch={field.numCharSearch}
+                    <VcSearchList value={value} disabled={disabled} label={_(label)} clean={field.clean} itemView={field.itemView} numCharSearch={field.numCharSearch}
                         idRef={field.idRef} tableSearch={field.tableSearch} fField={field.fField} checkSelected={field.checkSelected} onChange={onSelectSearch} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'selectList':
-            const labelList = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
-                    <VcSelectList disabled={disabled} data={dataSource[field.keySource || field.bind!] ?? []} label={_(labelList)} key={key} clean={field.clean}
+                    <VcSelectList disabled={disabled} data={dataSource[field.keySource || field.bind!] ?? []} label={_(label)} key={key} clean={field.clean}
                         fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit} checkSelected={field.checkSelected}
-                        itemView={field.itemView} fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={onSelectList} notFistFilter={field.notFistFilter} />
+                        idRef={field.idRef} itemView={field.itemView} fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={onSelectList} notFistFilter={field.notFistFilter} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'selectListMulti':
-            const labelListMulti = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={[field.style]}>
-                    <VcSelectListMulti data={dataSource[field.keySource || field.bind!] ?? []} label={_(labelListMulti)} key={key}
-                        itemView={field.itemView} fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit}
+                    <VcSelectListMulti data={dataSource[field.keySource || field.bind!] ?? []} label={_(label)} key={key}
+                        idRef={field.idRef} itemView={field.itemView} fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit}
                         fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={setValue} disabled={disabled} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'selectListPage':
             const display = getValue(field.fValue);
-            const labelListPage = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View key={`${key}view`} style={field.style}>
-                    <VcSelectPage label={_(labelListPage)} key={key} clean={field.clean} disabled={disabled}
+                    <VcSelectPage label={_(label)} key={key} clean={field.clean} disabled={disabled}
                         itemMenuWin={field.itemMenuWin} defaultFilter={field.defaultFilter} isNewEdit={field.isNewEdit}
                         value={value} display={display} onChange={(itemSelected) => {
                             setValues({
@@ -338,27 +344,23 @@ const ViewComponent: React.FC<IProps> = ({
         case 'empty':
             return <View style={field.style} />
         case 'checkbox':
-            const labelCheckbox = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return <View key={`${key}view`} style={field.style}>
-                <VcCheckBox disabled={disabled} textStyle={field.textStyle} align={field.align} label={_(labelCheckbox)} value={value}
+                <VcCheckBox disabled={disabled} textStyle={field.textStyle} align={field.align} label={_(label)} value={value}
                     onChange={setValue} type={field.typeView} />
             </View>
         case "option":
-            const labelOption = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return <View key={`${key}view`} style={field.style}>
-                <VcOptions disabled={disabled} textStyle={field.textStyle} label={_(labelOption)} value={value}
+                <VcOptions disabled={disabled} textStyle={field.textStyle} label={_(label)} value={value}
                     onChange={setValue} data={dataSource[field.keySource || field.bind!] ?? []} />
             </View>
         case 'button':
-            const labelButton = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return <View key={`${key}view`} style={field.style}>
-                <Button disabled={disabled} style={field.buttonStyle} mode={field.mode} onPress={onPressButton} >{_(labelButton)}</Button>
+                <Button disabled={disabled} style={field.buttonStyle} mode={field.mode} onPress={onPressButton} >{_(label)}</Button>
             </View>
         case 'rating':
-            const labelRating = field.label ? evalExpr(field.label, field.requiredKeys) : undefined;
             return (
                 <View style={[styles.rating, { backgroundColor: colors.background, borderColor: colors.vacom.borderColor }, field.style]}>
-                    {labelRating && <Text style={[styles.label, { fontWeight: "bold" }, field.labelStyle]}>{_(labelRating)}</Text>}
+                    {label && <Text style={[styles.label, { fontWeight: "bold" }, field.labelStyle]}>{_(label)}</Text>}
                     <StarRating value={value} max={field.max} onChange={setValue} />
                 </View>
             );

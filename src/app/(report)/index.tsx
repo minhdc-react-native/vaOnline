@@ -30,7 +30,6 @@ export default function ReportScreen() {
     const onConfirm = useCallback((paramKey?: Record<string, any> | undefined, timeItem?: IData | null) => {
         onFilter(paramKey, timeItem);
     }, [onFilter]);
-
     const renderFilter = useMemo(() => {
         if (!layoutFilter) return null;
         return (
@@ -39,7 +38,6 @@ export default function ReportScreen() {
                 schemaConfig={layoutFilter} />
         );
     }, [dataFilter, dataSource, layoutFilter, onConfirm, timeItem]);
-
     return (
         <View style={{ flex: 1, marginBottom: bottom }}>
             <Appbar.Header>

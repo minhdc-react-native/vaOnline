@@ -93,8 +93,15 @@ export const ListItemView: Record<string, IRowsColsField> = {
 }
 
 export const ItemViewByRefId: Record<string, IRowsColsField> = {
+    '65a4c6d2-481b-451b-bb6f-ff193512c547': getListItemView('id', 'TEN_V'), // đơn vị
     'a9fc0e77-6206-412b-bf68-7a6af3ed371d': ListItemView.ID, // người dùng
     '87f42b27-6df4-4295-b8f9-87d824eedbdd': ListItemView.VALUE,
+    '027accf8-a651-4e0e-92cf-a5c754721d8a': ListItemView.VALUE,
+    '5600b9ee-8652-4302-a804-f491f273d62c': ListItemView.VALUE,
+    'f54efa39-7871-4f8d-b59a-8257befd61a2': ListItemView.VALUE,
+    '33291373-09c3-4c08-bec8-c3a724b42f15': getListItemView('id', 'TEN_LF'), // Loại phí
+    '826995ba-7dca-4f36-9569-6c2ba101bffe': getListItemView('id', 'TEN_NH_TS'), // nhóm tài sản
+    '1975aaa2-6e6e-4c76-b81d-66987e327fb7': getListItemView('id', 'TEN_NH_TS'), // nhóm công cụ
     '01e14b5c-6e30-4b31-ae1d-4abbf7ed49d2': getListItemView('id', 'TEN_CT'), // chứng từ
     '86de5f41-4277-4a91-bf68-16acc89295c4': getListItemView('MA_DT', 'TEN_DT'), // đối tượng
     '98665935-a3db-487e-8bc5-2a63515972b5': getListItemView('id', 'TEN_NT'), // ngoại tệ

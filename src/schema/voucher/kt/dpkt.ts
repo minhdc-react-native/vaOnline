@@ -287,6 +287,52 @@ const dpkt0: ISchemaWin = {
                         type: "selectList",
                         tableWin: "Empty",
                         clean: false,
+                        label: "STATUS",
+                        bind: "STATUS",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "search",
+                        tableSearch: "DMDT",
+                        fField: 'MA_DT',
+                        expression: { TEN_DT0: 'TEN_DT', DIA_CHI: 'DIA_CHI', ONG_BA: 'DAI_DIEN' },
+                        itemView: ListItemView.MA_DT,
+                        label: "MA_DT0",
+                        bind: "MA_DT0",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                fields: [
+                    {
+                        type: "search",
+                        tableSearch: "CUSTOM",
+                        fField: 'MA_BP',
+                        idRef: '08790464-f168-49e6-97ea-2cb670e2139d',
+                        label: "MA_BP",
+                        bind: "MA_BP",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "search",
+                        tableSearch: "CUSTOM",
+                        fField: 'MA_HT',
+                        idRef: '1754a128-e296-49c7-9865-6c6ef183073d',
+                        label: "MA_HT",
+                        bind: "MA_HT",
+                        style: { flex: 1 }
+                    },
+                ]
+            },
+            {
+                type: "rows",
+                fields: [
+                    {
+                        type: "selectList",
+                        tableWin: "Empty",
+                        clean: false,
                         label: "MA_NT",
                         bind: "MA_NT",
                         expression: { TY_GIA: 'TY_GIA' },
@@ -319,35 +365,46 @@ const dpkt0: ISchemaWin = {
                     }
                 ]
             },
-            {
-                type: "rows",
-                fields: [
-                    {
-                        type: "search",
-                        tableSearch: "DMDT",
-                        fField: 'MA_DT',
-                        expression: { TEN_DT0: 'TEN_DT', DIA_CHI: 'DIA_CHI', ONG_BA: 'DAI_DIEN' },
-                        itemView: ListItemView.MA_DT,
-                        label: "MA_DT0",
-                        bind: "MA_DT0",
-                        style: { flex: 1 }
-                    },
-                    {
-                        type: "selectList",
-                        tableWin: "Empty",
-                        clean: false,
-                        label: "STATUS",
-                        bind: "STATUS",
-                        style: { flex: 1 }
-                    }
-                ]
-            },
+
             {
                 type: "input",
                 label: "TEN_DT0",
                 typeInput: "multi",
                 bind: "TEN_DT0"
             },
+            // {
+            //     type: "cols",
+            //     requiredKeys: ['_soTk'],
+            //     visibleIf: "{{_soTk}}",
+            //     fields: [
+            //         {
+            //             type: "rows",
+            //             fields: [
+            //                 {
+            //                     type: "search",
+            //                     tableSearch: "CUSTOM",
+            //                     idRef: 'd4a1a984-1145-43aa-91b6-b0914cf45617',
+            //                     fField: 'id',
+            //                     label: "SO_TK",
+            //                     bind: "SO_TK",
+            //                     style: { flex: 1 }
+            //                 },
+            //                 {
+            //                     type: "text",
+            //                     label: "MA_CITAD",
+            //                     bind: "MA_CITAD",
+            //                     style: { flex: 1 }
+            //                 }
+            //             ]
+            //         },
+            //         {
+            //             type: "text",
+            //             label: "TAI_NGH",
+            //             bind: "TAI_NGH",
+            //             style: { flex: 1 }
+            //         }
+            //     ]
+            // },
             {
                 type: "input",
                 label: "DIEN_GIAI",

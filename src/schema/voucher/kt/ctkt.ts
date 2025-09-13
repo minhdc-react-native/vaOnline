@@ -58,7 +58,6 @@ const ctkt0: ISchemaWin = {
                     },
                 ]
             },
-
             { type: "line" },
             {
                 type: "rows",
@@ -71,6 +70,8 @@ const ctkt0: ISchemaWin = {
                     },
                     {
                         type: "text",
+                        requiredKeys: ['_isCp0'],
+                        visibleIf: "{{_isCp0}}",
                         label: "IS_CP0",
                         bind: "IS_CP0",
                         format: { type: "checkbox" }
@@ -92,23 +93,26 @@ const ctkt0: ISchemaWin = {
         fields: [
             {
                 type: "rows",
+                requiredKeys: ["_tkNo"],
+                visibleIf: "{{_tkNo}}",
                 fields: [
                     {
-                        type: "selectList",
+                        type: "search",
+                        tableSearch: "CUSTOM",
                         clean: false,
-                        tableWin: "Empty",
-                        fDisplay: { fValue: "id" },
+                        idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                        fField: 'id',
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_NO",
                         bind: "TK_NO",
-                        keySource: "TK",
                         style: { flex: 1 }
                     },
                     {
-                        type: "selectList",
+                        type: "search",
+                        tableSearch: "CUSTOM",
                         clean: false,
-                        tableWin: "Empty",
-                        fDisplay: { fValue: "id" },
+                        idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                        fField: 'id',
                         checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                         label: "TK_CO",
                         bind: "TK_CO",
@@ -116,6 +120,73 @@ const ctkt0: ISchemaWin = {
                         style: { flex: 1 }
                     },
                 ]
+            },
+            {
+                type: "rows",
+                style: { alignItems: "center" },
+                fields: [
+                    {
+                        type: "search",
+                        tableSearch: "DMDT",
+                        itemView: ListItemView.MA_DT,
+                        expression: { TEN_DT: 'TEN_DT' },
+                        fField: 'MA_DT',
+                        label: "MA_DT",
+                        bind: 'MA_DT',
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "search",
+                        tableSearch: "DMDT",
+                        itemView: ListItemView.MA_DT,
+                        requiredKeys: ['_maDtBt'],
+                        visibleIf: "{{_maDtBt}}",
+                        fField: 'MA_DT',
+                        label: "MA_DT_BT",
+                        bind: 'MA_DT_BT',
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "checkbox",
+                        requiredKeys: ['_isCp0'],
+                        visibleIf: "{{_isCp0}}",
+                        label: "IS_CP0",
+                        bind: "IS_CP0"
+                    }
+                ]
+            },
+            {
+                type: "input",
+                label: "TEN_DT",
+                typeInput: "multi",
+                bind: "TEN_DT"
+            },
+            {
+                type: "rows",
+                fields: [
+                    {
+                        type: "number",
+                        requiredKeys: ["TY_GIA"],
+                        visibleIf: "{{TY_GIA!==1}}",
+                        label: "TIEN_NT",
+                        bind: 'TIEN_NT',
+                        format: "rAmountNt",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "number",
+                        label: "TIEN",
+                        bind: 'TIEN',
+                        format: "rAmount",
+                        style: { flex: 1 }
+                    },
+                ]
+            },
+            {
+                type: "input",
+                label: "GHI_CHU",
+                typeInput: "multi",
+                bind: "GHI_CHU"
             },
             {
                 type: "expand",
@@ -167,60 +238,6 @@ const ctkt0: ISchemaWin = {
                         ]
                     },
                 ]
-            },
-            {
-                type: "rows",
-                style: { alignItems: "center" },
-                fields: [
-                    {
-                        type: "search",
-                        tableSearch: "DMDT",
-                        itemView: ListItemView.MA_DT,
-                        expression: { TEN_DT: 'TEN_DT' },
-                        fField: 'MA_DT',
-                        label: "MA_DT",
-                        bind: 'MA_DT',
-                        style: { flex: 1 }
-                    },
-                    {
-                        type: "checkbox",
-                        label: "IS_CP0",
-                        bind: "IS_CP0"
-                    }
-                ]
-            },
-            {
-                type: "input",
-                label: "TEN_DT",
-                typeInput: "multi",
-                bind: "TEN_DT"
-            },
-            {
-                type: "rows",
-                fields: [
-                    {
-                        type: "number",
-                        requiredKeys: ["TY_GIA"],
-                        visibleIf: "{{TY_GIA!==1}}",
-                        label: "TIEN_NT",
-                        bind: 'TIEN_NT',
-                        format: "rAmountNt",
-                        style: { flex: 1 }
-                    },
-                    {
-                        type: "number",
-                        label: "TIEN",
-                        bind: 'TIEN',
-                        format: "rAmount",
-                        style: { flex: 1 }
-                    },
-                ]
-            },
-            {
-                type: "input",
-                label: "GHI_CHU",
-                typeInput: "multi",
-                bind: "GHI_CHU"
             }
         ]
     }

@@ -6,7 +6,7 @@ import { FieldRenderer } from './fieldRenderer';
 import { useComputedFields } from './hooks/useComputedFields';
 import { useEvalExpr } from './hooks/useEvalExpr';
 import { FormState, useFormState } from './hooks/useFormState';
-import { ISchemaUIProps } from './types';
+import { IConfigExpression, ISchemaUIProps } from './types';
 
 export const collectRequiredKeys = (fields: any[]): string[] => {
     let keys: string[] = [];
@@ -32,6 +32,7 @@ interface IFormContext {
     errors: Record<string, string>;
     dataSource: Record<string, any[]>;
     onChangeItemData?: (change: Record<string, any>) => void;
+    configExpression?: IConfigExpression;
 }
 
 // context dùng use-context-selector
@@ -46,6 +47,7 @@ export function SchemaUIEngine({
     errors = EMPTY_OBJECT,
     dataSource = EMPTY_OBJECT,
     dataActionMap,
+    configExpression
 }: ISchemaUIProps) {
     const paramSystem = useDataApp((state) => state.paramSystem);
     const formState = useFormState(data);
@@ -111,6 +113,7 @@ export function SchemaUIEngine({
             handleAction,
             errors,
             onChangeItemData,
+            configExpression
         }),
         [
             formState,      // đổi khi state thay đổi
@@ -121,6 +124,7 @@ export function SchemaUIEngine({
             handleAction,
             errors,
             onChangeItemData,
+            configExpression
         ]
     );
 

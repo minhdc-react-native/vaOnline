@@ -2,24 +2,6 @@ import { ISchemaWin, ISchemaWinValue } from "@/schema";
 import { theme } from "@/theme/theme";
 import { getListItemView, ListItemView } from "../itemView";
 const colors = theme.colors;
-
-const requiredKeysMa_hv = ['_isHt2', 'NHOM_CT', 'MA_CT', 'TK_HT'];
-const expressionMa_hv = `{{
-    { 
-        TEN_HV: 'TEN_HV',TEN_HV0:'TEN_HV',DVT_CB:'DVT',
-        ...(_isHt2 && NHOM_CT==='2' && { TK_NO2: TK_HT }),
-        ...(_isHt2 && NHOM_CT==='2' && { TK_CO2: 'TK_DTHU' }),
-        ...(_isHt2 && NHOM_CT==='2' && { TK_NO: 'TK_GV' }),
-        ...(_isHt2 && NHOM_CT==='2' && { TK_CO: 'TK_HV' })
-    }
-}}`;
-
-const expressionIfEmptyMa_hv = `{{
-    [
-        ...(_isHt2 && NHOM_CT==='2'?['TK_NO2']:[])
-    ]
-}}`;
-
 const cthv0: ISchemaWin = {
     itemAction: {
         type: "cols",
@@ -47,13 +29,16 @@ const cthv0: ISchemaWin = {
                 type: "text",
                 requiredKeys: ['MA_HV', 'DVT_CB', 'TEN_HV'],
                 label: "{{`${MA_HV} / ${DVT_CB} - ${TEN_HV}`}}",
-                textStyle: { fontWeight: "bold", color: colors.secondary },
+                numberOfLines: 3,
+                textStyle: { color: colors.secondary },
                 style: { flex: 1 }
             },
             { type: "line" },
             {
                 type: "rows",
                 style: { justifyContent: "space-between" },
+                requiredKeys: ['_tkNo2'],
+                visibleIf: "{{_tkNo2}}",
                 fields: [
                     {
                         type: "text",
@@ -77,6 +62,35 @@ const cthv0: ISchemaWin = {
                         textStyle: { fontWeight: "bold" }
                     }
                 ]
+            },
+            {
+                type: "rows",
+                style: { justifyContent: "space-between" },
+                requiredKeys: ['_tkNo2'],
+                visibleIf: "{{!_tkNo2}}",
+                fields: [
+                    {
+                        type: "text",
+                        label: 'SO_LUONG',
+                        bind: 'SO_LUONG',
+                        format: { type: "number", roundNumber: "rQuantity" },
+                        textStyle: { fontWeight: "bold" }
+                    },
+                    {
+                        type: "text",
+                        label: 'GIA',
+                        bind: 'GIA',
+                        format: { type: "number", roundNumber: "rPrice" },
+                        textStyle: { fontWeight: "bold" }
+                    },
+                    {
+                        type: "text",
+                        label: 'TIEN',
+                        bind: 'TIEN',
+                        format: { type: "number", roundNumber: "rAmount" },
+                        textStyle: { fontWeight: "bold" }
+                    }
+                ]
             }
         ]
     },
@@ -88,12 +102,107 @@ const cthv0: ISchemaWin = {
         type: "cols",
         fields: [
             {
+                type: "cols",
+                requiredKeys: ['_maKhoDc'],
+                visibleIf: "{{_maKhoDc}}",
+                style: { alignItems: "center" },
+                fields: [
+                    {
+                        type: "rows",
+                        style: { alignItems: "center" },
+                        fields: [
+                            {
+                                type: "search",
+                                tableSearch: "DMKHO",
+                                fField: 'MA_KHO',
+                                label: "MA_KHO",
+                                bind: 'MA_KHO',
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn kho chi tiết", requiredKeys: ["BOLD"] },
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "search",
+                                tableSearch: "DMKHO",
+                                fField: 'MA_KHO',
+                                label: "MA_KHO_DC",
+                                bind: 'MA_KHO_DC',
+                                keySource: 'MA_KHO',
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn kho chi tiết", requiredKeys: ["BOLD"] },
+                                style: { flex: 1 }
+                            },
+                        ]
+                    },
+                    {
+                        type: "search",
+                        tableSearch: "DMHV",
+                        itemView: ListItemView.MA_HV,
+                        fField: 'MA_HV',
+                        label: "MA_HV",
+                        bind: 'MA_HV',
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "cols",
+                requiredKeys: ['_maHvDc'],
+                visibleIf: "{{_maHvDc}}",
+                style: { alignItems: "center" },
+                fields: [
+                    {
+                        type: "rows",
+                        style: { alignItems: "center" },
+                        fields: [
+                            {
+                                type: "search",
+                                tableSearch: "DMKHO",
+                                fField: 'MA_KHO',
+                                label: "MA_KHO",
+                                bind: 'MA_KHO',
+                                checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn kho chi tiết", requiredKeys: ["BOLD"] },
+                                style: { flex: 1 }
+                            },
+                            { type: "empty", style: { flex: 1 } }
+                        ]
+                    },
+                    {
+                        type: "rows",
+                        style: { alignItems: "center" },
+                        fields: [
+                            {
+                                type: "search",
+                                tableSearch: "DMHV",
+                                itemView: ListItemView.MA_HV,
+                                fField: 'MA_HV',
+                                label: "MA_HV",
+                                bind: 'MA_HV',
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "search",
+                                tableSearch: "DMHV",
+                                itemView: ListItemView.MA_HV,
+                                fField: 'MA_HV',
+                                label: "MA_HV_DC",
+                                bind: 'MA_HV_DC',
+                                keySource: 'MA_HV',
+                                style: { flex: 1 }
+                            }
+                        ]
+                    },
+                ]
+            },
+            {
                 type: "rows",
+                requiredKeys: ['_maKhoDc', '_maHvDc'],
+                visibleIf: "{{!_maKhoDc && !_maHvDc}}",
                 style: { alignItems: "center" },
                 fields: [
                     {
                         type: "search",
                         tableSearch: "DMKHO",
+                        requiredKeys: ['_maKho'],
+                        visibleIf: "{{_maKho}}",
                         fField: 'MA_KHO',
                         label: "MA_KHO",
                         bind: 'MA_KHO',
@@ -104,9 +213,6 @@ const cthv0: ISchemaWin = {
                         type: "search",
                         tableSearch: "DMHV",
                         itemView: ListItemView.MA_HV,
-                        requiredKeys: requiredKeysMa_hv,
-                        expression: expressionMa_hv,
-                        expressionIfEmpty: expressionIfEmptyMa_hv,
                         fField: 'MA_HV',
                         label: "MA_HV",
                         bind: 'MA_HV',
@@ -126,9 +232,22 @@ const cthv0: ISchemaWin = {
                     {
                         type: "selectList",
                         tableWin: "Empty",
+                        requiredKeys: ['MA_CT'],
+                        visibleIf: "{{MA_CT!=='PDV'}}",
                         itemView: ListItemView.VALUE,
                         label: "DVT_CB",
                         bind: 'DVT_CB',
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "selectList",
+                        tableWin: "Empty",
+                        requiredKeys: ['MA_CT'],
+                        visibleIf: "{{MA_CT==='PDV'}}",
+                        itemView: ListItemView.VALUE,
+                        label: "DVT_CB",
+                        bind: 'DVT_CB',
+                        keySource: 'DVT',
                         style: { flex: 1 }
                     },
                     {
@@ -143,8 +262,8 @@ const cthv0: ISchemaWin = {
             {
                 type: "rows",
                 style: { alignItems: "center" },
-                requiredKeys: ['TY_GIA', '_isHt2'],
-                visibleIf: "{{_isHt2 && TY_GIA!==1}}",
+                requiredKeys: ['TY_GIA', '_tkNo2'],
+                visibleIf: "{{_tkNo2 && TY_GIA!==1}}",
                 fields: [
                     {
                         type: "number",
@@ -165,8 +284,8 @@ const cthv0: ISchemaWin = {
             {
                 type: "rows",
                 style: { alignItems: "center" },
-                requiredKeys: ['TY_GIA', '_isHt2'],
-                visibleIf: "{{_isHt2 && TY_GIA===1}}",
+                requiredKeys: ['TY_GIA', '_tkNo2'],
+                visibleIf: "{{_tkNo2 && TY_GIA===1}}",
                 fields: [
                     {
                         type: "number",
@@ -187,8 +306,96 @@ const cthv0: ISchemaWin = {
             {
                 type: "rows",
                 style: { alignItems: "center" },
-                requiredKeys: ['TY_GIA', '_isHt2'],
-                visibleIf: "{{_isHt2 && TY_GIA!==1}}",
+                requiredKeys: ['TY_GIA', '_tkNo2'],
+                visibleIf: "{{!_tkNo2 && TY_GIA!==1}}",
+                fields: [
+                    {
+                        type: "number",
+                        label: "GIA_NT",
+                        bind: 'GIA_NT',
+                        format: "rPriceNt",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "number",
+                        label: "TIEN_NT",
+                        bind: 'TIEN_NT',
+                        format: "rAmountNt",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { alignItems: "center" },
+                requiredKeys: ['TY_GIA', '_tkNo2'],
+                visibleIf: "{{!_tkNo2 && TY_GIA===1}}",
+                fields: [
+                    {
+                        type: "number",
+                        label: "GIA",
+                        bind: 'GIA',
+                        format: "rPrice",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "number",
+                        label: "TIEN",
+                        bind: 'TIEN',
+                        format: "rAmount",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { alignItems: "center" },
+                requiredKeys: ['TY_GIA', '_tNk'],
+                visibleIf: "{{_tNk && TY_GIA!==1}}",
+                fields: [
+                    {
+                        type: "number",
+                        label: "PT_NK",
+                        bind: 'PT_NK',
+                        format: "rPercentage",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "number",
+                        label: "T_NK_NT",
+                        bind: 'T_NK_NT',
+                        format: "rAmountNt",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { alignItems: "center" },
+                requiredKeys: ['TY_GIA', '_tNk'],
+                visibleIf: "{{_tNk && TY_GIA===1}}",
+                fields: [
+                    {
+                        type: "number",
+                        label: "PT_NK",
+                        bind: 'PT_NK',
+                        format: "rPercentage",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "number",
+                        label: "T_NK",
+                        bind: 'T_NK',
+                        format: "rAmount",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { alignItems: "center" },
+                requiredKeys: ['TY_GIA', '_tCk'],
+                visibleIf: "{{_tCk && TY_GIA!==1}}",
                 fields: [
                     {
                         type: "number",
@@ -209,8 +416,8 @@ const cthv0: ISchemaWin = {
             {
                 type: "rows",
                 style: { alignItems: "center" },
-                requiredKeys: ['TY_GIA', '_isHt2'],
-                visibleIf: "{{_isHt2 && TY_GIA===1}}",
+                requiredKeys: ['TY_GIA', '_tCk'],
+                visibleIf: "{{_tCk && TY_GIA===1}}",
                 fields: [
                     {
                         type: "number",
@@ -231,8 +438,8 @@ const cthv0: ISchemaWin = {
             {
                 type: "rows",
                 style: { alignItems: "center" },
-                requiredKeys: ['TY_GIA', '_isHt2'],
-                visibleIf: "{{_isHt2 && TY_GIA!==1}}",
+                requiredKeys: ['TY_GIA', '_tDb'],
+                visibleIf: "{{_tDb && TY_GIA!==1}}",
                 fields: [
                     {
                         type: "number",
@@ -253,8 +460,8 @@ const cthv0: ISchemaWin = {
             {
                 type: "rows",
                 style: { alignItems: "center" },
-                requiredKeys: ['TY_GIA', '_isHt2'],
-                visibleIf: "{{_isHt2 && TY_GIA===1}}",
+                requiredKeys: ['TY_GIA', '_tDb'],
+                visibleIf: "{{_tDb && TY_GIA===1}}",
                 fields: [
                     {
                         type: "number",
@@ -302,29 +509,29 @@ const cthv0: ISchemaWin = {
                     },
                     {
                         type: "rows",
-                        requiredKeys: ['_isHt2'],
-                        visibleIf: "{{_isHt2}}",
+                        requiredKeys: ['_tkNo2'],
+                        visibleIf: "{{_tkNo2}}",
                         fields: [
                             {
-                                type: "selectList",
+                                type: "search",
+                                tableSearch: "CUSTOM",
                                 clean: false,
-                                tableWin: "Empty",
-                                fDisplay: { fValue: "id" },
+                                idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                                fField: 'id',
                                 checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
-                                requiredKeys: ['NHOM_CT'],
-                                label: "{{NHOM_CT==='2'?'TK_HT':'TK_DTHU'}}",
+                                label: "TK_NO2",
                                 bind: "TK_NO2",
                                 keySource: "TK",
                                 style: { flex: 1 }
                             },
                             {
-                                type: "selectList",
+                                type: "search",
+                                tableSearch: "CUSTOM",
                                 clean: false,
-                                tableWin: "Empty",
-                                fDisplay: { fValue: "id" },
+                                idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                                fField: 'id',
                                 checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
-                                requiredKeys: ['NHOM_CT'],
-                                label: "{{NHOM_CT==='2'?'TK_DTHU':'TK_HT'}}",
+                                label: "TK_CO2",
                                 bind: "TK_CO2",
                                 keySource: "TK",
                                 style: { flex: 1 }
@@ -333,12 +540,15 @@ const cthv0: ISchemaWin = {
                     },
                     {
                         type: "rows",
+                        requiredKeys: ['_tkNo'],
+                        visibleIf: "{{_tkNo}}",
                         fields: [
                             {
-                                type: "selectList",
+                                type: "search",
+                                tableSearch: "CUSTOM",
                                 clean: false,
-                                tableWin: "Empty",
-                                fDisplay: { fValue: "id" },
+                                idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                                fField: 'id',
                                 checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                                 label: "TK_NO",
                                 bind: "TK_NO",
@@ -346,10 +556,11 @@ const cthv0: ISchemaWin = {
                                 style: { flex: 1 }
                             },
                             {
-                                type: "selectList",
+                                type: "search",
+                                tableSearch: "CUSTOM",
                                 clean: false,
-                                tableWin: "Empty",
-                                fDisplay: { fValue: "id" },
+                                idRef: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+                                fField: 'id',
                                 checkSelected: { isError: "{{BOLD==='C'}}", message: "Bạn phải chọn tài khoản chi tiết", requiredKeys: ["BOLD"] },
                                 label: "TK_CO",
                                 bind: "TK_CO",
@@ -413,7 +624,8 @@ export const cthv: ISchemaWinValue = {
     config: cthv0,
     defaultNew: { DPHV_id: "{{id}}", NAM: '#NAM#' }, require: true,
     zod: {
-        MA_HV: { type: 'string', msgError: '...' },
+        TK_NO: { type: 'string' },
+        TK_CO: { type: 'string' },
         SO_LUONG: { type: 'number' },
     }
 }
