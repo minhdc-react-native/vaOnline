@@ -95,14 +95,14 @@ declare global {
         'DMNHDT' | 'DMDT' | 'DMDT_NGH' | 'DMBP' | 'DMPX' | 'DMOB' | 'DMTK' |
         'DMKHO' | 'DMNHHV' | 'DMHV' | 'DMHV_DVT' | 'DMHV_GIA' | 'DMDVT' |
         'DPHV' | 'CTHV' | 'PSTHUE' | 'PSCF' | 'PBDT' |
-        'DPKT' | 'CTKT';
+        'DPKT' | 'CTKT' | 'LSTDVCS';
 
     type ITableSearch = 'CUSTOM' | 'DMDT' | 'DMCS' | 'DMKM' | 'DMHDG' | 'DMVV' | 'DMMNGH' | 'DMMCN' | 'DMTK' | 'DMTTDB' | 'DMDVT' |
         'DMTHUE' | 'DMQS' | 'DMHV' | 'DMKHO' | 'DMLH' | 'DMNG';
 
     type IKeyMenuWin = 'acCatalogBalance' | 'acCatalogBank' | 'acCatalogGood' | 'acCatalogOther' | 'acCatalogPartner' |
         'goodDocuments' | 'accountingDocuments' | 'congTacCuoiKy' |
-        'baoCaoDonVi' | 'baoCaoToanNganh'
+        'baoCaoDonVi' | 'baoCaoToanNganh' | 'systemAdmin'
 
     var isNotEmpty: (value: any) => boolean;
 }

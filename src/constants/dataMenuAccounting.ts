@@ -336,8 +336,12 @@ export const DataMenuAccounting: Record<string, Partial<Record<IKeyMenuWin, ICon
                 title: 'Chức năng', titleE: 'Function',
                 data: [
                     {
-                        id: 'WIN00237', typeWin: "(custom)", tableWin: "Empty", label: 'Kiểm tra bảo trì số liệu', labelE: 'Check maintenance data',
-                        icon: icon, row: 1, col: 1, typeView: { _typeView: 1 }
+                        id: 'TINH_GV', typeWin: "(custom)", tableWin: "Empty", label: 'Tính giá vốn hàng xuất', labelE: 'Calculate cost of exported goods',
+                        icon: icon, row: 1, col: 1
+                    },
+                    {
+                        id: 'WIN00227', typeWin: "(custom)", tableWin: "Empty", label: 'Phân bổ kết chuyển tự động', labelE: 'Automatic forward allocation',
+                        icon: icon, row: 2, col: 1
                     },
                 ]
             }

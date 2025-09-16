@@ -41,7 +41,11 @@ const Field = {
     TIEN_TT: 'TIEN_TT',
     PT_THUE: 'PT_THUE',
     T_THUE_NT: 'T_THUE_NT',
-    T_THUE: 'T_THUE'
+    T_THUE: 'T_THUE',
+    THUE_GTGT: 'THUE_GTGT',
+    TIEN_THUE: 'TIEN_THUE',
+    GIAM_TRU: 'GIAM_TRU',
+    TIEN_GT: 'TIEN_GT'
 }
 const TableWin = {
     DPKT: 'DPKT',
@@ -142,7 +146,8 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
     }, [dataMaster, isHt2]);
     const onScanned = useCallback((value: string, quantity: number, warehouseCode: string, groupCode: boolean, afterChange: () => void) => {
         const fixValue = encodeURIComponent(value);
-
+        const expression: Record<string, string> = currentTab?.EXPRESSION?.['MA_HV'] ?? {};
+        const defaultNew = currentTab?.DEFAULT_VALUE ?? {};
         api.get({
             link: `/api/System/GetDataByReferencesId?id=c0c79756-5702-4e39-840e-11c3fa759b81&filtervalue=${fixValue}`,
             callBack: async (res: IData[]) => {
@@ -156,20 +161,10 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
                         afterChange();
                     } else {
                         if (onNewDetail) {
-                            const Tk_ht = isHt2 ? defaultTk?.TK_PTHU : (['PNH', 'PNK', 'PNX'].includes(dataMaster!.MA_CT ?? '') ? defaultTk?.TK_PTRA : '');
-                            const expression: Record<string, string> =
-                            {
-                                TEN_HV: 'TEN_HV', TEN_HV0: 'TEN_HV', DVT_CB: 'DVT',
-                                ...(isHt2 && dataMaster!.NHOM_CT === '2' && { TK_NO2: Tk_ht }),
-                                ...(isHt2 && dataMaster!.NHOM_CT === '2' && { TK_CO2: 'TK_DTHU' }),
-                                ...(isHt2 && dataMaster!.NHOM_CT === '2' && { TK_NO: 'TK_GV' }),
-                                ...(isHt2 && dataMaster!.NHOM_CT === '2' && { TK_CO: 'TK_HV' })
-                            };
-
-                            let addExpression: any = { MA_HV: product.MA_HV, DVT_CB: product.DVT };
+                            let addExpression: any = { MA_HV: product.MA_HV };
                             if (expression) {
                                 Object.keys(expression).map(key => {
-                                    addExpression[key] = product[expression[key]] || expression[key];
+                                    addExpression[key] = product[expression[key]] || null;
                                 });
                             }
 
@@ -178,6 +173,7 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
                             const newItemDetail: IData | null = onNewDetail(null, {
                                 SO_LUONG: quantity,
                                 MA_KHO: warehouseCode,
+                                ...defaultNew,
                                 ...addExpression
                             });
 
@@ -355,11 +351,11 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
         const totalCtHv = sumByFields(dataDetails ?? [],
             [
                 'SO_LUONG', _fTIEN_NT, _fTIEN, 'T_GG_NT', 'T_GG', 'T_CK_NT', 'T_CK', 'T_THUE_NT', 'T_THUE',
-                'T_NK_NT', 'T_NK', 'T_DB_NT', 'T_DB', 'T_CP_NT', 'T_CP', 'T_CP_NT0', 'T_CP0', 'T_CP_NT1', 'T_CP1'
+                'T_NK_NT', 'T_NK', 'T_DB_NT', 'T_DB', 'T_CP_NT', 'T_CP', 'T_CP_NT0', 'T_CP0', 'T_CP_NT1', 'T_CP1', 'TIEN_GT'
             ],
             [
                 'T_SL', 'T_TIEN_HANG_NT', 'T_TIEN_HANG', 'T_TGG_NT', 'T_TGG', 'T_TCK_NT', 'T_TCK', 'T_THUE_NT', 'T_THUE',
-                'T_TNK_NT', 'T_TNK', 'T_TDB_NT', 'T_TDB', 'T_CP_NT', 'T_CP', 'T_TCP_NT0', 'T_TCP0', 'T_TCP_NT1', 'T_TCP1'
+                'T_TNK_NT', 'T_TNK', 'T_TDB_NT', 'T_TDB', 'T_CP_NT', 'T_CP', 'T_TCP_NT0', 'T_TCP0', 'T_TCP_NT1', 'T_TCP1', 'T_TIEN_GT'
             ]
         );
         const tTien_tt = dataMaster!.MA_CT === 'PCP' ? {
@@ -373,7 +369,7 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
             ...totalCtHv,
             ...tTien_tt,
             T_TIEN_NT: tTien_tt.T_TIEN_TT_NT + totalCtHv.T_THUE_NT,
-            T_TIEN: tTien_tt.T_TIEN_TT + totalCtHv.T_THUE
+            T_TIEN: tTien_tt.T_TIEN_TT + totalCtHv.T_THUE - totalCtHv.T_TIEN_GT
         };
     }, [dataDetails, isHt2]);
 
@@ -464,7 +460,8 @@ const useVoucherHv = (voucherCode?: string, changeOtherDetail?: React.RefObject<
     const isHt2 = listVoucher2.includes(voucherCode ?? '***');
     const _fTIEN_NT = isHt2 ? 'TIEN_NT2' : 'TIEN_NT';
     const _fTIEN = isHt2 ? 'TIEN2' : 'TIEN';
-    const _refreshAmount = (dataItem: IData, change: Record<string, any>, currentValue: Record<string, string>, type: 'all' | 'amount' | 't_gg' | 't_ck' | 't_db' | 't_nk' = "all") => {
+    const _refreshAmount = useCallback((dataItem: IData, change: Record<string, any>, currentValue: Record<string, string>,
+        type: 'all' | 'amount' | 't_gg' | 't_ck' | 't_db' | 't_nk' | 't_thue' | 'tien_thue' | 'tien_gt' = "all") => {
         if (changeOtherDetail) changeOtherDetail.current = true;
         let changeAdd: any = currentValue;
         let changeAdd0: any = {
@@ -472,6 +469,9 @@ const useVoucherHv = (voucherCode?: string, changeOtherDetail?: React.RefObject<
             TIEN2: Number(dataItem.TIEN2),
             TIEN_NT: Number(dataItem.TIEN_NT),
             TIEN: Number(dataItem.TIEN),
+            TIEN_THUE: Number(dataItem.TIEN_THUE),
+            T_TT_NT: Number(dataItem[_fTIEN_NT]),
+            T_TT: Number(dataItem[_fTIEN]),
             T_TT_NK_NT: Number(dataItem.TIEN_NT) + Number(dataItem.T_CP_NT1),
             T_TT_NK: Number(dataItem.TIEN) + Number(dataItem.T_CP1),
         }
@@ -485,6 +485,9 @@ const useVoucherHv = (voucherCode?: string, changeOtherDetail?: React.RefObject<
                 TIEN2: changeAdd.TIEN2,
                 TIEN_NT: changeAdd.TIEN_NT,
                 TIEN: changeAdd.TIEN,
+                TIEN_THUE: Number(dataItem.TIEN_THUE),
+                T_TT_NT: Number(changeAdd[_fTIEN_NT]),
+                T_TT: Number(changeAdd[_fTIEN]),
                 T_TT_NK_NT: changeAdd.TIEN_NT + Number(dataItem.T_CP_NT1),
                 T_TT_NK: changeAdd.TIEN + Number(dataItem.T_CP1),
             };
@@ -504,8 +507,12 @@ const useVoucherHv = (voucherCode?: string, changeOtherDetail?: React.RefObject<
                 changeAdd.T_GG = Helper.round(Number(change.SO_LUONG || dataItem.SO_LUONG) * Number(change.GIA_GG || dataItem.GIA_GG), paramSystem?.rAmount!);
             }
         }
+        changeAdd0.T_TT_NT -= changeAdd.T_GG_NT || dataItem.T_GG_NT;
+        changeAdd0.T_TT -= changeAdd.T_GG || dataItem.T_GG;
+
         changeAdd0.T_TT_NK_NT -= changeAdd.T_GG_NT || dataItem.T_GG_NT;
         changeAdd0.T_TT_NK -= changeAdd.T_GG || dataItem.T_GG;
+
         // chiết khấu
         if (['all', 'amount', 't_ck'].includes(type)) {
             changeAdd = {
@@ -516,6 +523,9 @@ const useVoucherHv = (voucherCode?: string, changeOtherDetail?: React.RefObject<
                 )
             };
         }
+        changeAdd0.T_TT_NT -= changeAdd.T_CK_NT || dataItem.T_CK_NT;
+        changeAdd0.T_TT -= changeAdd.T_CK || dataItem.T_CK;
+
         changeAdd0.T_TT_NK_NT -= changeAdd.T_CK_NT || dataItem.T_CK_NT;
         changeAdd0.T_TT_NK -= changeAdd.T_CK || dataItem.T_CK;
         // đặc biệt
@@ -528,6 +538,8 @@ const useVoucherHv = (voucherCode?: string, changeOtherDetail?: React.RefObject<
                 )
             };
         }
+        changeAdd0.T_TT_NT += changeAdd.T_DB_NT || dataItem.T_DB_NT;
+        changeAdd0.T_TT += changeAdd.T_DB || dataItem.T_DB;
         // nhập khẩu
         if (['all', 'amount', 't_nk'].includes(type)) {
             changeAdd = {
@@ -538,8 +550,42 @@ const useVoucherHv = (voucherCode?: string, changeOtherDetail?: React.RefObject<
                 )
             };
         }
+        changeAdd0.T_TT_NT += changeAdd.T_NK_NT || dataItem.T_NK_NT;
+        changeAdd0.T_TT += changeAdd.T_NK || dataItem.T_NK;
+        // thuế
+        if (['all', 'amount', 't_thue'].includes(type)) {
+            changeAdd = {
+                ...changeAdd,
+                ...changeNumberPT(
+                    changeAdd0.T_TT_NT, changeAdd0.T_TT, Number(change.PT_THUE || dataItem.PT_THUE),
+                    paramSystem!.rAmountNt, paramSystem!.rAmount, 'T_THUE_NT', 'T_THUE'
+                )
+            };
+        }
+        // thuế HKD
+        if (['all', 'amount', 'tien_thue'].includes(type)) {
+            changeAdd = {
+                ...changeAdd,
+                ...changeNumberPT(
+                    changeAdd0.T_TT_NT, changeAdd0.T_TT, Number(change.THUE_GTGT || dataItem.THUE_GTGT),
+                    paramSystem!.rAmountNt, paramSystem!.rAmount, 'TIEN_THUE_NT', 'TIEN_THUE'
+                )
+            };
+        }
+        changeAdd0.TIEN_THUE = changeAdd.TIEN_THUE || changeAdd0.TIEN_THUE;
+        // thuế HKD
+        if (['all', 'amount', 'tien_gt'].includes(type)) {
+            changeAdd = {
+                ...changeAdd,
+                ...changeNumberPT(
+                    0, changeAdd0.TIEN_THUE, Number(change.GIAM_TRU || dataItem.GIAM_TRU),
+                    paramSystem!.rAmountNt, paramSystem!.rAmount, 'TIEN_GT_NT', 'TIEN_GT'
+                )
+            };
+        }
         return changeAdd;
-    }
+    }, []);
+
     const changeCtHv = useCallback((dataItem: IData, change: Record<string, any>) => {
         const isMultiplication = !!currencies?.[dataItem.MA_NT].isMultiplication; //tỷ giá: phép nhân || phép chia
         let changeAdd: any = {};
@@ -675,6 +721,41 @@ const useVoucherHv = (voucherCode?: string, changeOtherDetail?: React.RefObject<
                     );
                     if (!vTien_db) break;
                     changeAdd.T_DB = vTien_db;
+                    break;
+                case Field.PT_THUE:
+                    changeAdd = _refreshAmount(dataItem, change, { PT_THUE: change.PT_THUE }, 't_thue');
+                    break;
+                case Field.T_THUE_NT:
+                    if (changeOtherDetail) changeOtherDetail.current = true;
+                    changeAdd.T_THUE = changeNumberNt(
+                        isMultiplication, Number(change.T_THUE_NT),
+                        dataItem.TY_GIA, paramSystem!.rAmount
+                    );
+                    break;
+                case Field.T_THUE:
+                    if (changeOtherDetail) changeOtherDetail.current = true;
+                    const vTien_thue = changeNumber(
+                        isMultiplication, Number(dataItem.T_THUE_NT), Number(change.T_THUE), dataItem.TY_GIA,
+                        paramSystem!.rAmountNt, paramSystem!.minAmountChange
+                    );
+                    if (!vTien_thue) break;
+                    changeAdd.T_THUE = vTien_thue;
+                    break;
+                case Field.THUE_GTGT:
+                    changeAdd = _refreshAmount(dataItem, change, { THUE_GTGT: change.THUE_GTGT }, 'tien_thue');
+                    break;
+                case Field.TIEN_THUE:
+                    if (changeOtherDetail) changeOtherDetail.current = true;
+                    changeAdd.TIEN_GT = Helper.round(change.TIEN_THUE * (dataItem.GIAM_TRU ?? 0) / 100, paramSystem!.rAmount);
+                    changeAdd.TIEN_ST = dataItem.TIEN2 - dataItem.T_CK - changeAdd.TIEN_GT;
+                    break;
+                case Field.GIAM_TRU:
+                    changeAdd = _refreshAmount(dataItem, change, { GIAM_TRU: change.GIAM_TRU }, 'tien_gt');
+                    changeAdd.TIEN_ST = dataItem.TIEN2 - dataItem.T_CK - changeAdd.TIEN_GT;
+                    break;
+                case Field.TIEN_GT:
+                    if (changeOtherDetail) changeOtherDetail.current = true;
+                    changeAdd.TIEN_ST = dataItem.TIEN2 - dataItem.T_CK - dataItem.TIEN_GT;
                     break;
                 case Field.T_CP_NT:
                     break;

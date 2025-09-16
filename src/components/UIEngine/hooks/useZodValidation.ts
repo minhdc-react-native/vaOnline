@@ -1,7 +1,9 @@
+import { useToast } from '@/components/dialog/useToast';
 import { useState } from 'react';
 import * as z from "zod";
 export function useZodValidation(state: any, zodSchema?: z.ZodObject) {
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const { showToast } = useToast();
     const validate = (): boolean => {
         if (!zodSchema) return true;
         try {
@@ -15,6 +17,8 @@ export function useZodValidation(state: any, zodSchema?: z.ZodObject) {
                     const path = e.path.join('.') || 'root';
                     fieldErrors[path] = e.message;
                 });
+                const keysString = Object.keys(fieldErrors).join(",");
+                showToast(`Bạn cần nhập [${keysString}]`, { type: "warning" });
                 setErrors(fieldErrors);
             }
             return false;

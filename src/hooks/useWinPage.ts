@@ -35,10 +35,13 @@ const FIELD_MAP = {
     MA_HV_DC: "_maHvDc",
     TK_NO: "_tkNo",
     TK_NO2: "_tkNo2",
+    PT_THUE: "_tThue",
+    THUE_GTGT: '_thueHKD',
     T_NK: "_tNk",
     T_CK: "_tCk",
     T_DB: "_tDb",
-    LOAI_PHI: "_loaiPhi"
+    LOAI_PHI: "_loaiPhi",
+    NHOM_HD: "_nhomHd"
 } as const;
 
 const backHandQuestion = { title: "Cảnh báo", message: "Dữ liệu đã thay đổi, bạn có muốn thoát không?" };
@@ -78,7 +81,6 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
 
     const dataItems = useDataItemWin((state) => state.dataItems);
     const setItemData = useDataItemWin((state) => state.setDataItem);
-
 
     const editMode = useDataItemWin((state) => state.editMode);
     const setEditMode = useDataItemWin((state) => state.setEditMode);
@@ -151,8 +153,9 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             DPKT: ["_soTk", "_loaiTk"],
             CTKT: ["_isCp0", "_maDtBt", "_tkNo"],
             DPHV: ["_tTnk", "_tTdb", "_tTck"],
-            CTHV: ["_maKho", "_maKhoDc", "_maHvDc", "_tkNo", "_tkNo2", "_tNk", "_tCk", "_tDb"],
-            PSCF: ["_loaiPhi"]
+            CTHV: ["_maKho", "_maKhoDc", "_maHvDc", "_tkNo", "_tkNo2", "_tThue", "_thueHKD", "_tNk", "_tCk", "_tDb"],
+            PSCF: ["_loaiPhi"],
+            PSTHUE: ["_nhomHd"]
         };
 
         const _getGroup = (display: any, groupName: string) => {
@@ -172,11 +175,13 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             // CTKT
             _isCp0: false, _maDtBt: false,
             // DPHV
-            _tTnk: false, _tTdb: false, _tTck: false,
+            _tThue: false, _thueHKD: false, _tTnk: false, _tTdb: false, _tTck: false,
             // CTHV
             _maKho: false, _maKhoDc: false, _maHvDc: false, _tkNo2: false, _tNk: false, _tCk: false, _tDb: false,
             // PSCF
-            _loaiPhi: false
+            _loaiPhi: false,
+            // PSTHUE
+            _nhomHd: false
         };
         let result: any = {
             EXPRESSION: {},
@@ -185,10 +190,13 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             CAPTION: {}
         };
         let zod: IZod = {};
+
         const fields: IData[] = tab.Fields;
         fields.map(f => {
 
-            if (isNotEmpty(f.VALID_RULE) && ['isNotEmpty', 'isFieldCode'].includes(f.VALID_RULE)) zod[f.COLUMN_NAME] = { type: TYPE_NUMBER.includes(f.COLUMN_TYPE) ? 'number' : 'string' };
+            if (!f.HIDDEN && isNotEmpty(f.VALID_RULE) && ['isNotEmpty', 'isFieldCode'].includes(f.VALID_RULE)) {
+                zod[f.COLUMN_NAME] = { type: TYPE_NUMBER.includes(f.COLUMN_TYPE) ? 'number' : 'string' };
+            }
 
             if (FIELD_DISPLAY.includes(f.COLUMN_NAME)) display[(FIELD_MAP as any)[f.COLUMN_NAME]] = !f.HIDDEN;
 
@@ -606,6 +614,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         await Promise.all(promises);
         setLoadingDetail(false);
     }, [dataItems, itemMenuWin.id, itemMenuWin.typeView, schemaUI.addDetails, setDataItemDetail, tableWin, tabs, currentTab]);
+
     const schemaWinDetail = useMemo(() => {
         const defaultSchema = schemaWin[currentTab?.TAB_TABLE ?? "Empty"] ?? schemaWinEmpty;
         const zod = { ...layoutData?.[currentTab?.TAB_TABLE]?.zod, ...currentTab?.ZOD };
@@ -672,7 +681,6 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         }, {} as Record<string, number>);
 
         const defaultValueConfig = currentTab?.DEFAULT_VALUE ?? {};
-
         if (addDetailMore !== undefined) {
             return {
                 id: UUID.v4(),

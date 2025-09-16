@@ -99,7 +99,10 @@ export const ItemViewByRefId: Record<string, IRowsColsField> = {
     '027accf8-a651-4e0e-92cf-a5c754721d8a': ListItemView.VALUE,
     '5600b9ee-8652-4302-a804-f491f273d62c': ListItemView.VALUE,
     'f54efa39-7871-4f8d-b59a-8257befd61a2': ListItemView.VALUE,
+    '1754a128-e296-49c7-9865-6c6ef183073d': ListItemView.VALUE,
+    '0a93c38b-5f1f-422a-8039-a6cee1967af2': getListItemView('id', 'TEN_TK'), // tài khoản
     '33291373-09c3-4c08-bec8-c3a724b42f15': getListItemView('id', 'TEN_LF'), // Loại phí
+    'bc6431f9-ed8b-4d67-a734-e8e5aa8efacd': getListItemView('id', 'TEN_LF'), // Loại phí
     '826995ba-7dca-4f36-9569-6c2ba101bffe': getListItemView('id', 'TEN_NH_TS'), // nhóm tài sản
     '1975aaa2-6e6e-4c76-b81d-66987e327fb7': getListItemView('id', 'TEN_NH_TS'), // nhóm công cụ
     '01e14b5c-6e30-4b31-ae1d-4abbf7ed49d2': getListItemView('id', 'TEN_CT'), // chứng từ

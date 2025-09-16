@@ -1,5 +1,5 @@
 import { VACOMTheme } from '@/theme/theme';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
     ColorValue,
     Platform,
@@ -7,7 +7,7 @@ import {
     StyleSheet,
     ViewStyle
 } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view' // Giúp form không bị che bởi bàn phím
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'; // Giúp form không bị che bởi bàn phím
 import { useTheme } from 'react-native-paper';
 interface Props {
     children: React.ReactNode;
@@ -24,7 +24,7 @@ export default function FormWrapper({ children, style, refreshControl, backgroun
             style={{ backgroundColor: backgroundColor || colors.vacom.backLayout }}
             contentContainerStyle={[styles.scrollContainer, { backgroundColor: backgroundColor || colors.vacom.backLayout }, style]}
             enableOnAndroid={true}
-            extraScrollHeight={Platform.OS === 'android' ? 80 : 40}
+            extraScrollHeight={Platform.OS === 'android' ? 80 : 80}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
             refreshControl={refreshControl}

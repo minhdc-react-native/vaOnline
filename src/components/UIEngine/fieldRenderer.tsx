@@ -55,10 +55,12 @@ const ViewComponent: React.FC<IProps> = ({
 
     const handleBlur = useCallback((prevValue: React.RefObject<any>) => {
         if (field.type !== "input") return;
+
         handleAction("onBlur", field.bind);
         if (field.typeInput === "taxCode" && value && value.length >= 10) {
             if (prevValue.current !== value) { // chỉ chạy khi thay đổi giá trị.
                 prevValue.current = value;
+                console.log('field??>>', configExpression?.expression);
                 const fixExpression = configExpression?.expression?.[field.bind!] || field.expression;
                 const fixExpressionIfEmpty = configExpression?.expressionIfEmpty?.[field.bind!] || field.expressionIfEmpty;
 

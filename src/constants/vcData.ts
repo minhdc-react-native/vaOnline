@@ -39,19 +39,19 @@ export const VcData = {
         { label: 'dashboard', path: '/accounting/dashboard', icon: 'view-dashboard-outline' },
         { label: 'catalog', path: '/accounting/catalog', icon: 'format-list-text' },
         { label: 'voucher', path: '/accounting/voucher', icon: 'file-document-multiple' },
-        { label: 'invoice', path: '/accounting/invoice', icon: 'file-document-outline' },
-        { label: 'tool', path: '/accounting/tool', icon: 'cube' },
-        { label: 'costing', path: '/accounting/costing', icon: 'factory' },
+        // { label: 'invoice', path: '/accounting/invoice', icon: 'file-document-outline' },
+        // { label: 'tool', path: '/accounting/tool', icon: 'cube' },
+        // { label: 'costing', path: '/accounting/costing', icon: 'factory' },
         { label: 'report', path: '/accounting/report', icon: 'chart-bar' },
-        { label: 'system', path: '/accounting/system', icon: 'cog' }
+        // { label: 'system', path: '/accounting/system', icon: 'cog' }
     ],
     drawerHkd: [
         { label: 'dashboard', path: '/hkd/dashboard', icon: 'view-dashboard-outline' },
         { label: 'catalog', path: '/hkd/catalog', icon: 'format-list-text' },
         { label: 'voucher', path: '/hkd/voucher', icon: 'file-document-multiple' },
-        { label: 'invoice', path: '/hkd/invoice', icon: 'file-document-outline' },
+        // { label: 'invoice', path: '/hkd/invoice', icon: 'file-document-outline' },
         { label: 'report', path: '/hkd/report', icon: 'chart-bar' },
-        { label: 'system', path: '/hkd/system', icon: 'cog' }
+        // { label: 'system', path: '/hkd/system', icon: 'cog' }
     ],
     menuApp: {
         'd72ee2a8-88ff-45b4-9c04-41f71d93e282': DataMenuAccounting,
@@ -93,8 +93,10 @@ export const VcReferences: IDataSource = {
     DMSX: { url: `/api/System/GetDataByReferencesId?id=4f4a3acd-c873-45aa-9d1b-098cea801f65` },
     DVT_CB: { url: `/api/System/GetDataByReferencesId?id=81ac9446-6c9f-410e-af92-a724a142cafc&filtervalue=null&extrafilter=#ExtraFilter#` },
     DMNN: { url: `/api/System/GetDataByReferencesId?id=f54efa39-7871-4f8d-b59a-8257befd61a2` },
-    DMLF: { url: `/api/System/GetDataByReferencesId?id=33291373-09c3-4c08-bec8-c3a724b42f15` },
+    DMLF_PNK: { url: `/api/System/GetDataByReferencesId?id=33291373-09c3-4c08-bec8-c3a724b42f15` },
+    DMLF_OTHER: { url: `/api/System/GetDataByReferencesId?id=bc6431f9-ed8b-4d67-a734-e8e5aa8efacd` },
     DMDVT: { url: `/api/System/GetDataByReferencesId?id=2beb4691-3bc8-40aa-a5ba-6170fef7a7c4` },
+    MA_NGANHNGHE: { url: `/api/System/GetDataByReferencesId?id=7a10ab7a-dfc5-478e-af00-53f5dc1cee1e` },
 }
 export interface IConfigDateMenuWin {
     title: string,
@@ -112,7 +114,7 @@ export const defaultNumberNew: Partial<Record<ITableWin, string[]>> = {
         'SO_LUONG', 'GIA_NT2', 'GIA2', 'TIEN_NT2', 'TIEN2', 'GIA_NT', 'GIA', 'TIEN_NT', 'TIEN',
         'PT_CK', 'T_CK_NT', 'T_CK', 'PT_GG', 'GIA_GG_NT', 'GIA_GG', 'T_GG_NT', 'T_GG', 'PT_NK', 'T_NK_NT', 'T_NK',
         'PT_DB', 'T_DB_NT', 'T_DB', 'PT_THUE', 'T_THUE_NT', 'T_THUE',
-        'T_CP_NT', 'T_CP', 'T_CP_NT1', 'T_CP1', 'T_CP_NT0', 'T_CP0'
+        'T_CP_NT', 'T_CP', 'T_CP_NT1', 'T_CP1', 'T_CP_NT0', 'T_CP0', 'THUE_GTGT', 'TIEN_THUE', 'GIAM_TRU', 'TIEN_GT', 'TIEN_ST'
     ],
     PSCF: ['TIEN_NT', 'TIEN'],
 }

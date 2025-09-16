@@ -128,6 +128,8 @@ const psthue0: ISchemaWin = {
                         type: "selectList",
                         clean: false,
                         tableWin: "Empty",
+                        requiredKeys: ['_nhomHd'],
+                        visibleIf: "{{_nhomHd}}",
                         fDisplay: { fValue: "id" },
                         itemView: ListItemView.NHOM_HD,
                         label: "KT",

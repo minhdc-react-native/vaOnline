@@ -557,7 +557,8 @@ export const dphv: ISchemaWinValue = {
         DMNHOMHD: 'DMNHOMHD',
         DVT: 'DMDVT',
         DVT_CB: 'DVT_CB',
-        LOAI_PHI: 'DMLF'
+        LP_PNK: 'DMLF_PNK',
+        LP_OTHER: 'DMLF_OTHER'
     },
     config: dphv0,
     fieldSearch: 'INFO_FILTER COLLATE SQL_Latin1_General_CP1_CI_AI', isRmTone: true,

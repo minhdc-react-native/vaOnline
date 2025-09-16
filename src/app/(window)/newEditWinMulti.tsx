@@ -53,6 +53,7 @@ const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, con
         }
         return isResult;
     }
+
     const onSubmit = (confirm: boolean, data?: IData) => {
         if (!confirm || checkFilter()) onSave(data);
     }
@@ -151,6 +152,7 @@ const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, con
                             errors={errors}
                             dataSource={dataSource}
                         />
+                        <View style={{ height: 100 }} />
                     </FormWrapper>
                 </View>
             </Animated.View>

@@ -60,6 +60,7 @@ const NewEditWin = () => {
                                 {`${_('DETAILS')} [${schemaUI.config.tabs?.length}]`}
                             </Button>}
                     </Card>}
+                <View style={{ height: 100 }} />
             </FormWrapper>
         </View>
     )

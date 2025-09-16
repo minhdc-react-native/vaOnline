@@ -103,10 +103,17 @@ const cthv0: ISchemaWin = {
         fields: [
             {
                 type: "cols",
-                requiredKeys: ['_maKhoDc'],
-                visibleIf: "{{_maKhoDc}}",
-                style: { alignItems: "center" },
+                requiredKeys: ['_maKhoDc', '_maHvDc'],
+                visibleIf: "{{_maKhoDc && !_maHvDc}}",
                 fields: [
+                    {
+                        type: "search",
+                        tableSearch: "DMHV",
+                        itemView: ListItemView.MA_HV,
+                        fField: 'MA_HV',
+                        label: "MA_HV",
+                        bind: 'MA_HV'
+                    },
                     {
                         type: "rows",
                         style: { alignItems: "center" },
@@ -131,15 +138,6 @@ const cthv0: ISchemaWin = {
                                 style: { flex: 1 }
                             },
                         ]
-                    },
-                    {
-                        type: "search",
-                        tableSearch: "DMHV",
-                        itemView: ListItemView.MA_HV,
-                        fField: 'MA_HV',
-                        label: "MA_HV",
-                        bind: 'MA_HV',
-                        style: { flex: 1 }
                     }
                 ]
             },
@@ -474,6 +472,102 @@ const cthv0: ISchemaWin = {
                         type: "number",
                         label: "T_DB",
                         bind: 'T_DB',
+                        format: "rAmount",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { alignItems: "center" },
+                requiredKeys: ['TY_GIA', '_tThue'],
+                visibleIf: "{{_tThue && TY_GIA!==1}}",
+                fields: [
+                    {
+                        type: "number",
+                        label: "PT_THUE",
+                        bind: 'PT_THUE',
+                        format: "rPercentage",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "number",
+                        label: "T_THUE_NT",
+                        bind: 'T_THUE_NT',
+                        format: "rAmountNt",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { alignItems: "center" },
+                requiredKeys: ['TY_GIA', '_tThue'],
+                visibleIf: "{{_tThue && TY_GIA===1}}",
+                fields: [
+                    {
+                        type: "number",
+                        label: "PT_THUE",
+                        bind: 'PT_THUE',
+                        format: "rPercentage",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "number",
+                        label: "T_THUE",
+                        bind: 'T_THUE',
+                        format: "rAmount",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "cols",
+                requiredKeys: ['_thueHKD'],
+                visibleIf: "{{_thueHKD}}",
+                fields: [
+                    {
+                        type: "rows",
+                        fields: [
+                            {
+                                type: "number",
+                                label: "THUE_GTGT",
+                                bind: 'THUE_GTGT',
+                                format: "rPercentage",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "number",
+                                label: "TIEN_THUE",
+                                bind: 'TIEN_THUE',
+                                format: "rAmount",
+                                style: { flex: 1 }
+                            }
+                        ]
+                    },
+                    {
+                        type: "rows",
+                        fields: [
+                            {
+                                type: "number",
+                                label: "GIAM_TRU",
+                                bind: 'GIAM_TRU',
+                                format: "rPercentage",
+                                style: { flex: 1 }
+                            },
+                            {
+                                type: "number",
+                                label: "TIEN_GT",
+                                bind: 'TIEN_GT',
+                                format: "rAmount",
+                                style: { flex: 1 }
+                            }
+                        ]
+                    },
+                    {
+                        type: "number",
+                        label: "TIEN_ST",
+                        bind: 'TIEN_ST',
                         format: "rAmount",
                         style: { flex: 1 }
                     }

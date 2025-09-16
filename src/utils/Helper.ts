@@ -350,19 +350,23 @@ export const Helper = {
         return result;
     },
     deepMerge: (target: any, source?: any): ISchemaWinValue => {
-        if (!source) return target;
+        if (!source) return { ...target }; // copy nông trước
+        const output: any = Array.isArray(target) ? [...target] : { ...target };
         for (const key of Object.keys(source)) {
             if (
                 source[key] instanceof Object &&
+                !Array.isArray(source[key]) &&
                 key in target &&
-                target[key] instanceof Object &&
-                !Array.isArray(source[key])
+                target[key] instanceof Object
             ) {
-                Helper.deepMerge(target[key], source[key]);
+                output[key] = Helper.deepMerge(target[key], source[key]); // đệ quy tạo mới
+            } else if (Array.isArray(source[key])) {
+                // nếu là mảng thì clone luôn
+                output[key] = [...source[key]];
             } else {
-                target[key] = source[key];
+                output[key] = source[key];
             }
         }
-        return target;
+        return output;
     }
 };
