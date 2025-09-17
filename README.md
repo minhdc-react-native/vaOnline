@@ -61,4 +61,7 @@ https://callstack.github.io/react-native-paper/docs/components/ActivityIndicator
 
 # update last version
 
-rm -rf node_modules package-lock.json && npm install -g npm-check-updates && ncu -u && npm install --legacy-peer-deps
+npm install -g npm-check-updates
+ncu -u
+npm install --legacy-peer-deps
+
