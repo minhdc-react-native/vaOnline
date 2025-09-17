@@ -480,8 +480,8 @@ const cthv0: ISchemaWin = {
             {
                 type: "rows",
                 style: { alignItems: "center" },
-                requiredKeys: ['TY_GIA', '_tThue'],
-                visibleIf: "{{_tThue && TY_GIA!==1}}",
+                requiredKeys: ['TY_GIA', '_tThue', '_typeView'],
+                visibleIf: "{{_tThue && TY_GIA!==1 && _typeView===2}}",
                 fields: [
                     {
                         type: "number",
@@ -502,8 +502,8 @@ const cthv0: ISchemaWin = {
             {
                 type: "rows",
                 style: { alignItems: "center" },
-                requiredKeys: ['TY_GIA', '_tThue'],
-                visibleIf: "{{_tThue && TY_GIA===1}}",
+                requiredKeys: ['TY_GIA', '_tThue', '_typeView'],
+                visibleIf: "{{_tThue && TY_GIA===1 && _typeView===2}}",
                 fields: [
                     {
                         type: "number",

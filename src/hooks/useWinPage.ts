@@ -106,7 +106,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     const resetItem = useDataItemWin((state) => state.resetItem);
     const { _ } = useTranslation();
 
-    const [layoutData, setLayoutData] = useState<Record<ITableWin, Record<string, any>>>();
+    const layoutData = useDataItemWin((state) => state.layoutData);
+    const setLayoutData = useDataItemWin((state) => state.setLayoutData);
 
     const [infoData, setInfoData] = useState({
         total: 0,
@@ -777,7 +778,29 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     // const [dataSource, setDataSource] = useState<Record<string, any[]>>({});
     const [tableRefresh, setTableRefresh] = useState<Record<string, { url: string, type?: string, dataPost?: Record<string, any>, key: string }>>({});
 
-    const loadDataBegin = async () => {
+
+    const setSource = useCallback((res: IData[], source: any, key: string) => {
+        if (res.length === 0) {
+            setDataSource(tableWin, key, []);
+            return;
+        };
+        const configSource: any = VcReferences[source[key]];
+        if (configSource.typeData === "tree") res = Helper.sortTreeFlat(res, configSource.fieldCode);
+        const fields: string[] = configSource.fields || Object.keys(res[0]);
+        const isColor = fields.indexOf("color") < 0 && typeof configSource.getColor === "function";
+        const result = res.map((item: any) => {
+            const obj = Object.fromEntries(
+                fields.map(f => [f, item[f]])
+            );
+            if (isColor) {
+                obj.color = configSource.getColor(item);
+            }
+            return obj;
+        });
+        setDataSource(tableWin, key, result);
+    }, [setDataSource, tableWin]);
+
+    const loadDataBegin = useCallback(async () => {
         let source: any = schemaWin[tableWin]?.dataSource ?? {};
 
         // tabs.forEach((tab) => {
@@ -810,28 +833,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             }
         });
         await Promise.all(promises);
-    };
+    }, [setDataSource, setSource, tableWin]);
 
-    const setSource = useCallback((res: IData[], source: any, key: string) => {
-        if (res.length === 0) {
-            setDataSource(tableWin, key, []);
-            return;
-        };
-        const configSource: any = VcReferences[source[key]];
-        if (configSource.typeData === "tree") res = Helper.sortTreeFlat(res, configSource.fieldCode);
-        const fields: string[] = configSource.fields || Object.keys(res[0]);
-        const isColor = fields.indexOf("color") < 0 && typeof configSource.getColor === "function";
-        const result = res.map((item: any) => {
-            const obj = Object.fromEntries(
-                fields.map(f => [f, item[f]])
-            );
-            if (isColor) {
-                obj.color = configSource.getColor(item);
-            }
-            return obj;
-        });
-        setDataSource(tableWin, key, result);
-    }, [setDataSource, tableWin]);
 
     useEffect(() => {
         if (shouldRefresh && tableRefresh[shouldRefresh]) {
@@ -865,6 +868,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 link: `/api/System/ExecuteQuery?sql=${sql}`,
                 callBack: (res) => {
                     if (res && isNotEmpty(res[0])) {
+
                         const layout = res[0].LAYOUT_MOBILE;
                         const fn = new Function("colors", "getListItemView", "ListItemView", layout);
                         const result = fn(colors, getListItemView, ListItemView);
@@ -888,7 +892,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         // lấy các dữ liệu reference liên quan
         await loadDataBegin();
         hide();
-    }, []);
+    }, [colors, extractWinConfig, hide, loadDataBegin, show, windowId]);
 
     const onBack = useCallback(() => {
         if (isChange) {

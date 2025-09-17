@@ -24,7 +24,7 @@ export default function FormWrapper({ children, style, refreshControl, backgroun
             style={{ backgroundColor: backgroundColor || colors.vacom.backLayout }}
             contentContainerStyle={[styles.scrollContainer, { backgroundColor: backgroundColor || colors.vacom.backLayout }, style]}
             enableOnAndroid={true}
-            extraScrollHeight={Platform.OS === 'android' ? 80 : 80}
+            extraScrollHeight={Platform.OS === 'android' ? 80 : 40}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
             refreshControl={refreshControl}

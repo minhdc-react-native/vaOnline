@@ -271,7 +271,7 @@ const HeaderView = ({ setSearchText, txtSearch, label = "Chọn mã", numCharSea
                     style={{ flex: 1, height: 40 }}
                 />
             </View>
-            {(Helper.isEmpty(valueSearch) || valueSearch.length < 3) && <Text variant="bodySmall" style={{ textAlign: "center", color: colors.secondary, paddingVertical: 10 }}>{`Bạn phải tìm tối thiểu ${numCharSearch} ký tự!`}</Text>}
+            {(Helper.isEmpty(valueSearch) || valueSearch.length < numCharSearch) && <Text variant="bodySmall" style={{ textAlign: "center", color: colors.secondary, paddingVertical: 10 }}>{`Bạn phải tìm tối thiểu ${numCharSearch} ký tự!`}</Text>}
         </>
     );
 };

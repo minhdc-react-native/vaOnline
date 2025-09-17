@@ -24,7 +24,7 @@ export default function LayoutAccounting() {
                     headerLeft: () => <IconButton icon="menu" size={24} iconColor={colors.primary} onPress={() => navigation.toggleDrawer()} />
                 });
             }}
-            drawerContent={() => <CustomDrawerContent drawerItems={VcData.drawerAccounting} />}
+            drawerContent={() => <CustomDrawerContent drawerItems={VcData.drawerAccounting} title={lang === "vi" ? "Kế toán" : "Accounting"} />}
         />
     );
 }

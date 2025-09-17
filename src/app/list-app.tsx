@@ -1,3 +1,4 @@
+import LoadingScreen from '@/components/loadingScreen';
 import VcSelectList from '@/components/vcSelectList';
 import { VcData } from '@/constants/vcData';
 import { useAuth } from '@/hooks/useAuth';
@@ -5,7 +6,7 @@ import { useDataApp } from '@/hooks/zustand/useDataApp';
 import { saveYear } from '@/utils/vcStorage';
 import { AntDesign } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Card, Icon, IconButton, Text, useTheme } from 'react-native-paper';
 
@@ -16,6 +17,7 @@ export default function ListApp() {
     const setCurrentYear = useDataApp((state) => state.setCurrentYear);
     const lang = useDataApp((state) => state.lang);
     const { colors } = useTheme();
+    const [loading, setLoading] = useState(true);
     const onSelectYear = async (year: any) => {
         saveYear(year.NAM);
         setCurrentYear(year.NAM);
@@ -24,7 +26,7 @@ export default function ListApp() {
     useEffect(() => {
         const _getData = async () => {
             await getListApp();
-            await getInfoDvcs();
+            await getInfoDvcs(setLoading);
             await getLicenseInfo();
         }
         _getData();
@@ -45,8 +47,10 @@ export default function ListApp() {
                         </View>
                     </View>
                     <View style={{ paddingVertical: 10, paddingHorizontal: 20, gap: 5 }}>
-                        <Text variant='titleMedium' style={{ color: colors.secondary }}>{`${infoDvcs?.DVCS_ID} - ${infoDvcs?.TEN_DVCS}`}</Text>
-                        <Text variant='titleSmall'>{`${lang === 'vi' ? 'Mã số thuế:' : 'TaxCode:'} ${infoDvcs?.MS_THUE}`}</Text>
+                        {loading ? <LoadingScreen style={{ height: 80 }} /> : <>
+                            <Text variant='titleMedium' style={{ color: colors.secondary }}>{`${infoDvcs?.DVCS_ID} - ${infoDvcs?.TEN_DVCS}`}</Text>
+                            <Text variant='titleSmall'>{`${lang === 'vi' ? 'Mã số thuế:' : 'TaxCode:'} ${infoDvcs?.MS_THUE}`}</Text>
+                        </>}
                     </View>
                 </Card>
                 <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center', gap: 50, paddingHorizontal: 50, flexWrap: "wrap" }}>

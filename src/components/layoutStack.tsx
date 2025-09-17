@@ -1,6 +1,6 @@
 // src/app/_layout.tsx
 
-import { Stack } from 'expo-router'
+import { Stack } from 'expo-router';
 import { useTheme } from 'react-native-paper';
 interface IProgs {
     data: Record<string, { headerShown?: boolean, title?: string }>
@@ -20,7 +20,8 @@ export default function LayoutStack({ data }: IProgs) {
                 headerTitleStyle: {
                     fontWeight: 'bold',
                 },
-                animation: 'slide_from_right',
+                // animation: 'slide_from_right',
+                animation: "slide_from_bottom"
             })}
         >
             {Object.entries(data).map(([name, options]) => (

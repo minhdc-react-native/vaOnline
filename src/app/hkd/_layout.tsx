@@ -9,6 +9,7 @@ export default function LayoutHkd() {
     const { colors } = useTheme();
     const lang = useDataApp((state) => state.lang);
     const dataTitle = lang === 'vi' ? VcData.drawerTitle : VcData.drawerTitleE;
+
     return (
         <Drawer
             initialRouteName="dashboard"
@@ -24,7 +25,7 @@ export default function LayoutHkd() {
                     headerLeft: () => <IconButton icon="menu" size={24} iconColor={colors.primary} onPress={() => navigation.toggleDrawer()} />
                 });
             }}
-            drawerContent={() => <CustomDrawerContent drawerItems={VcData.drawerHkd} />}
+            drawerContent={() => <CustomDrawerContent drawerItems={VcData.drawerHkd} title={lang === "vi" ? "Hộ Kinh Doanh" : "Household"} />}
         />
     );
 }

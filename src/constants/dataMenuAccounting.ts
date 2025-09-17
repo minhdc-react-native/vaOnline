@@ -2,6 +2,20 @@ import { theme } from "@/theme/theme";
 import { IConfigDateMenuWin } from "./vcData";
 const colors = theme.colors, nameIcon = "arrow-right-thin";
 const icon: any = { type: "M", name: nameIcon, color: colors.secondary };
+export const WindowAccounting = {
+    goods: [
+        'WIN00122', 'WIN00125', 'WIN00052', 'WIN00076', 'WIN00077', 'WIN00054', 'WIN00361', 'WIN00252',
+        'WIN00126', 'WIN00049', 'WIN00062', 'WIN00075', 'WIN00215', 'WIN00216', 'WIN00130', 'WIN00131',
+        'WIN00057', 'WIN00058', 'WIN00253', 'WIN00063', 'WIN00251', 'WIN00081', 'WIN00082'
+    ],
+    accounting: ['WIN00018', 'WIN00033', 'WIN00038', 'WIN00039', 'WIN00040', 'WIN00043', 'WIN00041', 'WIN00042'],
+    reports: [
+        'WIN00071', 'WIN00027', 'WIN00072', 'WIN00051', 'WIN00142', 'WIN00085', 'WIN00086', 'WIN00280',
+        'WIN00083', 'WIN00091', 'WIN00318', 'WIN00084', 'WIN00180', 'WIN00367', 'WIN00399',
+        'WIN00157', 'WIN00281',
+        'WIN00229', 'WIN00230', 'WIN00231', 'WIN00232', 'WIN00233', 'WIN00283', 'WIN00234'
+    ]
+}
 export const DataMenuAccounting: Record<string, Partial<Record<IKeyMenuWin, IConfigDateMenuWin[]>>> = {
     catalog: {
         acCatalogBalance: [],
@@ -345,6 +359,28 @@ export const DataMenuAccounting: Record<string, Partial<Record<IKeyMenuWin, ICon
                     },
                 ]
             }
+        ]
+    },
+    custom: {
+        otherSubsystems: [
+            {
+                title: 'Chứng từ hàng hoá', titleE: 'Goods documents',
+                data: [
+
+                ]
+            },
+            {
+                title: 'Chứng từ kế toán', titleE: 'Accounting documents',
+                data: [
+
+                ]
+            },
+            {
+                title: 'Báo cáo', titleE: 'Report',
+                data: [
+
+                ]
+            },
         ]
     }
 }

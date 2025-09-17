@@ -7,9 +7,9 @@ import { useWindowDimensions, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { TabView } from 'react-native-tab-view';
 
-const menuMain = 'report';
+const menuMain = 'custom';
 
-export default function ReportHkd() {
+export default function CustomAccounting() {
     const { colors } = useTheme();
     const layout = useWindowDimensions();
     const [index, setIndex] = useState(0);
@@ -17,7 +17,7 @@ export default function ReportHkd() {
     const lang = useDataApp((state) => state.lang);
 
     const allRoutes = [
-        { key: 'baoCaoDonVi', title: lang === 'vi' ? 'Báo cáo' : 'Report', keyMenuWin: 'baoCaoDonVi' }
+        { key: 'otherSubsystems', title: lang === 'vi' ? 'Phân hệ khác' : 'Other subsystems', keyMenuWin: 'otherSubsystems' }
     ];
 
     const hasPermission = (keyMenuWin: IKeyMenuWin) => {

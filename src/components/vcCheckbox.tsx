@@ -27,7 +27,7 @@ const VcCheckBox = ({ label, value = false, onChange, textStyle, style, variant,
                 onChange(value === "C" ? 'K' : 'C');
                 break;
             case "number":
-                onChange(value === 1 ? 1 : 0);
+                onChange(value === 1 ? 0 : 1);
                 break;
             default:
                 onChange(!value);

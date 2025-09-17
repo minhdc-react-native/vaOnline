@@ -58,3 +58,7 @@ https://www.flaticon.com/
 
 https://snack.expo.dev/@react-native-paper/react-native-paper-example_v5
 https://callstack.github.io/react-native-paper/docs/components/ActivityIndicator
+
+# update last version
+
+rm -rf node_modules package-lock.json && npm install -g npm-check-updates && ncu -u && npm install --legacy-peer-deps

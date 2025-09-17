@@ -1,3 +1,4 @@
+import EmptyView from '@/app/empty-view';
 import MenuScreen from '@/app/menu';
 import { CustomTabBar } from '@/components/customTabBar';
 import { useDataApp } from '@/hooks/zustand/useDataApp';
@@ -21,7 +22,7 @@ export default function ReportAccounting() {
     ];
 
     const hasPermission = (keyMenuWin: IKeyMenuWin) => {
-        return !!dataMenuWin[menuMain][keyMenuWin];
+        return !!dataMenuWin[menuMain]?.[keyMenuWin];
     };
 
     // Tạo routes hợp lệ
@@ -34,13 +35,13 @@ export default function ReportAccounting() {
 
     return (
         <View style={{ flex: 1, gap: 10, backgroundColor: colors.background }}>
-            <TabView
+            {routes.length === 0 ? <EmptyView /> : <TabView
                 navigationState={{ index, routes }}
                 renderScene={renderScene}
                 renderTabBar={(pros: any) => <CustomTabBar {...pros} setIndex={setIndex} />}
                 onIndexChange={setIndex}
                 initialLayout={{ width: layout.width }}
-            />
+            />}
         </View>
     );
 }

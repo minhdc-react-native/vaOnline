@@ -2,6 +2,7 @@ import BarChartScreen from '@/app/accounting/dashboard/barChartScreen';
 import InfoBalance from '@/app/accounting/dashboard/InfoBalance';
 import PieChartScreen from '@/app/accounting/dashboard/pieChartScreen';
 import FormWrapper from '@/components/formWrapper';
+import LoadingScreen from '@/components/loadingScreen';
 import { useAuth } from '@/hooks/useAuth';
 import { useDataApp } from '@/hooks/zustand/useDataApp';
 import { VACOMTheme } from '@/theme/theme';
@@ -16,6 +17,7 @@ export default function Dashboard() {
     const lang = useDataApp((state) => state.lang);
     const [numRefresh, setNumberRefresh] = useState(0);
     const [refresh, setRefresh] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [refreshView, setRefreshView] = useState({ barChart: false, pieChart: false, infoBalance: false })
     const onRefresh = () => {
         setRefresh(true);
@@ -33,7 +35,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         const _getData = async () => {
-            await getInfoDvcs();
+            await getInfoDvcs(setLoading);
         }
         _getData();
     }, []);
@@ -56,8 +58,10 @@ export default function Dashboard() {
         >
             <View style={{ gap: 10, backgroundColor: colors.background, padding: 20, borderBottomWidth: 0.5, borderBottomColor: colors.vacom.borderColor }}>
                 <Chip style={{ alignSelf: "flex-start" }}><Text>{currentYear}</Text></Chip>
-                <Text variant='titleMedium' style={{ color: colors.secondary }}>{`${infoDvcs?.DVCS_ID} - ${infoDvcs?.TEN_DVCS}`}</Text>
-                <Text variant='titleSmall'>{`${lang === 'vi' ? 'Mã số thuế:' : 'TaxCode:'} ${infoDvcs?.MS_THUE}`}</Text>
+                {loading ? <LoadingScreen /> : <>
+                    <Text variant='titleMedium' style={{ color: colors.secondary }}>{`${infoDvcs?.DVCS_ID} - ${infoDvcs?.TEN_DVCS}`}</Text>
+                    <Text variant='titleSmall'>{`${lang === 'vi' ? 'Mã số thuế:' : 'TaxCode:'} ${infoDvcs?.MS_THUE}`}</Text>
+                </>}
             </View>
             <InfoBalance numRefresh={numRefresh} onFinish={() => onFinish({ infoBalance: true })} />
             <BarChartScreen numRefresh={numRefresh} onFinish={() => onFinish({ barChart: true })} />

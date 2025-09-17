@@ -2,6 +2,17 @@ import { theme } from "@/theme/theme";
 import { IConfigDateMenuWin } from "./vcData";
 const colors = theme.colors, nameIcon = "arrow-right-thin";
 const icon: any = { type: "M", name: nameIcon, color: colors.secondary };
+export const WindowHkd = {
+    goods: ['WIN00323', 'WIN00324', 'WIN00362', 'WIN00352'],
+    accounting: [
+        'WIN00321', 'WIN00322', 'WIN00326', 'WIN00327', 'WIN00325',
+        'WIN00048', 'WIN00120', 'WIN00264', 'WIN00061', 'WIN00044', 'WIN00045', 'WIN00046', 'WIN00047', 'WIN00255', 'WIN00276', 'WIN00353' // chứng từ bỏ qua
+    ],
+    reports: [
+        'WIN00330', 'WIN00398',
+        'WIN00118', 'WIN00092', 'WIN00093' // bỏ qua: QĐ 15, QĐ 48
+    ]
+}
 export const DataMenuHkd: Record<string, Partial<Record<IKeyMenuWin, IConfigDateMenuWin[]>>> = {
     catalog: {
         acCatalogBalance: [],
@@ -115,4 +126,26 @@ export const DataMenuHkd: Record<string, Partial<Record<IKeyMenuWin, IConfigDate
             }
         ]
     },
+    custom: {
+        otherSubsystems: [
+            {
+                title: 'Chứng từ hàng hoá', titleE: 'Goods documents',
+                data: [
+
+                ]
+            },
+            {
+                title: 'Chứng từ kế toán', titleE: 'Accounting documents',
+                data: [
+
+                ]
+            },
+            {
+                title: 'Báo cáo', titleE: 'Report',
+                data: [
+
+                ]
+            },
+        ]
+    }
 }

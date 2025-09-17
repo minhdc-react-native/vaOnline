@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { useWindowDimensions, View } from 'react-native';
 import { Appbar, Divider, IconButton, useTheme } from 'react-native-paper';
 import { TabView } from 'react-native-tab-view';
+import EmptyView from '../empty-view';
 import MenuScreen from '../menu';
 const menuMain = 'system';
 export default function AdminScreen() {
@@ -19,7 +20,7 @@ export default function AdminScreen() {
     ];
 
     const hasPermission = (keyMenuWin: IKeyMenuWin) => {
-        return !!dataMenuWin[menuMain][keyMenuWin];
+        return !!dataMenuWin[menuMain]?.[keyMenuWin];
     };
 
     // Tạo routes hợp lệ
@@ -33,18 +34,18 @@ export default function AdminScreen() {
     return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
             <Appbar.Header>
-                <Appbar.Content title={lang === "vi" ? "Quản trị" : "Admin"} />
                 <IconButton icon={'apps'} iconColor={colors.secondary} onPress={() => router.replace("/list-app")} />
+                <Appbar.Content title={lang === "vi" ? "Quản trị" : "Admin"} />
             </Appbar.Header>
             <Divider />
             <View style={{ flex: 1, gap: 10, backgroundColor: colors.background }}>
-                <TabView
+                {routes.length === 0 ? <EmptyView /> : <TabView
                     navigationState={{ index, routes }}
                     renderScene={renderScene}
                     renderTabBar={(pros: any) => <CustomTabBar {...pros} setIndex={setIndex} />}
                     onIndexChange={setIndex}
                     initialLayout={{ width: layout.width }}
-                />
+                />}
             </View>
         </View>
     );

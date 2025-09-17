@@ -85,9 +85,9 @@ const VcSelector = ({ data, value, onChange, containerStyle, itemStyle, type = "
                         }
                     ]}
                 >
-                    <View style={{ position: "absolute", bottom: 0, width: itemWidth }}>
+                    {type === "line" && <View style={{ position: "absolute", bottom: 0, width: itemWidth }}>
                         <View style={{ height: 2, borderRadius: 2, backgroundColor: colors.primary, marginHorizontal: itemWidth / 4 }} />
-                    </View>
+                    </View>}
                 </Animated.View>
                 {data.map((item, index) => (
                     <Pressable

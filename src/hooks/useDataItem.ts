@@ -3,6 +3,8 @@ import { create } from 'zustand';
 interface IDataItemWin {
     editMode: 'new' | 'edit' | null;
     setEditMode: (editMode: 'new' | 'edit' | null) => void;
+    layoutData: Record<ITableWin, Record<string, any>> | null;
+    setLayoutData: (layoutData: Record<ITableWin, Record<string, any>>) => void;
     dataSources: Partial<Record<ITableWin, Record<string, any[]>>>;
     setDataSource: (tableWin: ITableWin, key: string, data: any) => void;
     dataItems: Partial<Record<ITableWin, IData>>;
@@ -25,6 +27,11 @@ export const useDataItemWin = create<IDataItemWin>((set) => ({
     setEditMode: (editMode) =>
         set((state) => ({
             editMode: editMode
+        })),
+    layoutData: null,
+    setLayoutData: (layoutData: Record<ITableWin, Record<string, any>>) =>
+        set((state) => ({
+            layoutData: layoutData
         })),
     dataSources: {},
     setDataSource: (tableWin, key, data) =>
@@ -123,6 +130,7 @@ export const useDataItemWin = create<IDataItemWin>((set) => ({
                 dataSources: restSources,
                 dataTags: restTags,
                 dataItemDetail: restDetails,
+                layoutData: null
             };
         }),
     resetItem: (tableWin) =>

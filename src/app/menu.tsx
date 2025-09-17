@@ -21,7 +21,6 @@ export default function MenuScreen({ menuMain, keyMenuWin }: { menuMain: string,
     return (
         <ScrollView style={{ flex: 1, padding: 20, backgroundColor: colors.vacom.backLayout }}>
             {dataMenu && dataMenu.map((item, idx) => {
-
                 return (
                     <VcGroupButton key={idx} title={lang === 'vi' ? item.title : item.titleE} expanded={item.expanded !== undefined ? item.expanded : true}
                         data={item.data} icon={item.icon} disabled={item.disable} onPress={onPress} />

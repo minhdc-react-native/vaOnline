@@ -90,12 +90,17 @@ export default function LoginScreen() {
             switch (value.param) {
                 case "domain":
                     await saveSubDomain(data[value.param]);
+                    const domain = data[value.param];
+                    if (!Helper.isEmpty(domain) && !Helper.isEmpty(data.username)) {
+                        lastLoad.current = { domain: domain, username: data.username };
+                        await getDvcsByUser(data.username);
+                    }
                     break;
                 case "username":
                     const username = data[value.param];
                     if (!Helper.isEmpty(username) && lastLoad.current.username !== username) {
                         lastLoad.current = { domain: data.domain, username: data.username };
-                        getDvcsByUser(username);
+                        await getDvcsByUser(username);
                     }
                     break;
                 default:

@@ -192,23 +192,23 @@ export const PopupContent = ({
                                 {/* Nút xác nhận */}
                                 <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 10 }}>
                                     {showCancel && <Pressable
-                                        style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
+                                        style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1, minWidth: 60 }]}
                                         onPress={() => {
                                             closeWithAnimation();
                                             onCanCel?.();
                                         }}
                                     >
-                                        <Text style={{ padding: 5, borderRadius: 6, borderWidth: 1, borderColor: getIconColor[iconType] }}>
+                                        <Text style={{ padding: 5, borderRadius: 6, borderWidth: 1, textAlign: "center", borderColor: getIconColor[iconType] }}>
                                             {cancelText || _('KHONG')}
                                         </Text>
                                     </Pressable>}
                                     <Pressable
-                                        style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1 }]}
+                                        style={({ pressed }) => [{ opacity: pressed ? 0.8 : 1, minWidth: 60 }]}
                                         onPress={() => {
                                             closeWithAnimation();
                                             onConfirm?.(inputText);
                                         }}>
-                                        <Text style={{ padding: 5, borderRadius: 6, backgroundColor: getIconColor[iconType], borderWidth: 0, color: colors.background }}>
+                                        <Text style={{ padding: 5, borderRadius: 6, backgroundColor: getIconColor[iconType], borderWidth: 0, textAlign: "center", color: colors.background }}>
                                             {confirmText || _('CO')}
                                         </Text>
                                     </Pressable>

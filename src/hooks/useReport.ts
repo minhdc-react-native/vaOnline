@@ -12,6 +12,8 @@ import { StyleProp, ViewStyle } from "react-native";
 import UUID from 'react-native-uuid';
 import { useDataApp } from "./zustand/useDataApp";
 
+const fixWidth = 1.07;
+
 const FROM_DATE = ['P_NGAY_CT1', 'P_NGAY1'];
 const TO_DATE = ['P_NGAY_CT2', 'P_NGAY2'];
 
@@ -146,6 +148,13 @@ export const useReport = ({ itemMenuWin, reportDefault }: IProgs) => {
     const [dataSource, setDataSource] = useState<Record<string, any[]>>({});
     const [tableRefresh, setTableRefresh] = useState<Record<string, { url: string, type?: string, dataPost?: Record<string, any>, key: string }>>({});
     const setSource = useCallback((res: IData[] | string[], source: any, key: string) => {
+        if (res.length === 0) {
+            setDataSource(prev => ({
+                ...prev,
+                [key]: []
+            }));
+            return;
+        };
         const configSource: any = source[key];
 
         if (res.length > 0 && typeof res[0] === "string") res = (res as string[]).map(r => ({ id: r as string, value: r as string }));
@@ -324,7 +333,7 @@ const getColumn = (item: IData) => {
     return {
         id: field,
         title: name,
-        width: REPORTCOLUMN_WIDTH,
+        width: REPORTCOLUMN_WIDTH * fixWidth,
         format: {
             type: formatType,
             roundNumber: formatType === "number" ? keyRoundNumber : undefined
@@ -390,8 +399,8 @@ const mapLayoutFilter = (dataFilter: IData[], orgUnit: string, userLogin: string
             if (FROM_DATE0.includes((item.NAME as string).toUpperCase())) isSelectTime.from0 = item.NAME;
             if (TO_DATE0.includes((item.NAME as string).toUpperCase())) isSelectTime.to0 = item.NAME;
 
-            if (['gridcombo', 'combo', 'multiselect', 'treesuggest', 'richselect'].includes(item.TYPE_EDITOR)) {
-                dataSource[item.REF_ID] = { url: getUrlReference(item.REF_ID) };
+            if (['gridcombo', 'combo', 'multiselect', 'treesuggest', 'richselect', 'radio'].includes(item.TYPE_EDITOR)) {
+                dataSource[item.REF_ID] = item.TYPE_EDITOR !== 'radio' ? { url: getUrlReference(item.REF_ID) } : { data: JSON.parse(item.LIST_COLUMN) };
             }
 
             if ([...FROM_DATE, ...TO_DATE, ...FROM_DATE0, ...TO_DATE0].includes((item.NAME as string).toUpperCase())) zod[item.NAME] = { type: "string" };

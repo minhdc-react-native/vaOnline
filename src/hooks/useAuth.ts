@@ -1,5 +1,8 @@
+import { DataMenuAccounting, WindowAccounting } from "@/constants/dataMenuAccounting";
+import { DataMenuHkd, WindowHkd } from "@/constants/dataMenuHkd";
 import { IConfigDateMenuWin, VcData } from "@/constants/vcData";
 import { useTranslation } from "@/context/TranslationContext";
+import { theme } from "@/theme/theme";
 import { api } from "@/utils/apiMethods";
 import { clearRemember, clearToken, saveOrgUnit, saveRemember, saveToken, saveYear } from "@/utils/vcStorage";
 import { router } from "expo-router";
@@ -7,17 +10,62 @@ import { useState } from "react";
 import * as Keychain from "react-native-keychain";
 import { useFeedback } from "./useFeedback";
 import { useDataApp } from "./zustand/useDataApp";
+const colors = theme.colors, nameIcon = "arrow-right-thin";
+const icon: any = { type: "M", name: nameIcon, color: colors.secondary };
+// reset config
+const windowIds = {
+    goods: [...WindowAccounting.goods, ...WindowHkd.goods],
+    accounting: [...WindowAccounting.accounting, ...WindowHkd.accounting],
+    reports: [...WindowAccounting.reports, ...WindowHkd.reports]
+}
 
-const collectAllIds = (menuItems: any[]): string[] => {
+const collectAllIds = (menuItems: any[], resVoucher: IData[]): string[] => {
+
+    const otherSubsystemsAccounting = DataMenuAccounting.custom.otherSubsystems;
+    const otherSubsystemsHkd = DataMenuHkd.custom.otherSubsystems;
+
+    for (let i = 0; i < 3; i++) {
+        otherSubsystemsAccounting![i].data = [];
+        otherSubsystemsHkd![i].data = []
+    }
+    resVoucher.map(vourcher => {
+        const idx = vourcher.DP === 'KT' ? 1 : 0;
+        const copyDetails = vourcher.DP === 'KT' ? { CTKT: ['TK_NO', 'TK_CO'] } : { CTHV: ['MA_KHO'] };
+        const tableWin: ITableWin = vourcher.DP === 'KT' ? "DPKT" : "DPHV";
+        const lenAcc = otherSubsystemsAccounting![idx].data.length + 1;
+        const lenHkd = otherSubsystemsHkd![idx].data.length + 1;
+        const menuWin: IMenuWin = {
+            id: vourcher.WINDOW_ID, typeWin: "(winMaster)", tableWin: tableWin, label: vourcher.WINDOW_NAME, labelE: vourcher.WINDOW_NAME,
+            defaultValue: { MA_CT: vourcher.MA_CT }, copyDetails: copyDetails, icon: icon, col: 1, row: 1, typeView: { _typeView: 2 }
+        };
+        otherSubsystemsAccounting![idx].data.push({ ...menuWin, row: lenAcc, typeView: { _typeView: 1 } });
+        otherSubsystemsHkd![idx].data.push({ ...menuWin, row: lenHkd, typeView: { _typeView: 2 } });
+    });
     const ids: string[] = [];
     function traverse(items: any[]) {
         for (const item of items) {
-            if (item.id) {
-                ids.push(item.window_id);
-            }
             // Đệ quy nếu có submenu là mảng
             if (item.submenu && Array.isArray(item.submenu)) {
                 traverse(item.submenu);
+            } else {
+                // nếu là báo cáo
+                if (item.code === 'reportwindow' && !windowIds.reports.includes(item.window_id)) {
+                    const len = otherSubsystemsAccounting![2].data.length + 1;
+                    const label = item.value;
+                    otherSubsystemsAccounting![2].data.push(
+                        {
+                            id: item.window_id, typeWin: "(report)", tableWin: "Empty", label: label, labelE: label,
+                            icon: icon, row: len, col: 1
+                        }
+                    );
+                    otherSubsystemsHkd![2].data.push(
+                        {
+                            id: item.window_id, typeWin: "(report)", tableWin: "Empty", label: label, labelE: label,
+                            icon: icon, row: len, col: 1
+                        }
+                    );
+                }
+                ids.push(item.window_id);
             }
         }
     }
@@ -32,17 +80,14 @@ function filterDataMenu(
         Object.entries(data)
             .map(([sectionKey, sectionValue]) => {
                 if (!sectionValue) return [sectionKey, {}];
-
                 const filteredSection = Object.fromEntries(
                     Object.entries(sectionValue)
                         .map(([menuKey, arr]) => {
                             if (!arr) return [menuKey, []];
-
                             const newArr = arr.map(section => ({
                                 ...section,
                                 data: section.data.filter(item => (item.id.startsWith("LINE-") || ids.includes(item.id)))
                             }));
-
                             // Bỏ các section không có data
                             const nonEmptySections = newArr.filter(s => s.data.length > 0);
                             return [menuKey, nonEmptySections];
@@ -50,7 +95,6 @@ function filterDataMenu(
                         // Bỏ key nếu toàn bộ arr rỗng
                         .filter(([, arr]) => (arr as IConfigDateMenuWin[]).length > 0)
                 );
-
                 return [sectionKey, filteredSection];
             })
             // Bỏ cả section nếu không còn gì
@@ -76,6 +120,7 @@ export const useAuth = () => {
     const setLang = useDataApp((state) => state.setLang);
     const setListVoucher2 = useDataApp((state) => state.setListVoucher2);
     const setCurrencies = useDataApp((state) => state.setCurrencies);
+    const orgUnit = useDataApp((state) => state.orgUnit);
     const { setTranslations, _ } = useTranslation();
 
     const saveBiometric = async (password: string) => {
@@ -287,7 +332,7 @@ export const useAuth = () => {
         });
     }
 
-    const getInfoDvcs = async () => {
+    const getInfoDvcs = async (setLoading?: (loading: boolean) => void) => {
         await api.get({
             link: `/api/System/GetInfoDvcs`,
             callBack: (res: any[]) => {
@@ -295,16 +340,28 @@ export const useAuth = () => {
                     setInfoDvcs(res[0]);
                 }
             },
-            // setLoading: setLoading
+            setLoading: setLoading
         });
     }
 
     const onSelectApp = async (id: string) => {
+        // lấy những chứng tự đặc thù.
+        const listVoucher = [...windowIds.goods, ...windowIds.accounting];
+
+        const url = encodeURIComponent(`SELECT a.id,a.WINDOW_ID,a.WINDOW_NAME,b.MA_CT,b.DP ` +
+            `FROM VC_WINDOW a INNER JOIN DMCT b ON a.MA_CT=b.MA_CT AND b.DVCS_ID=N'${orgUnit}' AND CharIndex(b.DP,'HV,KT')>0 ` +
+            `ORDER BY b.DP desc,b.STT_CT,b.MA_CT`);
+        const res: IData[] = await api.get({
+            link: `/api/System/ExecuteQuery?sql=${url}`
+        });
+
+        const resVoucher = res.filter(i => !listVoucher.includes(i.WINDOW_ID));
+
         await api.get({
             link: `/api/System/GetAppMenu?id=${id}`,
             callBack: (res: any[]) => {
                 if (res && res.length > 0) {
-                    const ids = collectAllIds(res);
+                    const ids = collectAllIds(res, resVoucher);
                     setMenuIds(ids);
                     const filtered = filterDataMenu((VcData.menuApp as any)[id], ids);
                     setDataMenuWin(filtered);

@@ -102,7 +102,7 @@ declare global {
 
     type IKeyMenuWin = 'acCatalogBalance' | 'acCatalogBank' | 'acCatalogGood' | 'acCatalogOther' | 'acCatalogPartner' |
         'goodDocuments' | 'accountingDocuments' | 'congTacCuoiKy' |
-        'baoCaoDonVi' | 'baoCaoToanNganh' | 'systemAdmin'
+        'baoCaoDonVi' | 'baoCaoToanNganh' | 'systemAdmin' | 'otherSubsystems'
 
     var isNotEmpty: (value: any) => boolean;
 }

@@ -4,6 +4,7 @@ import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { IRowsColsField } from "@/components/UIEngine/types";
 import VcSelectList from "@/components/vcSelectList";
+import { useTranslation } from "@/context/TranslationContext";
 import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { ListItemView } from "@/schema/voucher/itemView";
 import { api } from "@/utils/apiMethods";
@@ -29,6 +30,7 @@ export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeIte
 
     const slideAnim = useRef(new Animated.Value(HEIGHT_WINDOW)).current;
     const { colors } = useTheme();
+    const { _ } = useTranslation();
 
     const arrReplace: Record<string, any> = {
         '#DVCS_ID#': orgUnit,
@@ -143,6 +145,13 @@ export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeIte
         setLoading(false);
     };
     const setSource = useCallback((res: IData[], source: any, key: string) => {
+        if (res.length === 0) {
+            setDataSource(prev => ({
+                ...prev,
+                [key]: []
+            }));
+            return;
+        };
         const configSource: any = source[key];
         if (configSource.typeData === "tree") res = Helper.sortTreeFlat(res, configSource.fieldCode);
         const fields: string[] = configSource.fields || Object.keys(res[0]);
@@ -198,15 +207,15 @@ export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeIte
                         <IconButton icon="close" onPress={() => closePanel(false)} />
                         {isSelectTime ? <VcSelectList
                             data={isSelectTime?.data || Helper.filterTime}
-                            placeholder="Chọn ngày"
+                            placeholder={_('LIST_TIME')}
                             value={filterTime?.id ?? ""}
                             itemView={ListItemView.VALUE}
                             style={{ flex: 1, borderWidth: 0 }}
                             clean={true}
                             onChange={(item) => setFilterTime(item)}
                             notFistFilter={true}
-                        /> : <Text style={styles.title} numberOfLines={1}>{schemaConfig.title || 'Tham số'}</Text>}
-                        <Button mode="contained" onPress={() => closePanel(true, paramKey0)}>Xác nhận</Button>
+                        /> : <Text style={styles.title} numberOfLines={1}>{schemaConfig.title || _('IS_FILTER')}</Text>}
+                        <Button mode="contained" onPress={() => closePanel(true, paramKey0)}>{_('NHAN')}</Button>
                     </View>
                 </View>
                 <View style={[styles.content]}>

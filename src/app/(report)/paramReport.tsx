@@ -4,6 +4,7 @@ import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { SchemaUIEngine } from "@/components/UIEngine/schemaUIEngine";
 import { IRowsColsField } from "@/components/UIEngine/types";
 import VcSelectList from "@/components/vcSelectList";
+import { useTranslation } from "@/context/TranslationContext";
 import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { ListItemView } from "@/schema/voucher/itemView";
 import { VACOMTheme } from "@/theme/theme";
@@ -28,6 +29,8 @@ export default function ParamReport({ onConfirm, paramKey, schemaConfig, dataSou
     const orgUnit = useDataApp((state) => state.orgUnit);
     const userLogin = useDataApp((state) => state.userLogin);
     const currentYear = useDataApp((state) => state.currentYear);
+
+    const { _ } = useTranslation();
 
     const slideAnim = useRef(new Animated.Value(HEIGHT_WINDOW)).current;
     const { colors } = useTheme<VACOMTheme>();
@@ -121,18 +124,18 @@ export default function ParamReport({ onConfirm, paramKey, schemaConfig, dataSou
                         <IconButton icon="close" onPress={() => closePanel(false)} />
                         {isSelectTime ? <VcSelectList
                             data={isSelectTime?.data || Helper.filterTime}
-                            placeholder="Chọn ngày"
+                            placeholder={_('LIST_TIME')}
                             value={filterTime?.id ?? ""}
                             itemView={ListItemView.VALUE}
                             style={{ flex: 1, borderWidth: 0 }}
                             clean={true}
                             onChange={(item) => setFilterTime(item)}
                             notFistFilter={true}
-                        /> : <Text numberOfLines={1} style={styles.title}>{schemaConfig.title || 'Tham số'}</Text>}
-                        <Button mode="contained" onPress={() => closePanel(true, paramKey0)}>Xác nhận</Button>
+                        /> : <Text numberOfLines={1} style={styles.title}>{schemaConfig.title || _('IS_FILTER')}</Text>}
+                        <Button mode="contained" onPress={() => closePanel(true, paramKey0)}>{_('NHAN')}</Button>
                     </View>
                 </View>
-                <View style={[styles.content, { maxHeight: schemaEdit.height ?? "90%", backgroundColor: colors.vacom.backLayout }]}>
+                <View style={[styles.content, { maxHeight: schemaEdit.height ?? HEIGHT_WINDOW / 1.5, backgroundColor: colors.vacom.backLayout }]}>
                     <FormWrapper>
                         <View style={{ height: 20 }} />
                         <SchemaUIEngine
@@ -182,7 +185,6 @@ const styles = StyleSheet.create({
     },
     content: {
         paddingHorizontal: 20,
-        gap: 10,
-        marginBottom: 50
+        gap: 10
     },
 });

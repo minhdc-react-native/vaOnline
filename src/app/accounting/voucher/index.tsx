@@ -22,7 +22,7 @@ export default function VoucherAccounting() {
     ];
 
     const hasPermission = (keyMenuWin: IKeyMenuWin) => {
-        return !!dataMenuWin[menuMain][keyMenuWin];
+        return !!dataMenuWin[menuMain]?.[keyMenuWin];
     };
 
     // Tạo routes hợp lệ

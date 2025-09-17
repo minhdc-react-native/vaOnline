@@ -22,6 +22,7 @@ export const VcData = {
         invoice: 'Hoá đơn',
         tool: 'TSCĐ - CCDC',
         costing: 'Giá thành',
+        custom: 'Phân hệ khác',
         report: 'Báo cáo',
         system: 'Hệ thống'
     },
@@ -32,6 +33,7 @@ export const VcData = {
         invoice: 'Invoice',
         tool: 'Assets - Tools',
         costing: 'Costing',
+        custom: 'Other subsystems',
         report: 'Reports',
         system: 'System'
     },
@@ -42,6 +44,7 @@ export const VcData = {
         // { label: 'invoice', path: '/accounting/invoice', icon: 'file-document-outline' },
         // { label: 'tool', path: '/accounting/tool', icon: 'cube' },
         // { label: 'costing', path: '/accounting/costing', icon: 'factory' },
+        { label: 'custom', path: '/accounting/custom', icon: 'mother-heart' },
         { label: 'report', path: '/accounting/report', icon: 'chart-bar' },
         // { label: 'system', path: '/accounting/system', icon: 'cog' }
     ],
@@ -50,6 +53,7 @@ export const VcData = {
         { label: 'catalog', path: '/hkd/catalog', icon: 'format-list-text' },
         { label: 'voucher', path: '/hkd/voucher', icon: 'file-document-multiple' },
         // { label: 'invoice', path: '/hkd/invoice', icon: 'file-document-outline' },
+        { label: 'custom', path: '/hkd/custom', icon: 'mother-heart' },
         { label: 'report', path: '/hkd/report', icon: 'chart-bar' },
         // { label: 'system', path: '/hkd/system', icon: 'cog' }
     ],
