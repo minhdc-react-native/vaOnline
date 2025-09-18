@@ -289,13 +289,17 @@ const dmhv0: ISchemaWin = {
                 visibleIf: "{{_typeView===2}}",
                 fields: [
                     {
+                        type: "inputBarcode",
+                        label: "BARCODE",
+                        bind: "BARCODE"
+                    },
+                    {
                         type: "rows",
                         fields: [
                             {
                                 type: "selectList",
                                 clean: false,
                                 tableWin: "Empty",
-                                idRef: '189d7179-da87-40cc-a5b3-64f52cef8b86',
                                 label: "MA_KHO",
                                 bind: "MA_KHO",
                                 style: { flex: 1 }
@@ -333,7 +337,6 @@ const dmhv0: ISchemaWin = {
                         type: "selectList",
                         clean: false,
                         tableWin: "Empty",
-                        idRef: 'f54efa39-7871-4f8d-b59a-8257befd61a2',
                         label: "MA_NN",
                         bind: "MA_NN",
                         style: { flex: 1 }

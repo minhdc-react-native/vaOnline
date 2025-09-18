@@ -3,23 +3,58 @@ import { useLoading } from "@/components/dialog/loadingProvider";
 import { usePopup } from "@/components/dialog/popupProvider";
 import { useToast } from "@/components/dialog/useToast";
 import { api } from "@/utils/apiMethods";
+import { File } from 'expo-file-system';
 import { router } from "expo-router";
+import * as Sharing from "expo-sharing";
 import { useMemo } from "react";
-import RNFS from 'react-native-fs';
-import Share from 'react-native-share';
 interface IShareFile {
-    uri: string,
-    title?: string,
-    type?: 'text/xml' | 'application/pdf' | 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // type: 'application/vnd.ms-excel' xls
-    isDelete?: boolean
+    uri: string;
+    title?: string;
+    type?:
+    | "text/xml"
+    | "application/pdf"
+    | "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    | "application/vnd.ms-excel";
+    isDelete?: boolean;
 }
-export const shareFile = async ({ uri, title = "Chia sẻ file ...", type = "text/xml", isDelete = true }: IShareFile) => {
+function getUTI(type: string): string {
+    switch (type) {
+        case "application/pdf":
+            return "com.adobe.pdf";
+        case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+            return "org.openxmlformats.spreadsheetml.sheet";
+        case "application/vnd.ms-excel":
+            return "com.microsoft.excel.xls";
+        case "text/xml":
+        default:
+            return "public.xml";
+    }
+}
+
+export const shareFile = async ({
+    uri,
+    title = "Chia sẻ file ...",
+    type = "application/pdf",
+    isDelete = true,
+}: IShareFile) => {
     if (!uri) return;
-    Share.open({
-        url: uri,
-        type: type,
-        title: title,
-    }).finally(() => isDelete && RNFS.unlink(uri));
+    try {
+        await Sharing.shareAsync(uri, {
+            mimeType: type,
+            UTI: getUTI(type),
+            dialogTitle: title,
+        });
+    } finally {
+        if (isDelete) {
+            try {
+                const file = new File(uri);
+                file.delete();
+                console.log("✅ Xoá thành công:", uri);
+            } catch (err) {
+                console.warn("❌ Lỗi xoá file:", err);
+            }
+        }
+    }
 };
 interface IProgs {
     handleRefresh: () => void,

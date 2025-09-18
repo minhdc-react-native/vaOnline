@@ -90,7 +90,7 @@ const ViewComponent: React.FC<IListProps> = ({
     return (
         <>
             <Pressable
-                style={[styles.button, { borderColor: isError ? colors.error : colors.vacom.borderColor, backgroundColor: disabled ? colors.elevation.level1 : colors.background }, style]}
+                style={({ pressed }) => [styles.button, { opacity: pressed ? 0.7 : 1, borderColor: isError ? colors.error : colors.vacom.borderColor, backgroundColor: disabled ? colors.elevation.level1 : colors.background }, style]}
                 // pressStyle={{
                 //     backgroundColor: colors.background, justifyContent: "space-between", flexDirection: "row", alignItems: "center",
                 //     paddingVertical: 10, paddingHorizontal: 20, gap: 10, borderRadius: 6
@@ -150,7 +150,7 @@ const ViewComponent: React.FC<IListProps> = ({
                         keyExtractor={(item: IData) => item[fId].toString()}
                         showsVerticalScrollIndicator={false}
                         // ListHeaderComponent={<HeaderView setSearchText={setSearchText} label={label || placeholder} table={table} closeModal={closeModal} isNewEdit={isNewEdit} />}
-                        renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected}
+                        renderItem={({ item, index }: { item: IData, index: number }) => <ItemView item={item} onPress={getItemSelected}
                             isSelect={item[fId] === itemSelected?.[fId]} itemView={itemView}
                             tableWin={tableWin} closeModal={closeModal} isNewEdit={isNewEdit} checkSelected={checkSelected} />}
                         ItemSeparatorComponent={() => <Divider />}

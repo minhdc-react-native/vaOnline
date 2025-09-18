@@ -35,7 +35,8 @@ find "$TMP_DIR" -name "*.so" | while read sofile; do
     fi
 done
 
+# Xoá thư mục tạm
+rm -rf "$TMP_DIR"
+
 echo "✅ Hoàn tất kiểm tra."
-
-
 # run: ./check-pagesize.sh app/build/outputs/bundle/release/app-release.aab

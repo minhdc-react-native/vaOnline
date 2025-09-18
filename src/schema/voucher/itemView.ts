@@ -110,4 +110,6 @@ export const ItemViewByRefId: Record<string, IRowsColsField> = {
     '98665935-a3db-487e-8bc5-2a63515972b5': getListItemView('id', 'TEN_NT'), // ngoại tệ
     '08790464-f168-49e6-97ea-2cb670e2139d': getListItemView('id', 'TEN_BP'), // bộ phận
     '4fcca1d7-9011-4b4f-b9e8-721a546aa637': getListItemView('id', 'TEN_VV'), // vụ việc
+    'dbbd3c73-280c-4d5f-8e93-06b0cbbfee2d': getListItemView('id', 'TEN_VV'), // vụ việc
+    '49e80ac4-2b07-47ef-8297-6efb2074fbdd': getListItemView('id', 'TEN_KM'), // khoản mục
 };

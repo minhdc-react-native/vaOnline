@@ -79,23 +79,8 @@ const pscf0: ISchemaWin = {
                     {
                         type: "selectList",
                         tableWin: "Empty",
-                        idRef: '33291373-09c3-4c08-bec8-c3a724b42f15',
-                        requiredKeys: ['_loaiPhi', 'MA_CT'],
-                        visibleIf: "{{_loaiPhi && MA_CT==='PNK'}}",
                         label: "LOAI_PHI",
                         bind: 'LOAI_PHI',
-                        keySource: 'LP_PNK',
-                        style: { flex: 1 }
-                    },
-                    {
-                        type: "selectList",
-                        tableWin: "Empty",
-                        idRef: 'bc6431f9-ed8b-4d67-a734-e8e5aa8efacd',
-                        requiredKeys: ['_loaiPhi', 'MA_CT'],
-                        visibleIf: "{{_loaiPhi && MA_CT!=='PNK'}}",
-                        label: "LOAI_PHI",
-                        bind: 'LOAI_PHI',
-                        keySource: 'LP_OTHER',
                         style: { flex: 1 }
                     },
                     {

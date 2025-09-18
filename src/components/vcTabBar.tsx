@@ -27,17 +27,24 @@ export const VcTabBar = ({ value, data, onPress, style }: IProgs) => {
         onPress(item);
         setScroll(item);
     };
+    const [layoutReady, setLayoutReady] = useState(false);
+
     useEffect(() => {
-        if (value) {
-            const item = data.find(i => i.id === value)
+        if (value && layoutReady) {
+            const item = data.find(i => i.id === value);
             if (item) setScroll(item);
         }
-    }, [value]);
+    }, [value, layoutReady]);
 
     return (
         <View style={[{ height: 50, backgroundColor: colors.background, borderRadius: 20, borderWidth: 0.5, borderColor: colors.backdrop }, style]} onLayout={(event: LayoutChangeEvent) => {
             const { x, width } = event.nativeEvent.layout;
             setWidthView(width);
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    setLayoutReady(true);
+                }, 10); // Đợi 1 chút để nội dung thực sự hiển thị
+            });
         }}>
             <ScrollView
                 horizontal

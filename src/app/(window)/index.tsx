@@ -4,7 +4,7 @@ import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RefreshControl, View } from "react-native";
-import { ActivityIndicator, Appbar, FAB } from "react-native-paper";
+import { ActivityIndicator, Appbar, Divider, FAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { IHandleActionConfig } from "../../schema";
@@ -156,7 +156,6 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
         });
         return unsubscribe;
     }, [navigation]);
-
     return (
         <View style={{ flex: 1 }}>
             <Appbar.Header>
@@ -170,6 +169,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
                     hideFilter={schemaUI.config.filterConfig?.hideFilter}
                     isFastView={menuWin0 !== undefined} />
             </Appbar.Header>
+            <Divider />
             <SwipeListView
                 data={data}
                 style={{ backgroundColor: colors.vacom.backLayout, paddingTop: 5 }}

@@ -6,7 +6,7 @@ import { useEvalExpr } from "@/components/UIEngine/hooks/useEvalExpr";
 import { useZodValidation } from "@/components/UIEngine/hooks/useZodValidation";
 import { defaultNumberNew, VcReferences } from "@/constants/vcData";
 import { useTranslation } from "@/context/TranslationContext";
-import { IZod, schemaWin, schemaWinEmpty } from "@/schema";
+import { IDataSource, IZod, schemaWin, schemaWinEmpty } from "@/schema";
 import { getListItemView, ListItemView } from "@/schema/voucher/itemView";
 import { VACOMTheme } from "@/theme/theme";
 import { api } from "@/utils/apiMethods";
@@ -21,6 +21,10 @@ import UUID from 'react-native-uuid';
 import { useDataItemWin } from "./useDataItem";
 import { useVoucher } from "./useVoucher";
 import { useDataApp } from "./zustand/useDataApp";
+
+const getUrlReference = (id: string) => {
+    return { url: `/api/System/GetDataByReferencesId?id=${id}` }
+};
 
 const FIELD_MAP = {
     SO_TK: "_soTk",
@@ -73,7 +77,12 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     const { showToast } = useToast();
     const { show, hide } = useLoading();
     const { showPopup } = usePopup();
-    const [winConfig, setWinConfig] = useState<IWinConfig | null>();
+
+    // const [winConfig, setWinConfig] = useState<IWinConfig | null>();
+
+    const winConfig = useDataItemWin((state) => state.winConfig)[tableWin];
+    const setWinConfig = useDataItemWin((state) => state.setWinConfig);
+
     const [data, setData] = useState<IData[]>([]);
     const dataSources = useDataItemWin((state) => state.dataSources);
     const setDataSource = useDataItemWin((state) => state.setDataSource);
@@ -188,7 +197,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             EXPRESSION: {},
             EXPRESSION_If_EMPTY: {},
             DEFAULT_VALUE: {},
-            CAPTION: {}
+            CAPTION: {},
+            REF_ID: {},
         };
         let zod: IZod = {};
 
@@ -222,6 +232,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 result.EXPRESSION[f.COLUMN_NAME] = filter;
                 if (notReplace.length > 0) result.EXPRESSION_If_EMPTY[f.COLUMN_NAME] = notReplace;
             }
+            if (isNotEmpty(f.REF_ID)) result.REF_ID[f.COLUMN_NAME] = f.REF_ID;
         });
         return { config: result, display: _getGroup(display, tab.TAB_TABLE), zod };
     }, []);
@@ -253,7 +264,10 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         });
         setDataTags(tableWin, newTabs);
         const dmct = dataConfig.DATA_EXTRA.find((f: any) => f.id === 'dmct');
-        return {
+
+        const mapSource: Record<string, string> = schemaWin[tableWin]?.mapDataSource ?? {};
+        let refIds: any = {};
+        const resultWinConfig = {
             // references: data.references ?? {},
             window: {
                 WINDOW_ID: windowId,
@@ -265,6 +279,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 Tabs: dataConfig.Tabs.filter((tab: any) => tab.HIDE_EDIT !== 'C')
                     .map((tab: any): ITabWin => {
                         const configTab = getConfigTab(tab);
+                        refIds = { ...refIds, ...configTab.config.REF_ID };
                         return {
                             id: tab.id ?? "",
                             value: tab.TAB_NAME ?? "",
@@ -284,6 +299,15 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                     })
             }
         };
+        // get more data source
+        let sourceAdd: IDataSource = {};
+        Object.keys(mapSource).map(key => {
+            sourceAdd[key] = getUrlReference(refIds[mapSource[key]]);
+        });
+
+        loadDataBegin(sourceAdd);
+
+        return resultWinConfig;
     }, [_, getConfigTab, pageSize, setDataTags, tableWin, typeWin, windowId])
 
     const tabs = useMemo(() => {
@@ -775,16 +799,15 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         delete: onDeleteDetail
     }
 
-    // const [dataSource, setDataSource] = useState<Record<string, any[]>>({});
     const [tableRefresh, setTableRefresh] = useState<Record<string, { url: string, type?: string, dataPost?: Record<string, any>, key: string }>>({});
 
 
-    const setSource = useCallback((res: IData[], source: any, key: string) => {
+    const setSource = useCallback((res: IData[], source: any, key: string, defaultSource?: IDataSource) => {
         if (res.length === 0) {
             setDataSource(tableWin, key, []);
             return;
         };
-        const configSource: any = VcReferences[source[key]];
+        const configSource: any = defaultSource?.[key] || VcReferences[source[key]];
         if (configSource.typeData === "tree") res = Helper.sortTreeFlat(res, configSource.fieldCode);
         const fields: string[] = configSource.fields || Object.keys(res[0]);
         const isColor = fields.indexOf("color") < 0 && typeof configSource.getColor === "function";
@@ -800,16 +823,16 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         setDataSource(tableWin, key, result);
     }, [setDataSource, tableWin]);
 
-    const loadDataBegin = useCallback(async () => {
-        let source: any = schemaWin[tableWin]?.dataSource ?? {};
-
+    const loadDataBegin = useCallback(async (defaultSource?: IDataSource) => {
+        let source: any = defaultSource || (schemaWin[tableWin]?.dataSource ?? {});
         // tabs.forEach((tab) => {
         //     const _source = schemaWin[tab.TAB_TABLE]?.dataSource ?? {};
         //     source = { ...source, ..._source };
         // });
         // const source: any = schema.dataSource ?? {};
         const promises = Object.keys(source).map(async (key: any) => {
-            const configSource: any = VcReferences[source[key]];
+            const configSource: any = defaultSource?.[key] || VcReferences[source[key]];
+
             if (configSource?.data) {
                 setDataSource(tableWin, key, configSource?.data);
             }
@@ -820,7 +843,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                     link: url, data: configSource.dataPost,
                     callBack: (res => {
                         if (res) {
-                            setSource(res, source, key);
+                            setSource(res, source, key, defaultSource);
                             if (configSource.tableWin) {
                                 setTableRefresh(prev => ({
                                     ...prev,
@@ -879,7 +902,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         } catch (error) { }
         await api.get({
             link: `/api/System/GetAllByWindowNo?window_id=${windowId}`,
-            callBack: (res) => setWinConfig(extractWinConfig(res[0])),
+            callBack: (res) => setWinConfig(tableWin, extractWinConfig(res[0])),
         });
 
         await api.post({
@@ -945,7 +968,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         configExpression: {
             expression: winConfig?.window.Tabs[0].EXPRESSION,
             expressionIfEmpty: winConfig?.window.Tabs[0].EXPRESSION_If_EMPTY,
-            caption: winConfig?.window.Tabs[0].CAPTION
+            caption: winConfig?.window.Tabs[0].CAPTION,
+            refId: winConfig?.window.Tabs[0].REF_ID
         },
         setIsChange,
         setFilterRows,
@@ -970,7 +994,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             configExpression: {
                 expression: currentTab?.EXPRESSION,
                 expressionIfEmpty: currentTab?.EXPRESSION_If_EMPTY,
-                caption: currentTab?.CAPTION
+                caption: currentTab?.CAPTION,
+                refId: currentTab?.REF_ID
             },
             refreshSourceDvtCb,
             setCurrentTab,

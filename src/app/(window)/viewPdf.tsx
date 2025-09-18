@@ -1,43 +1,52 @@
 import { VACOMTheme } from '@/theme/theme';
-import { MaterialIcons } from "@expo/vector-icons";
+import { File } from 'expo-file-system';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import RNFS from 'react-native-fs';
-import { IconButton, Text, useTheme } from 'react-native-paper';
+import { Appbar, useTheme } from 'react-native-paper';
 import Pdf from 'react-native-pdf';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Share from 'react-native-share';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { shareFile } from './useActionMap';
 
 const ViewerPdf = () => {
+    const insets = useSafeAreaInsets();
     const { title, uriPdf } = useLocalSearchParams();
     const navigation = useNavigation();
     const uri = uriPdf?.toString();
     const { colors } = useTheme<VACOMTheme>();
     const sharePdf = async () => {
-        if (!uri) return;
-        Share.open({
-            url: uri,
-            type: 'application/pdf',
-            title: 'Chia sẻ file...',
-        }).finally(() => { });
+        if (uri) {
+            await shareFile({
+                uri: uri,
+                type: "application/pdf",
+                isDelete: false
+            });
+        }
     };
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', () => {
-            uri && RNFS.unlink(uri);
+            {
+                if (uri) {
+                    try {
+                        const file = new File(uri);
+                        file.delete();
+                        console.log("✅ Xoá thành công:", uri);
+                    } catch (err) {
+                        console.warn("❌ Lỗi xoá file:", err);
+                    }
+                }
+            }
         });
         return unsubscribe;
     }, [navigation, uri]);
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
-            <View style={styles.header}>
-                <IconButton icon={() => <MaterialIcons name="keyboard-arrow-left" size={30} color={colors.secondary} />} onPress={() => router.back()} />
-                <View style={{ flex: 1 }}>
-                    <Text numberOfLines={1} variant='titleLarge'>{title?.toString()}</Text>
-                </View>
-                <IconButton icon="share-variant" iconColor={colors.secondary} onPress={sharePdf} />
-            </View>
+        <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout, marginBottom: insets.bottom }}>
+            <Appbar.Header>
+                <Appbar.BackAction onPress={() => router.back()} />
+                <Appbar.Content title={title?.toString()} />
+                <Appbar.Action icon="share-variant" onPress={sharePdf} />
+            </Appbar.Header>
             {uri && <Pdf
                 source={{ uri: uri }}
                 style={styles.pdf}
@@ -49,7 +58,7 @@ const ViewerPdf = () => {
                 onLoadComplete={(pages) => console.log(`Tổng trang: ${pages}`)}
                 onError={(error) => console.log(error)}
             />}
-        </SafeAreaView>
+        </View>
     );
 };
 

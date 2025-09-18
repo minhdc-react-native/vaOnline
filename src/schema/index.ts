@@ -75,6 +75,7 @@ export interface ISchemaWinValue {
     config: ISchemaWin,
     action?: { new?: boolean, edit?: boolean, showEditMaster?: boolean },
     dataSource?: Record<string, keyof typeof VcReferences>,
+    mapDataSource?: Record<string, string>,
     fieldSearch?: string, isRmTone?: boolean, require?: boolean,
     defaultNew: Record<string, any>,
     dataMaster?: string[],

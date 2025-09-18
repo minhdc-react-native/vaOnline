@@ -217,8 +217,8 @@ const VcSelectListMulti = ({
                     />
                     <BottomSheetFlatList
                         data={filteredList}
-                        keyExtractor={(item) => item[fId].toString()}
-                        renderItem={({ item }) => (
+                        keyExtractor={(item: IData) => item[fId].toString()}
+                        renderItem={({ item }: { item: IData }) => (
                             <ItemView
                                 item={item}
                                 onPress={addItemSelected}

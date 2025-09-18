@@ -59,6 +59,7 @@ declare global {
         EXPRESSION_If_EMPTY?: Record<string, string[]>;
         DEFAULT_VALUE?: Record<string, any>;
         CAPTION?: Record<string, string>;
+        REF_ID?: Record<string, string>;
     }
     interface IWinConfig {
         window: {

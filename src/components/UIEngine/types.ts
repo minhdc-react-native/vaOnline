@@ -268,6 +268,7 @@ export type IConfigExpression = {
     expression?: Record<string, Record<string, string>>,
     expressionIfEmpty?: Record<string, string[]>;
     caption?: Record<string, string>;
+    refId?: Record<string, string>;
 };
 export type ISchemaUIProps = {
     schema: IRowsColsField;

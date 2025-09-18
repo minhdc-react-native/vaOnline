@@ -110,7 +110,8 @@ export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, re
             const report = {
                 reportId: menu.REPORT_ID,
                 dataFilter: filter,
-                routerNumber: routerNumber + 1
+                routerNumber: routerNumber + 1,
+                vnd_nt: vnd_nt
             };
             if (routerNumber + 1 > 3) {
                 showToast('Ứng dụng đang không cho phép truy vấn sâu hơn 4 cấp !', { type: "info" })
@@ -122,7 +123,7 @@ export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, re
                 params: { report: JSON.stringify(report) }
             })
         }
-    }, [routerNumber, filterKey]);
+    }, [routerNumber, filterKey, vnd_nt]);
     const rowRenderer = useCallback((__: string | number, item: T) => {
         const newMenu = menuRow.filter(menu => {
             const fnVisible = new Function('parentRow', menu.VISIBLE_WHEN || 'return true');

@@ -2,7 +2,7 @@
 import { Helper } from '@/utils/Helper';
 import { AxiosRequestConfig } from 'axios';
 import { Buffer } from 'buffer';
-import * as FileSystem from 'expo-file-system';
+import { File, Paths } from 'expo-file-system';
 import vcAxios from './vcAxios';
 
 interface IApiParams {
@@ -113,12 +113,13 @@ export const api = {
                 const res = await vcAxios.get(link, { responseType: 'arraybuffer' });
                 const contentDisposition = res.headers?.['content-disposition'];
                 const finalName = getFilenameFromContentDisposition(fileName, contentDisposition);
+                const uint8 = new Uint8Array(res.data);
                 const base64Str = Buffer.from(res.data, 'binary').toString('base64');
-                const fileUri = FileSystem.documentDirectory + finalName;
+                const fileUri = Paths.document.uri + finalName;
+                const file = new File(fileUri);
 
-                await FileSystem.writeAsStringAsync(fileUri, base64Str, {
-                    encoding: FileSystem.EncodingType.Base64,
-                });
+                file.write(uint8);
+
                 return {
                     uri: fileUri,
                     base64: isBase64 ? base64Str : undefined,
@@ -137,12 +138,13 @@ export const api = {
                 const res = await vcAxios.post(link, data, { responseType: 'arraybuffer' });
                 const contentDisposition = res.headers?.['content-disposition'];
                 const finalName = getFilenameFromContentDisposition(fileName, contentDisposition);
+                const uint8 = new Uint8Array(res.data);
                 const base64Str = Buffer.from(res.data, 'binary').toString('base64');
-                const fileUri = FileSystem.documentDirectory + finalName;
+                const fileUri = Paths.document.uri + finalName;
+                const file = new File(fileUri);
 
-                await FileSystem.writeAsStringAsync(fileUri, base64Str, {
-                    encoding: FileSystem.EncodingType.Base64,
-                });
+                file.write(uint8);
+
                 return {
                     uri: fileUri,
                     base64: isBase64 ? base64Str : undefined,
@@ -164,11 +166,11 @@ export const api = {
                 });
                 const contentDisposition = res.headers?.['content-disposition'];
                 const finalName = getFilenameFromContentDisposition(fileName, contentDisposition);
-                const fileUri = FileSystem.documentDirectory + finalName;
 
-                await FileSystem.writeAsStringAsync(fileUri, res.data, {
-                    encoding: FileSystem.EncodingType.UTF8,
-                });
+                const fileUri = Paths.document.uri + finalName;
+                const file = new File(fileUri);
+                file.write(res.data);
+
                 return {
                     uri: fileUri,
                     dataXml: res.data,

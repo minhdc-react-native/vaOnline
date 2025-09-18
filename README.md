@@ -65,3 +65,18 @@ npm install -g npm-check-updates
 ncu -u
 npm install --legacy-peer-deps
 
+
+rm -rf node_modules package-lock.json yarn.lock
+npm install   # hoặc yarn install
+npx expo-doctor
+
+npx expo install --fix
+
+# chạy ./gradlew clean lỗi:
+rm -rf android/.cxx
+rm -rf android/app/.cxx
+rm -rf android/app/build
+
+# run:
+./gradlew bundleRelease --stacktrace
+

@@ -1,14 +1,15 @@
+import { useTranslation } from '@/context/TranslationContext';
 import { VACOMTheme } from '@/theme/theme';
 import { Helper } from '@/utils/Helper';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { Pressable } from 'react-native-gesture-handler';
-import Modal from "react-native-modal";
-import { IconButton, Text, useTheme } from 'react-native-paper';
+import { Divider, IconButton, Text, useTheme } from 'react-native-paper';
+import ShowBottom from './dialog/showBottom';
 import { VcTabBar } from './vcTabBar';
 dayjs.extend(utc);
 
@@ -61,13 +62,12 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
   const [selectYear, setSelectYear] = useState<number>(parseInt((currentDate || nowDate).split('-')[0]));
   const [selectMonth, setSelectMonth] = useState<number>(parseInt((currentDate || nowDate).split('-')[1]));
   const { colors } = useTheme<VACOMTheme>();
-
   const [initialDate, setInitialDate] = useState<string | null>(currentDate);
 
   const handleDayPress = (day: any) => {
     onChange(`${day.dateString} 00:00:00`);
     setCurrentDate(day.dateString);
-    setVisible(false);
+    hideCalendar(day.dateString);
   };
   const isChange = useRef<boolean>(false);
   useEffect(() => {
@@ -87,23 +87,31 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
     }
   }, [selectYear, selectMonth])
 
-  const setCurrentValue = () => {
-    if ((currentDate || nowDate) === initialDate) return;
-    const parts = (currentDate || nowDate).split('-');
+  const setCurrentValue = useCallback((_currentDate?: string | null) => {
+    const fixCurrentDate = _currentDate || currentDate || nowDate;
+    if (fixCurrentDate === initialDate) return;
+    const parts = fixCurrentDate.split('-');
     const newYear = parseInt(parts[0]);
     const newMonth = parseInt(parts[1]);
     if (selectYear !== newYear) setSelectYear(newYear);
     if (selectMonth !== newMonth) setSelectMonth(newMonth);
-  }
+  }, [currentDate, initialDate, nowDate, selectMonth, selectYear]);
+
+  const hideCalendar = useCallback((_currentDate?: string | null) => {
+    setCurrentValue(_currentDate);
+    setVisible(false);
+  }, [setCurrentValue]);
 
   useEffect(() => {
     isChange.current = true;
     const _currentDate = value ? dayjs.utc(value).format("YYYY-MM-DD") : null;
-    const _selectYear = parseInt((currentDate || nowDate).split('-')[0]);
-    const _selectMonth = parseInt((currentDate || nowDate).split('-')[1]);
+    const parts = (_currentDate || nowDate).split('-');
+    const _selectYear = parseInt(parts[0]);
+    const _selectMonth = parseInt(parts[1]);
     setCurrentDate(_currentDate);
     setSelectYear(_selectYear);
     setSelectMonth(_selectMonth);
+    setInitialDate(_currentDate);
     setTimeout(() => {
       isChange.current = false;
     }, 1000)
@@ -112,7 +120,7 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
   return (
     <>
       <View style={[{ marginTop: 6 }, style]}>
-        <Pressable style={[styles.button, { backgroundColor: disabled ? colors.elevation.level1 : colors.background, borderColor: colors.vacom.borderColor }]} onPress={() => {
+        <Pressable style={({ pressed }) => [styles.button, { opacity: pressed ? 0.7 : 1, backgroundColor: disabled ? colors.elevation.level1 : colors.background, borderColor: colors.vacom.borderColor }]} onPress={() => {
           if (disabled) return;
           setVisible(true);
         }}>
@@ -123,7 +131,8 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
           </View>
           {(Helper.isEmpty(value) || disabled) && <FontAwesome name="calendar" size={20} color={colors.secondary} />}
         </Pressable >
-        {!Helper.isEmpty(value) && !disabled && <IconButton style={{ position: "absolute", right: -5 }} icon="close-circle" size={15} iconColor={colors.primary} onPress={() => onChange("")} />
+        {!Helper.isEmpty(value) && !disabled &&
+          <IconButton style={{ position: "absolute", right: -5 }} icon="close-circle" size={15} iconColor={colors.primary} onPress={() => onChange("")} />
         }
         {
           !Helper.isEmpty(value) &&
@@ -136,64 +145,89 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
           </View>
         }
       </View >
-
-      <Modal isVisible={visible}
-        animationIn={'bounceIn'}
-        animationOut={'bounceOut'}
-        onBackdropPress={() => setVisible(false)}
-        onModalHide={() => setCurrentValue()}
-        style={{ zIndex: 1 }}  // chỉnh zIndex được    
-      >
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContent}>
-            <Calendar
-              key={currentDate || nowDate}
-              current={currentDate || nowDate}
-              initialDate={initialDate ?? undefined}
-              onDayPress={handleDayPress}
-              onMonthChange={(date: any) => {
-                if (date.year !== selectYear) setSelectYear(date.year);
-                if (date.month !== selectMonth) setSelectMonth(date.month);
-              }}
-              markedDates={
-                currentDate
-                  ? {
-                    [currentDate]: {
-                      selected: true,
-                      selectedColor: colors.primary,
-                    },
-                  }
-                  : undefined
-              }
-              theme={{
-                backgroundColor: '#ffffff',
-                calendarBackground: '#ffffff',
-                textSectionTitleColor: '#333',
-                selectedDayBackgroundColor: colors.primary,
-                selectedDayTextColor: '#ffffff',
-                todayTextColor: colors.primary,
-                dayTextColor: '#333',
-                textDisabledColor: '#d9e1e8',
-                arrowColor: colors.primary,
-                monthTextColor: '#000',
-                indicatorColor: colors.primary,
-              }}
-            />
-            <View style={{ gap: 5, paddingHorizontal: 10 }}>
-              <VcTabBar data={years} value={selectYear} onPress={(year) => setSelectYear(year.id as number)} style={{ borderRadius: 10, paddingHorizontal: 10 }} />
-              <VcTabBar data={months} value={selectMonth} onPress={(month) => setSelectMonth(month.id as number)} style={{ borderRadius: 10, paddingHorizontal: 10 }} />
-            </View>
-            <IconButton mode='contained' icon={"close"} iconColor={colors.secondary} onPress={() => setVisible(false)}
-              style={{ alignSelf: "center", marginVertical: 10 }} />
-          </View>
-        </View>
-      </Modal >
+      {visible && <ShowCalendar
+        // key={currentDate || nowDate}
+        hideCalendar={hideCalendar}
+        currentDate={currentDate} nowDate={nowDate}
+        initialDate={initialDate ?? undefined} handleDayPress={handleDayPress}
+        selectMonth={selectMonth} setSelectMonth={setSelectMonth}
+        selectYear={selectYear} setSelectYear={setSelectYear}
+      />}
     </>
   );
 };
 export const VcDatePicker = React.memo(ViewComponent);
 
+interface ICalendar {
+  currentDate: string | null;
+  nowDate: string
+  initialDate?: string;
+  handleDayPress: (day: any) => void;
+  selectMonth: number;
+  setSelectMonth: (value: React.SetStateAction<number>) => void
+  selectYear: number;
+  setSelectYear: (value: React.SetStateAction<number>) => void;
+  hideCalendar: () => void;
+  style?: StyleProp<ViewStyle>
+}
+const ShowCalendar: React.FC<ICalendar> = ({
+  currentDate, nowDate, initialDate, handleDayPress,
+  selectMonth, setSelectMonth, selectYear, setSelectYear,
+  hideCalendar, style
+}) => {
+  const { colors } = useTheme();
+  const { _ } = useTranslation();
+  return (
+    <ShowBottom hideCalendar={hideCalendar} style={style}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <IconButton icon={'close'} onPress={() => hideCalendar()} />
+        <Text variant='titleMedium'>{_('LIST_TIME')}</Text>
+      </View>
+      <Divider />
+      <Calendar
+        current={currentDate || nowDate}
+        initialDate={initialDate ?? undefined}
+        onDayPress={handleDayPress}
+        onMonthChange={(date: any) => {
+          if (date.year !== selectYear) setSelectYear(date.year);
+          if (date.month !== selectMonth) setSelectMonth(date.month);
+        }}
+        markedDates={
+          currentDate
+            ? {
+              [currentDate]: {
+                selected: true,
+                selectedColor: colors.primary,
+              },
+            }
+            : undefined
+        }
+        theme={{
+          backgroundColor: '#ffffff',
+          calendarBackground: '#ffffff',
+          textSectionTitleColor: '#333',
+          selectedDayBackgroundColor: colors.primary,
+          selectedDayTextColor: '#ffffff',
+          todayTextColor: colors.primary,
+          dayTextColor: '#333',
+          textDisabledColor: '#d9e1e8',
+          arrowColor: colors.primary,
+          monthTextColor: '#000',
+          indicatorColor: colors.primary,
+        }}
+      />
+      <View style={{ gap: 5, paddingHorizontal: 10 }}>
+        <VcTabBar data={years} value={selectYear} onPress={(year) => setSelectYear(year.id as number)} style={{ borderRadius: 10, paddingHorizontal: 10 }} />
+        <VcTabBar data={months} value={selectMonth} onPress={(month) => setSelectMonth(month.id as number)} style={{ borderRadius: 10, paddingHorizontal: 10 }} />
+      </View>
+    </ShowBottom>
+  );
+}
 const styles = StyleSheet.create({
+  popup: {
+    backgroundColor: 'white',
+    borderRadius: 12
+  },
   button: {
     flexDirection: "row",
     alignItems: "center",

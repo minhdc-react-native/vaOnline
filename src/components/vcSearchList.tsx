@@ -62,7 +62,6 @@ interface IProgs {
     checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 }
 const ViewComponent: React.FC<IProgs> = ({ tableSearch, idRef, label, placeholder, value, fField, onChange, clean = true, rightIcon, style, isLoading, disabled, checkSelected, itemView, numCharSearch = 2 }: IProgs) => {
-
     const url = useMemo(() => {
         return tableSearch === "CUSTOM" ? getUrlReference(idRef ?? '') : urlBase[tableSearch];
     }, [idRef, tableSearch]);
@@ -120,7 +119,7 @@ const ViewComponent: React.FC<IProgs> = ({ tableSearch, idRef, label, placeholde
     return (
         <>
             <Pressable
-                style={[styles.button, { borderColor: colors.vacom.borderColor, backgroundColor: disabled ? colors.elevation.level1 : colors.background }, style]}
+                style={({ pressed }) => [styles.button, { opacity: pressed ? 0.7 : 1, borderColor: colors.vacom.borderColor, backgroundColor: disabled ? colors.elevation.level1 : colors.background }, style]}
                 onPress={openModalSelect}>
                 {isLoading ? <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}><ActivityIndicator
                     size={20}
@@ -177,7 +176,7 @@ const ViewComponent: React.FC<IProgs> = ({ tableSearch, idRef, label, placeholde
                         data={data}
                         showsVerticalScrollIndicator={false}
                         keyExtractor={(item: Record<string, any>) => item.id}
-                        renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected} isSelect={item[fField] === value} tableSearch={tableSearch} checkSelected={checkSelected} itemView={itemView} />}
+                        renderItem={({ item, index }: { item: IData, index: number }) => <ItemView item={item} onPress={getItemSelected} isSelect={item[fField] === value} tableSearch={tableSearch} checkSelected={checkSelected} itemView={itemView} />}
                         ItemSeparatorComponent={() => <Divider />}
                         ListFooterComponent={() => <View style={{ height: 50 }} />}
                         initialNumToRender={20}

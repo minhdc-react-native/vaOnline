@@ -60,7 +60,7 @@ const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, con
     const setValue = async (change: Record<string, string>) => {
         let changeAdd: any = change;
         if (change.NGAY_CT !== undefined && data) {
-            changeAdd = await tangSoCt(data, change.NGAY_CT);
+            changeAdd = { ...change, ...await tangSoCt(data, change.NGAY_CT) };
         }
         if (currentTab?.TAB_TABLE === "CTHV" && data) {
             if (change.MA_HV !== undefined) {

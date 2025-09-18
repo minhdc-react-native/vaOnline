@@ -1,8 +1,8 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import { Linking, Pressable, StyleProp, StyleSheet, TextStyle } from "react-native";
 import { Text, useTheme } from "react-native-paper";
 import { VariantProp } from "react-native-paper/lib/typescript/components/Typography/types";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 interface IProg {
     text?: string | null;
     style?: StyleProp<TextStyle>;
@@ -34,7 +34,7 @@ export const VcTextLink = ({ text, style, variant, typeLink = 'tel', numberOfLin
                 loop
                 style={styles.lottie}
             />}
-            {typeLink !== "tel" && <MaterialCommunityIcons style={{ paddingRight: 5 }} name={typeLink === "web" ? "web" : "email-send"} size={20} color={colors.secondary} />}
+            {typeLink !== "tel" && <MaterialCommunityIcons style={{ paddingRight: 5 }} name={typeLink === "web" ? "web" : "email-arrow-right"} size={20} color={colors.secondary} />}
             <Text numberOfLines={numberOfLines} variant={variant} style={style}>{text}</Text>
         </Pressable>
     );

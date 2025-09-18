@@ -37,4 +37,5 @@ interface IReportItemDefault {
     reportItem: IData;
     dataFilter: Record<string, any>;
     routerNumber: number;
+    vnd_nt: '1' | '2' | '3'
 }

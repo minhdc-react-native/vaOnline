@@ -310,7 +310,6 @@ const dpkt0: ISchemaWin = {
                         type: "search",
                         tableSearch: "CUSTOM",
                         fField: 'MA_BP',
-                        idRef: '08790464-f168-49e6-97ea-2cb670e2139d',
                         label: "MA_BP",
                         bind: "MA_BP",
                         style: { flex: 1 }
@@ -318,8 +317,20 @@ const dpkt0: ISchemaWin = {
                     {
                         type: "search",
                         tableSearch: "CUSTOM",
+                        requiredKeys: ['_typeView'],
+                        visibleIf: "{{_typeView===1}}",
                         fField: 'MA_HT',
-                        idRef: '1754a128-e296-49c7-9865-6c6ef183073d',
+                        label: "MA_HT",
+                        bind: "MA_HT",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "selectList",
+                        tableWin: "Empty",
+                        fValue: 'id',
+                        itemView: ListItemView.VALUE,
+                        requiredKeys: ['_typeView'],
+                        visibleIf: "{{_typeView===2}}",
                         label: "MA_HT",
                         bind: "MA_HT",
                         style: { flex: 1 }
@@ -422,6 +433,7 @@ export const dpkt: ISchemaWinValue = {
         STATUS: 'STATUS',
         DMNHOMHD: 'DMNHOMHD'
     },
+    mapDataSource: { MA_HT: 'MA_HT' }, // add source dựa vào config refId.
     config: dpkt0,
     fieldSearch: 'INFO_FILTER COLLATE SQL_Latin1_General_CP1_CI_AI', isRmTone: true,
     defaultNew: { NAM: '#NAM#', NGAY_CT: '#TODAY#', MA_NT: '#MA_NT#', TY_GIA: '#TY_GIA#', STATUS: 1 },

@@ -4,6 +4,7 @@ import { useToast } from "@/components/dialog/useToast";
 import { IField } from "@/components/UIEngine/types";
 import { useTranslation } from "@/context/TranslationContext";
 import { IDataSource, IHandleActionConfig } from "@/schema";
+import { ListItemView } from "@/schema/voucher/itemView";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
 import { router } from "expo-router";
@@ -52,7 +53,7 @@ export const useReport = ({ itemMenuWin, reportDefault }: IProgs) => {
     const routerNumber = useRef(reportDefault?.routerNumber ?? 0);
 
     const [reportSchema, setReportSchema] = useState<ISchemaReport | null>(null);
-    const [vnd_nt, setVnd_nt] = useState<'1' | '2' | '3'>('1');
+    const [vnd_nt, setVnd_nt] = useState<'1' | '2' | '3'>(reportDefault?.vnd_nt ?? '1');
     const [dataFilter, setDataFilter] = useState<Record<string, any>>({});
     const [timeItem, setTimeItem] = useState<IData | null>();
 
@@ -472,8 +473,8 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
             return {
                 type: "selectList",
                 tableWin: "Empty",
-                fValue: 'id',
                 idRef: item.REF_ID,
+                itemView: ListItemView.VALUE,
                 keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,
@@ -484,6 +485,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 type: "selectList",
                 tableWin: "Empty",
                 idRef: item.REF_ID,
+                itemView: ListItemView.VALUE,
                 keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,

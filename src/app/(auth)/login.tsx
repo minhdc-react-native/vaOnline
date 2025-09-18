@@ -1,5 +1,4 @@
 // app/welcome.tsx
-import FormWrapper from '@/components/formWrapper';
 import { useZodValidation } from '@/components/UIEngine/hooks/useZodValidation';
 import { SchemaUIEngine } from '@/components/UIEngine/schemaUIEngine';
 import { IRowsColsField } from '@/components/UIEngine/types';
@@ -11,6 +10,7 @@ import { getRemember, getSubDomain, saveSubDomain } from '@/utils/vcStorage';
 import { useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { Card, Text, ToggleButton, useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 const sloganVacom = require('@/assets/images/splash.png') // Logo
 const loginTranslations = {
     vi: {
@@ -135,8 +135,8 @@ export default function LoginScreen() {
         }
     }, [data, getDvcsByUser])
     return (
-        <FormWrapper style={{ flex: 1, justifyContent: 'flex-end', padding: 20 }}>
-            <View style={{ justifyContent: "center", alignItems: "center", marginBottom: 50 }}>
+        <SafeAreaView style={{ flex: 1, justifyContent: 'flex-end', padding: 20 }}>
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                 <Image source={sloganVacom} style={styles.logo} />
                 {/* <TextDrop text='Accounting' heightDrop={400} /> */}
             </View>
@@ -167,11 +167,11 @@ export default function LoginScreen() {
             <SchemaUIEngine schema={infoVacom} />
             <Text
                 variant='labelMedium'
-                style={{ textAlign: 'center', color: colors.backdrop, paddingBottom: 20 }}
+                style={{ textAlign: 'center', color: colors.backdrop }}
             >
                 VACOM JSC. Copyright © 2025
             </Text>
-        </FormWrapper>
+        </SafeAreaView>
     );
 }
 
