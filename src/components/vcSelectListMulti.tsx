@@ -1,5 +1,5 @@
 import { schemaWin, schemaWinEmpty } from "@/schema";
-import { ItemViewByRefId } from "@/schema/voucher/itemView";
+import { getListItemViewByRefId, ItemViewIdKey, ItemViewValueKey } from "@/schema/voucher/itemView";
 import { VACOMTheme } from "@/theme/theme";
 import { Helper } from "@/utils/Helper";
 import { EvilIcons, FontAwesome6 } from "@expo/vector-icons";
@@ -7,6 +7,7 @@ import BottomSheet, {
     BottomSheetBackdrop,
     BottomSheetFlatList
 } from "@gorhom/bottom-sheet";
+import debounce from "lodash.debounce";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Keyboard,
@@ -77,6 +78,22 @@ const VcSelectListMulti = ({
     const [searchText, setSearchText] = useState("");
     const [itemSelected, setItemSelected] = useState<IData[]>([]);
 
+    fId = idRef ? ItemViewIdKey[idRef] ?? fId : fId;
+    fValue = idRef ? ItemViewValueKey[idRef] ?? fValue : fValue;
+
+    const selectedSet = useMemo(
+        () => new Set(itemSelected.map((i) => i[fId].toString())),
+        [itemSelected, fId]
+    );
+
+    const debouncedSearch = useMemo(
+        () =>
+            debounce((txt: string) => {
+                setSearchText(txt);
+            }, 300),
+        []
+    );
+
     const filteredList = useMemo(() => {
         if (!searchText) return data;
         const _searchText = Helper.rmTone(searchText).toLowerCase();
@@ -85,13 +102,17 @@ const VcSelectListMulti = ({
                 Helper.rmTone(item[fId].toString()).toLowerCase().includes(_searchText) ||
                 Helper.rmTone(item[fValue]).toLowerCase().includes(_searchText)
         );
-    }, [searchText, data]);
+    }, [searchText, data, fId, fValue]);
 
     const openModalSelect = () => {
         Keyboard.dismiss();
         bottomSheetRef.current?.snapToIndex(2);
     };
-    itemView = idRef ? (ItemViewByRefId[idRef] ?? itemView) : itemView;
+
+    itemView = useMemo(() => {
+        return idRef ? (getListItemViewByRefId(idRef) ?? itemView) : itemView;
+    }, [idRef, itemView]);
+
     const addItemSelected = (item: IData) => {
         const exist = itemSelected.find((i) => i[fId] === item[fId]);
         if (!exist) {
@@ -174,19 +195,6 @@ const VcSelectListMulti = ({
                     </View>
                 )}
                 <IconButton icon={() => <FontAwesome6 name="list-check" size={20} color={colors.secondary} />} onPress={openModalSelect} />
-                {/* {!Helper.isEmpty(value) && label && (
-                    <View style={styles.label}>
-                        <View style={styles.label}>
-                            <Text style={{ color: colors.inverseSurface, fontSize: 12.7 }}>
-                                {label}
-                            </Text>
-                        </View>
-                        <Text style={{ color: colors.background, paddingHorizontal: 4 }}>
-                            {label}
-                        </Text>
-                        <View style={[styles.line, { borderColor: colors.background }]} />
-                    </View>
-                )} */}
             </View>
 
             <Portal>
@@ -209,7 +217,7 @@ const VcSelectListMulti = ({
                     containerStyle={{ marginTop: 60 }}
                 >
                     <HeaderView
-                        setSearchText={setSearchText}
+                        setSearchText={debouncedSearch}
                         label={label || placeholder}
                         tableWin={tableWin}
                         closeModal={closeModal}
@@ -222,7 +230,7 @@ const VcSelectListMulti = ({
                             <ItemView
                                 item={item}
                                 onPress={addItemSelected}
-                                isSelect={itemSelected.some((i) => i[fId] === item[fId])}
+                                isSelect={selectedSet.has(item[fId].toString())}
                                 tableWin={tableWin}
                                 itemView={itemView}
                                 closeModal={closeModal}

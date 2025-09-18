@@ -1,6 +1,6 @@
 import { useTranslation } from "@/context/TranslationContext";
 import { schemaWin, schemaWinEmpty } from "@/schema";
-import { ItemViewByRefId } from "@/schema/voucher/itemView";
+import { getListItemViewByRefId, ItemViewIdKey, ItemViewValueKey } from "@/schema/voucher/itemView";
 import { VACOMTheme } from "@/theme/theme";
 import { Helper } from "@/utils/Helper";
 import { EvilIcons, FontAwesome } from "@expo/vector-icons";
@@ -40,7 +40,10 @@ const ViewComponent: React.FC<IListProps> = ({
     label, placeholder, data, value, onChange, fDisplay, typeDisplay = "value", disabled = false,
     fId = "id", fValue = "value", clean = true, rightIcon, style, loading, tableWin, isError, isNewEdit = false, notFistFilter = true, checkSelected, idRef, itemView
 }) => {
-    itemView = idRef ? (ItemViewByRefId[idRef] ?? itemView) : itemView;
+    fId = idRef ? ItemViewIdKey[idRef] ?? fId : fId;
+    fValue = idRef ? ItemViewValueKey[idRef] ?? fValue : fValue;
+    itemView = idRef ? (getListItemViewByRefId(idRef) ?? itemView) : itemView;
+
     const colors = useTheme<VACOMTheme>().colors;
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ['50%', '70%', '90%'], []);
@@ -54,7 +57,7 @@ const ViewComponent: React.FC<IListProps> = ({
             Helper.rmTone(item[fId].toString()).toLowerCase().includes(_searchText) ||
             Helper.rmTone(item[fValue]).toLowerCase().includes(_searchText)
         );
-    }, [searchText, data]);
+    }, [searchText, data, fId, fValue]);
 
     const openModalSelect = () => {
         if (disabled) return;
