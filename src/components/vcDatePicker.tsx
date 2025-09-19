@@ -1,4 +1,3 @@
-import { useTranslation } from '@/context/TranslationContext';
 import { VACOMTheme } from '@/theme/theme';
 import { Helper } from '@/utils/Helper';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -174,13 +173,13 @@ const ShowCalendar: React.FC<ICalendar> = ({
   hideCalendar, style
 }) => {
   const { colors } = useTheme();
-  const { _ } = useTranslation();
   return (
     <Portal>
       <PopupProvider>
         <ShowBottom hideCalendar={hideCalendar} style={[{ borderRadius: 16 }, style]} position='center'>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <IconButton icon={'close'} style={{ left: -10 }} onPress={() => hideCalendar()} iconColor={colors.secondary} />
+            <View style={{ flex: 1 }} />
             <VcNum value={selectMonth} minValue={1} maxValue={12} onChange={(value) => value && setSelectMonth(value)}
               ignoreFormat={true} showMinusPlus={true} style={{ width: 100, marginRight: 5 }} />
             <VcNum value={selectYear} minValue={1000} maxValue={9999} onChange={(value) => value && setSelectYear(value)}

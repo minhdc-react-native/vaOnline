@@ -58,7 +58,7 @@ export default function Dashboard() {
         >
             <View style={{ gap: 10, backgroundColor: colors.background, padding: 20, borderBottomWidth: 0.5, borderBottomColor: colors.vacom.borderColor }}>
                 <Chip style={{ alignSelf: "flex-start" }}><Text>{currentYear}</Text></Chip>
-                {loading ? <LoadingScreen /> : <>
+                {loading ? <LoadingScreen style={{ height: 40, marginTop: 10, marginHorizontal: 0 }} /> : <>
                     <Text variant='titleMedium' style={{ color: colors.secondary }}>{`${infoDvcs?.DVCS_ID} - ${infoDvcs?.TEN_DVCS}`}</Text>
                     <Text variant='titleSmall'>{`${lang === 'vi' ? 'Mã số thuế:' : 'TaxCode:'} ${infoDvcs?.MS_THUE}`}</Text>
                 </>}

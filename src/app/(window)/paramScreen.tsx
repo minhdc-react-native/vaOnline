@@ -219,7 +219,7 @@ export default function ParamScreen({ onConfirm, paramKey, schemaConfig, timeIte
                     </View>
                 </View>
                 <View style={[styles.content]}>
-                    {loading ? <LoadingScreen /> : <SchemaUIEngine
+                    {loading ? <LoadingScreen style={{ height: 50, marginTop: 10, marginHorizontal: 0 }} /> : <SchemaUIEngine
                         schema={schemaEdit}
                         data={paramKey0}
                         onChangeItemData={setValue}

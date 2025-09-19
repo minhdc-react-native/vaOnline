@@ -52,7 +52,7 @@ export default function ShowBottom({ children, hideCalendar, style, position = "
                         alignSelf: position === "center" ? "center" : "stretch",
                         position: position === "center" ? "absolute" : "relative",
                         bottom: position === "center" ? undefined : 0,
-                        top: position === "center" ? "50%" : undefined,
+                        top: position === "center" ? (HEIGHT_WINDOW - containHeight) / 2 : undefined,
                         transform: position === "center"
                             ? [{
                                 translateY: slideAnim.interpolate({

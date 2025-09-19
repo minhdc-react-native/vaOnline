@@ -66,7 +66,8 @@ ncu -u
 npm install --legacy-peer-deps
 
 
-rm -rf node_modules package-lock.json yarn.lock
+rm -rf ios/Pods ios/build ios/Podfile.lock node_modules package-lock.json yarn.lock
+
 npm install   # hoặc yarn install
 npx expo-doctor
 

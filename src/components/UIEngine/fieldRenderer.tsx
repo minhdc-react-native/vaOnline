@@ -148,23 +148,19 @@ const ViewComponent: React.FC<IProps> = ({
         return fixLabel ? evalExpr(fixLabel, field.requiredKeys) : undefined;
     }, [field, configExpression, evalExpr]);
 
-    const refId = useMemo(() => {
-        const refId = configExpression?.refId?.[field.bind || '']?.id;
-        return refId ?? undefined;
-    }, [configExpression?.refId, field.bind]);
+    const itemView: { view: IRowsColsField, refId?: string, id?: string, value?: string } | undefined = useMemo(() => {
+        const config = configExpression?.refId?.[field.bind || ''];
+        const typeEditor = config?.TYPE_EDITOR;
 
-    const itemView: { view: IRowsColsField, id?: string, value?: string } | undefined = useMemo(() => {
-        const typeEditor = configExpression?.refId?.[field.bind || '']?.TYPE_EDITOR;
+        if (!!typeEditor && ['combo', 'richselect'].includes(typeEditor)) return { view: ListItemView.VALUE, refId: config.id };
 
-        if (!!typeEditor && ['combo', 'richselect'].includes(typeEditor)) return { view: ListItemView.VALUE };
-
-        const listColumn = configExpression?.refId?.[field.bind || '']?.LIST_COLUMN;
+        const listColumn = config?.LIST_COLUMN;
 
         if (!listColumn) return undefined;
         const fixListColumn = listColumn.filter(col0 => !col0.hidden);
 
         if (fixListColumn.length > 1) {
-            return { id: fixListColumn[0].id, value: fixListColumn[1].id, view: getListItemView(fixListColumn[0].id, fixListColumn[1].id) };
+            return { id: fixListColumn[0].id, value: fixListColumn[1].id, view: getListItemView(fixListColumn[0].id, fixListColumn[1].id), refId: config.id };
         } else {
             return undefined;
         }
@@ -327,7 +323,7 @@ const ViewComponent: React.FC<IProps> = ({
             return (
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
                     <VcSearchList value={value} disabled={disabled} label={_(label)} clean={field.clean} itemView={field.itemView || itemView?.view} numCharSearch={field.numCharSearch}
-                        idRef={field.idRef || refId} tableSearch={field.tableSearch} fField={field.fField} checkSelected={field.checkSelected} onChange={onSelectSearch} />
+                        idRef={field.idRef || itemView?.refId} tableSearch={field.tableSearch} fField={field.fField} checkSelected={field.checkSelected} onChange={onSelectSearch} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
@@ -336,7 +332,7 @@ const ViewComponent: React.FC<IProps> = ({
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
                     <VcSelectList disabled={disabled} data={dataSource[field.keySource || field.bind!] ?? []} label={_(label)} key={key} clean={field.clean}
                         fValue={field.fValue || itemView?.value} fId={field.fId || itemView?.id} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit} checkSelected={field.checkSelected}
-                        idRef={field.idRef || refId} itemView={field.itemView || itemView?.view} fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={onSelectList} notFistFilter={field.notFistFilter} />
+                        idRef={field.idRef || itemView?.refId} itemView={field.itemView || itemView?.view} fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={onSelectList} notFistFilter={field.notFistFilter} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
@@ -344,7 +340,7 @@ const ViewComponent: React.FC<IProps> = ({
             return (
                 <View key={`${key}view`} style={[field.style]}>
                     <VcSelectListMulti data={dataSource[field.keySource || field.bind!] ?? []} label={_(label)} key={key}
-                        idRef={field.idRef || refId} itemView={field.itemView} fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit}
+                        idRef={field.idRef || itemView?.refId} itemView={field.itemView} fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit}
                         fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={setValue} disabled={disabled} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>

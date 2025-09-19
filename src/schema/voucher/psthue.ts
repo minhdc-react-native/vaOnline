@@ -92,13 +92,11 @@ const psthue0: ISchemaWin = {
                 style: { alignItems: "center" },
                 fields: [
                     {
-                        type: "search",
-                        tableSearch: "DMTHUE",
-                        fField: 'MA_THUE',
+                        type: "selectList",
+                        tableWin: "Empty",
                         label: "MA_THUE",
+                        fDisplay: { fValue: 'id' },
                         clean: false,
-                        itemView: ListItemView.MA_THUE,
-                        numCharSearch: 1,
                         expression: { TK_NO: 'TK_NO', TK_CO: 'TK_CO', PT_THUE: 'PT_THUE', GHI_CHU: 'TEN_THUE' },
                         bind: 'MA_THUE',
                         style: { flex: 1 }

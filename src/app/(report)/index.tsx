@@ -49,7 +49,7 @@ export default function ReportScreen() {
             </Appbar.Header>
             <Card style={{ backgroundColor: colors.background, margin: 10 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 10 }}>
-                    <View style={{ flex: 1, paddingHorizontal: 10 }}>
+                    <View style={{ flex: 1 }}>
                         <VcSelector containerStyle={{ marginTop: 0 }} itemStyle={{ paddingVertical: 5 }} value={vnd_nt} data={currencies} onChange={(item) => setVnd_nt(item.id as any)} type='box' />
                     </View>
                     <IconButton icon={() => <FontAwesome name="file-pdf-o" size={24} color="orange" />} onPress={() => onCreateReport('pdf', dataFilter)} />

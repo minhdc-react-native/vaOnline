@@ -550,7 +550,7 @@ export const dphv: ISchemaWinValue = {
         DVT: 'DMDVT',
         DVT_CB: 'DVT_CB'
     },
-    mapDataSource: { LOAI_PHI: 'LOAI_PHI' }, // add source dựa vào config refId.
+    mapDataSource: { LOAI_PHI: 'LOAI_PHI', MA_THUE: 'MA_THUE' }, // add source dựa vào config refId.
     config: dphv0,
     fieldSearch: 'INFO_FILTER COLLATE SQL_Latin1_General_CP1_CI_AI', isRmTone: true,
     defaultNew: { NAM: '#NAM#', NGAY_CT: '#TODAY#', MA_NT: '#MA_NT#', TY_GIA: '#TY_GIA#', STATUS: 1 },

@@ -327,7 +327,7 @@ const dpkt0: ISchemaWin = {
                     {
                         type: "selectList",
                         tableWin: "Empty",
-                        fValue: 'id',
+                        fDisplay: { fValue: 'id' },
                         // itemView: ListItemView.VALUE,
                         clean: false,
                         requiredKeys: ['_typeView'],
@@ -434,7 +434,7 @@ export const dpkt: ISchemaWinValue = {
         STATUS: 'STATUS',
         DMNHOMHD: 'DMNHOMHD'
     },
-    mapDataSource: { MA_HT: 'MA_HT' }, // add source dựa vào config refId.
+    mapDataSource: { MA_HT: 'MA_HT', MA_THUE: 'MA_THUE' }, // add source dựa vào config refId.
     config: dpkt0,
     fieldSearch: 'INFO_FILTER COLLATE SQL_Latin1_General_CP1_CI_AI', isRmTone: true,
     defaultNew: { NAM: '#NAM#', NGAY_CT: '#TODAY#', MA_NT: '#MA_NT#', TY_GIA: '#TY_GIA#', STATUS: 1 },

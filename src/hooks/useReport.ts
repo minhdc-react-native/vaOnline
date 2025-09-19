@@ -480,7 +480,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
             return {
                 type: "selectList",
                 tableWin: "Empty",
-                fValue: 'id',
+                fDisplay: { fValue: 'id' },
                 itemView: getItemViewReport(item.TYPE_EDITOR, item.LIST_COLUMN),
                 idRef: item.REF_ID,
                 keySource: item.REF_ID,
@@ -514,7 +514,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
             return {
                 type: "selectList",
                 tableWin: "Empty",
-                fValue: 'id',
+                fDisplay: { fValue: 'id' },
                 idRef: item.REF_ID,
                 itemView: getItemViewReport(item.TYPE_EDITOR, item.LIST_COLUMN),
                 keySource: item.REF_ID,

@@ -115,7 +115,7 @@ export const api = {
                 const finalName = getFilenameFromContentDisposition(fileName, contentDisposition);
                 const uint8 = new Uint8Array(res.data);
                 const base64Str = Buffer.from(res.data, 'binary').toString('base64');
-                const fileUri = Paths.document.uri + finalName;
+                const fileUri = Paths.cache.uri + finalName;
                 const file = new File(fileUri);
 
                 file.write(uint8);
@@ -140,7 +140,7 @@ export const api = {
                 const finalName = getFilenameFromContentDisposition(fileName, contentDisposition);
                 const uint8 = new Uint8Array(res.data);
                 const base64Str = Buffer.from(res.data, 'binary').toString('base64');
-                const fileUri = Paths.document.uri + finalName;
+                const fileUri = Paths.cache.uri + finalName;
                 const file = new File(fileUri);
 
                 file.write(uint8);
@@ -167,7 +167,7 @@ export const api = {
                 const contentDisposition = res.headers?.['content-disposition'];
                 const finalName = getFilenameFromContentDisposition(fileName, contentDisposition);
 
-                const fileUri = Paths.document.uri + finalName;
+                const fileUri = Paths.cache.uri + finalName;
                 const file = new File(fileUri);
                 file.write(res.data);
 
