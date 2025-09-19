@@ -34,7 +34,8 @@ interface NumericInputProps {
     disabled?: boolean;
     minValue?: number;
     maxValue?: number;
-    isError?: boolean
+    isError?: boolean;
+    ignoreFormat?: boolean
 }
 
 const ViewComponent: React.FC<NumericInputProps> = ({
@@ -56,7 +57,8 @@ const ViewComponent: React.FC<NumericInputProps> = ({
     minValue,
     maxValue,
     iconColors,
-    isError
+    isError,
+    ignoreFormat
 }) => {
     const defaultIconColors = useMemo(() => ({ minus: "red", plus: "blue" }), []);
     iconColors = iconColors || defaultIconColors;
@@ -93,7 +95,7 @@ const ViewComponent: React.FC<NumericInputProps> = ({
                     onPress={() => {
                         if (disabled) return;
                         Keyboard.dismiss();
-                        showPopup({ showView: () => (<KeyBoardNumber value={value} onChange={onChange} locale={locale} decimalLimit={decimalLimit} minValue={minValue} maxValue={maxValue} />) });
+                        showPopup({ showView: () => (<KeyBoardNumber value={value} onChange={onChange} locale={locale} decimalLimit={decimalLimit} minValue={minValue} maxValue={maxValue} ignoreFormat={ignoreFormat} />) });
                     }}
                     style={({ pressed }) => [{ flex: 1, opacity: pressed ? 0.6 : 1 }]}
                 >
@@ -102,7 +104,7 @@ const ViewComponent: React.FC<NumericInputProps> = ({
                         ref={inputRef}
                         // label={label}
                         label={label && <Text style={{ color: Helper.isEmpty(value) ? colors.backdrop : colors.onSurface }}>{label}</Text>}
-                        value={value || value === 0 ? numberFormatter.format(value) : ''}
+                        value={value || value === 0 ? (ignoreFormat ? value.toString() : numberFormatter.format(value)) : ''}
                         // textColor={value && value < 0 ? "red" : "black"}
                         // onFocus={() => setVisible(true)}
                         showSoftInputOnFocus={false}
@@ -140,8 +142,9 @@ interface IProgs {
     decimalLimit: number;
     minValue?: number;
     maxValue?: number;
+    ignoreFormat?: boolean
 }
-const KeyBoardNumber = ({ value, onChange, locale, decimalLimit, minValue, maxValue }: IProgs) => {
+const KeyBoardNumber = ({ value, onChange, locale, decimalLimit, minValue, maxValue, ignoreFormat }: IProgs) => {
     const convertValue = useCallback((value: number | null | undefined) => {
         const sValue = value?.toString();
         if (!sValue) return '';
@@ -182,6 +185,7 @@ const KeyBoardNumber = ({ value, onChange, locale, decimalLimit, minValue, maxVa
     }, [tempValue]);
     const formatDisplay = useCallback((value: string) => {
         if (!value) return '';
+        if (ignoreFormat) return value;
         const hasTrailingComma = value.endsWith(',');
         const isNegative = value.startsWith('-');
         const parsed = parseFloat(parseFormattedNumber(value));
@@ -224,12 +228,12 @@ const KeyBoardNumber = ({ value, onChange, locale, decimalLimit, minValue, maxVa
             if (parts.length === 2 && parts[1].length > decimalLimit) return;
             // Kiểm tra min/max khi nhập
             const parsed = parseFloat(parseFormattedNumber(newValue));
-            if (!isNaN(parsed)) {
-                if ((minValue !== undefined && parsed < minValue) || (maxValue !== undefined && parsed > maxValue)) {
-                    showToast(messMinMaxValue, { type: "warning" });
-                    return;
-                }
-            }
+            // if (!isNaN(parsed)) {
+            //     if ((minValue !== undefined && parsed < minValue) || (maxValue !== undefined && parsed > maxValue)) {
+            //         showToast(messMinMaxValue, { type: "warning" });
+            //         return;
+            //     }
+            // }
             setTempValue(newValue);
         }
     };

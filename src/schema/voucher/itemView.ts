@@ -102,7 +102,7 @@ export const ItemViewValueKey: Record<string, string> = {
     'bc6431f9-ed8b-4d67-a734-e8e5aa8efacd': 'TEN_LF', // Loại phí
     '826995ba-7dca-4f36-9569-6c2ba101bffe': 'TEN_NH_TS', // nhóm tài sản
     '1975aaa2-6e6e-4c76-b81d-66987e327fb7': 'TEN_NH_TS', // nhóm công cụ
-    '01e14b5c-6e30-4b31-ae1d-4abbf7ed49d2': 'TEN_NH_TS', // chứng từ
+    '01e14b5c-6e30-4b31-ae1d-4abbf7ed49d2': 'TEN_CT', // chứng từ
     '86de5f41-4277-4a91-bf68-16acc89295c4': 'TEN_DT', // đối tượng
     '98665935-a3db-487e-8bc5-2a63515972b5': 'TEN_NT', // ngoại tệ
     '08790464-f168-49e6-97ea-2cb670e2139d': 'TEN_BP', // bộ phận

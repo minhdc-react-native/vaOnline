@@ -27,22 +27,22 @@ const EmptyView: IRowsColsField = {
 const getUrlReference = (id: string) => `/api/System/GetDataByReferencesId?id=${id}&filtervalue=#filterValue#`
 const urlBase: Record<ITableSearch, string> = { // gắn api cho đỡ nhầm...
     CUSTOM: '???',
-    DMTHUE: getUrlReference('6bba44d6-6a47-4471-ad98-656ed502fc5a'),
-    DMQS: getUrlReference('9c19a269-2c63-46df-8912-e4c9569fd46b'),
-    DMDT: getUrlReference('86de5f41-4277-4a91-bf68-16acc89295c4'),
-    DMCS: getUrlReference('a228db46-2754-4fa3-a2b4-6729d3f0c248'),
-    DMKM: getUrlReference('49e80ac4-2b07-47ef-8297-6efb2074fbdd'),
-    DMHDG: getUrlReference('67b663cb-d062-4057-83ff-cec81a60a996'),
-    DMVV: getUrlReference('4fcca1d7-9011-4b4f-b9e8-721a546aa637'),
-    DMMNGH: getUrlReference('0b22c919-a275-4d05-83bd-c34844d9ec67'),
-    DMMCN: getUrlReference('0600dd65-9cf4-4fd7-bf43-ff50a5578b42'),
-    DMTK: getUrlReference('0a93c38b-5f1f-422a-8039-a6cee1967af2'),
-    DMTTDB: getUrlReference('ad61024c-69cc-4d3b-9d5e-e5685db5bdce'),
-    DMDVT: getUrlReference('2beb4691-3bc8-40aa-a5ba-6170fef7a7c4'),
-    DMKHO: getUrlReference('189d7179-da87-40cc-a5b3-64f52cef8b86'),
-    DMHV: getUrlReference('c0c79756-5702-4e39-840e-11c3fa759b81'),
-    DMLH: getUrlReference('77b75702-c884-4752-bfe5-2170214945ba'),
-    DMNG: getUrlReference('4f263d9d-a736-447b-a126-e338fc700f5d')
+    DMTHUE: '6bba44d6-6a47-4471-ad98-656ed502fc5a',
+    DMQS: '9c19a269-2c63-46df-8912-e4c9569fd46b',
+    DMDT: '86de5f41-4277-4a91-bf68-16acc89295c4',
+    DMCS: 'a228db46-2754-4fa3-a2b4-6729d3f0c248',
+    DMKM: '49e80ac4-2b07-47ef-8297-6efb2074fbdd',
+    DMHDG: '67b663cb-d062-4057-83ff-cec81a60a996',
+    DMVV: '4fcca1d7-9011-4b4f-b9e8-721a546aa637',
+    DMMNGH: '0b22c919-a275-4d05-83bd-c34844d9ec67',
+    DMMCN: '0600dd65-9cf4-4fd7-bf43-ff50a5578b42',
+    DMTK: '0a93c38b-5f1f-422a-8039-a6cee1967af2',
+    DMTTDB: 'ad61024c-69cc-4d3b-9d5e-e5685db5bdce',
+    DMDVT: '2beb4691-3bc8-40aa-a5ba-6170fef7a7c4',
+    DMKHO: '189d7179-da87-40cc-a5b3-64f52cef8b86',
+    DMHV: 'c0c79756-5702-4e39-840e-11c3fa759b81',
+    DMLH: '77b75702-c884-4752-bfe5-2170214945ba',
+    DMNG: '4f263d9d-a736-447b-a126-e338fc700f5d'
 }
 interface IProgs {
     tableSearch: ITableSearch,
@@ -62,11 +62,12 @@ interface IProgs {
     checkSelected?: { isError: string, message: string, requiredKeys: string[] };
 }
 const ViewComponent: React.FC<IProgs> = ({ tableSearch, idRef, label, placeholder, value, fField, onChange, clean = true, rightIcon, style, isLoading, disabled, checkSelected, itemView, numCharSearch = 2 }: IProgs) => {
+    idRef = idRef || urlBase[tableSearch]
     const url = useMemo(() => {
-        return tableSearch === "CUSTOM" ? getUrlReference(idRef ?? '') : urlBase[tableSearch];
+        return tableSearch === "CUSTOM" ? getUrlReference(idRef ?? '') : getUrlReference(urlBase[tableSearch]);
     }, [idRef, tableSearch]);
 
-    itemView = idRef ? (getListItemViewByRefId(idRef) ?? itemView) : itemView;
+    itemView = itemView || (idRef ? (getListItemViewByRefId(idRef) ?? itemView) : itemView);
 
     const { colors } = useTheme<VACOMTheme>();
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -143,8 +144,8 @@ const ViewComponent: React.FC<IProgs> = ({ tableSearch, idRef, label, placeholde
                         <View style={styles.label}>
                             <Text style={{ color: colors.inverseSurface, fontSize: 12.7 }}>{label}</Text>
                         </View>
-                        <Text style={{ color: disabled ? colors.elevation.level1 : colors.background, paddingHorizontal: 4 }}>{label}</Text>
-                        <View style={[styles.line, { borderColor: colors.background }]} />
+                        {!Helper.isEmpty(label) && <Text style={{ color: disabled ? colors.elevation.level1 : colors.background, paddingHorizontal: 4 }}>{label}</Text>}
+                        {!Helper.isEmpty(label) && <View style={[styles.line, { borderColor: colors.background }]} />}
                     </View>
                 }
             </Pressable>

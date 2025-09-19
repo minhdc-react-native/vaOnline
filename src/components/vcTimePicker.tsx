@@ -10,8 +10,8 @@ import {
     View,
     ViewStyle,
 } from 'react-native';
-import Modal from "react-native-modal";
-import { Button, Divider, IconButton, Text, useTheme } from 'react-native-paper';
+import { Button, Divider, IconButton, Portal, Text, useTheme } from 'react-native-paper';
+import ShowBottom from './dialog/showBottom';
 
 interface IProgs {
     label?: string;
@@ -55,12 +55,12 @@ const ViewComponent = ({ label, value, onChange, disabled, style, placeholder }:
                     </View>
                 }
             </View>
-            <TimePicker
+            {modalVisible && <TimePicker
                 visible={modalVisible}
                 initialValue={selectedTime}
                 onClose={() => setModalVisible(false)}
                 onConfirm={onChangeTime}
-            />
+            />}
         </>
     );
 }
@@ -130,15 +130,9 @@ const TimePicker = ({
         [pad]
     );
 
-
     return (
-        <Modal isVisible={visible}
-            animationIn={'bounceIn'}
-            animationOut={'bounceOut'}
-            onBackdropPress={onClose}
-            style={{ zIndex: 1 }}  // chỉnh zIndex được    
-        >
-            <View style={styles.overlay}>
+        <Portal>
+            <ShowBottom hideCalendar={onClose} style={[{ borderRadius: 16 }]} position='center'>
                 <View style={styles.popup}>
                     <Text variant='titleMedium' style={styles.columnTitle}>{`Thời gian: ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`}</Text>
                     <Divider />
@@ -154,8 +148,8 @@ const TimePicker = ({
                     <Divider />
                     <Button style={{ marginTop: 10, width: 150, alignSelf: "center" }} mode='contained' onPress={confirm}>Xác nhận</Button>
                 </View>
-            </View>
-        </Modal>
+            </ShowBottom>
+        </Portal>
     );
 };
 

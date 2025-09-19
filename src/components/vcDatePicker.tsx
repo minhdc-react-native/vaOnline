@@ -8,9 +8,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { Pressable } from 'react-native-gesture-handler';
-import { Divider, IconButton, Text, useTheme } from 'react-native-paper';
+import { Divider, IconButton, Portal, Text, useTheme } from 'react-native-paper';
+import { PopupProvider } from './dialog/popupProvider';
 import ShowBottom from './dialog/showBottom';
-import { VcTabBar } from './vcTabBar';
+import { VcNum } from './vcNum';
 dayjs.extend(utc);
 
 LocaleConfig.locales['vi-VN'] = {
@@ -35,9 +36,6 @@ LocaleConfig.locales['vi-VN'] = {
 };
 
 LocaleConfig.defaultLocale = 'vi-VN';
-const months = Array.from({ length: 12 }, (_, index) => { return { id: index + 1, value: `Tháng ${index + 1}` } });
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 200 }, (_, i) => ({ id: i + currentYear - 100, value: `${i + currentYear - 100}` }));
 
 interface VcDatePickerProps {
   label?: string;
@@ -178,49 +176,52 @@ const ShowCalendar: React.FC<ICalendar> = ({
   const { colors } = useTheme();
   const { _ } = useTranslation();
   return (
-    <ShowBottom hideCalendar={hideCalendar} style={style}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <IconButton icon={'close'} onPress={() => hideCalendar()} />
-        <Text variant='titleMedium'>{_('LIST_TIME')}</Text>
-      </View>
-      <Divider />
-      <Calendar
-        current={currentDate || nowDate}
-        initialDate={initialDate ?? undefined}
-        onDayPress={handleDayPress}
-        onMonthChange={(date: any) => {
-          if (date.year !== selectYear) setSelectYear(date.year);
-          if (date.month !== selectMonth) setSelectMonth(date.month);
-        }}
-        markedDates={
-          currentDate
-            ? {
-              [currentDate]: {
-                selected: true,
-                selectedColor: colors.primary,
-              },
+    <Portal>
+      <PopupProvider>
+        <ShowBottom hideCalendar={hideCalendar} style={[{ borderRadius: 16 }, style]} position='center'>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <IconButton icon={'close'} style={{ left: -10 }} onPress={() => hideCalendar()} iconColor={colors.secondary} />
+            <VcNum value={selectMonth} minValue={1} maxValue={12} onChange={(value) => value && setSelectMonth(value)}
+              ignoreFormat={true} showMinusPlus={true} style={{ width: 100, marginRight: 5 }} />
+            <VcNum value={selectYear} minValue={1000} maxValue={9999} onChange={(value) => value && setSelectYear(value)}
+              ignoreFormat={true} showMinusPlus={true} style={{ width: 120 }} />
+          </View>
+          <Divider />
+          <Calendar
+            current={currentDate || nowDate}
+            initialDate={initialDate ?? undefined}
+            onDayPress={handleDayPress}
+            onMonthChange={(date: any) => {
+              if (date.year !== selectYear) setSelectYear(date.year);
+              if (date.month !== selectMonth) setSelectMonth(date.month);
+            }}
+            markedDates={
+              currentDate
+                ? {
+                  [currentDate]: {
+                    selected: true,
+                    selectedColor: colors.primary,
+                  },
+                }
+                : undefined
             }
-            : undefined
-        }
-        theme={{
-          backgroundColor: '#ffffff',
-          calendarBackground: '#ffffff',
-          textSectionTitleColor: '#333',
-          selectedDayBackgroundColor: colors.primary,
-          selectedDayTextColor: '#ffffff',
-          todayTextColor: colors.primary,
-          dayTextColor: '#333',
-          textDisabledColor: '#d9e1e8',
-          arrowColor: colors.primary,
-          monthTextColor: '#000',
-          indicatorColor: colors.primary,
-        }}
-      />
-      <View style={{ gap: 5, paddingHorizontal: 10 }}>
-        <VcTabBar data={years} value={selectYear} onPress={(year) => setSelectYear(year.id as number)} style={{ borderRadius: 10, paddingHorizontal: 10 }} />
-        <VcTabBar data={months} value={selectMonth} onPress={(month) => setSelectMonth(month.id as number)} style={{ borderRadius: 10, paddingHorizontal: 10 }} />
-      </View>
-    </ShowBottom>
+            theme={{
+              backgroundColor: '#ffffff',
+              calendarBackground: '#ffffff',
+              textSectionTitleColor: '#333',
+              selectedDayBackgroundColor: colors.primary,
+              selectedDayTextColor: '#ffffff',
+              todayTextColor: colors.primary,
+              dayTextColor: '#333',
+              textDisabledColor: '#d9e1e8',
+              arrowColor: colors.primary,
+              monthTextColor: '#000',
+              indicatorColor: colors.primary,
+            }}
+          />
+        </ShowBottom>
+      </PopupProvider>
+    </Portal>
   );
 }
 const styles = StyleSheet.create({

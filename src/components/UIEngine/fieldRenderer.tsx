@@ -1,5 +1,6 @@
 // =============================
 import { useTranslation } from '@/context/TranslationContext';
+import { getListItemView, ListItemView } from '@/schema/voucher/itemView';
 import { VACOMTheme } from '@/theme/theme';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -23,7 +24,7 @@ import { TextField } from './Fields/textField';
 import { useBoundField } from './hooks/useBoundField';
 import { FormState } from './hooks/useFormState';
 import { FormContext } from './schemaUIEngine';
-import { ICON_REGISTRY, IField } from './types';
+import { ICON_REGISTRY, IField, IRowsColsField } from './types';
 
 export const dummyFormState: FormState<Record<string, any>> = {
     state: { values: {} },
@@ -148,8 +149,25 @@ const ViewComponent: React.FC<IProps> = ({
     }, [field, configExpression, evalExpr]);
 
     const refId = useMemo(() => {
-        const refId = configExpression?.refId?.[field.bind || ''];
+        const refId = configExpression?.refId?.[field.bind || '']?.id;
         return refId ?? undefined;
+    }, [configExpression?.refId, field.bind]);
+
+    const itemView: { view: IRowsColsField, id?: string, value?: string } | undefined = useMemo(() => {
+        const typeEditor = configExpression?.refId?.[field.bind || '']?.TYPE_EDITOR;
+
+        if (!!typeEditor && ['combo', 'richselect'].includes(typeEditor)) return { view: ListItemView.VALUE };
+
+        const listColumn = configExpression?.refId?.[field.bind || '']?.LIST_COLUMN;
+
+        if (!listColumn) return undefined;
+        const fixListColumn = listColumn.filter(col0 => !col0.hidden);
+
+        if (fixListColumn.length > 1) {
+            return { id: fixListColumn[0].id, value: fixListColumn[1].id, view: getListItemView(fixListColumn[0].id, fixListColumn[1].id) };
+        } else {
+            return undefined;
+        }
     }, [configExpression?.refId, field.bind]);
 
     switch (field.type) {
@@ -308,7 +326,7 @@ const ViewComponent: React.FC<IProps> = ({
         case 'search':
             return (
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
-                    <VcSearchList value={value} disabled={disabled} label={_(label)} clean={field.clean} itemView={field.itemView} numCharSearch={field.numCharSearch}
+                    <VcSearchList value={value} disabled={disabled} label={_(label)} clean={field.clean} itemView={field.itemView || itemView?.view} numCharSearch={field.numCharSearch}
                         idRef={field.idRef || refId} tableSearch={field.tableSearch} fField={field.fField} checkSelected={field.checkSelected} onChange={onSelectSearch} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
@@ -317,8 +335,8 @@ const ViewComponent: React.FC<IProps> = ({
             return (
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
                     <VcSelectList disabled={disabled} data={dataSource[field.keySource || field.bind!] ?? []} label={_(label)} key={key} clean={field.clean}
-                        fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit} checkSelected={field.checkSelected}
-                        idRef={field.idRef || refId} itemView={field.itemView} fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={onSelectList} notFistFilter={field.notFistFilter} />
+                        fValue={field.fValue || itemView?.value} fId={field.fId || itemView?.id} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit} checkSelected={field.checkSelected}
+                        idRef={field.idRef || refId} itemView={field.itemView || itemView?.view} fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={onSelectList} notFistFilter={field.notFistFilter} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );

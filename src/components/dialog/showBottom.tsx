@@ -1,23 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
-import { customText, Portal, useTheme } from "react-native-paper";
+import { useTheme } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-const Text = customText<'customVariant'>();
 const HEIGHT_WINDOW = Dimensions.get("window").height;
 interface IProgs {
     children: React.ReactNode;
     hideCalendar: () => void;
-    style?: StyleProp<ViewStyle>
+    style?: StyleProp<ViewStyle>;
+    position?: "bottom" | "center"; // thêm prop
 }
-// thêm vào cho hết warning
-export default function ShowBottom({ children, hideCalendar, style }: IProgs) {
+
+export default function ShowBottom({ children, hideCalendar, style, position = "bottom" }: IProgs) {
     const insets = useSafeAreaInsets();
     const { colors } = useTheme();
     const slideAnim = useRef(new Animated.Value(HEIGHT_WINDOW)).current;
     const [containHeight, setContainHeight] = useState<number>(0);
+
     const setHeight = (height: number) => {
         if (containHeight !== height) setContainHeight(height);
-    }
+    };
+
     useEffect(() => {
         Animated.timing(slideAnim, {
             toValue: 0,
@@ -35,21 +37,40 @@ export default function ShowBottom({ children, hideCalendar, style }: IProgs) {
     };
 
     return (
-        <Portal>
-            <View style={[styles.backdrop, { backgroundColor: colors.backdrop, marginBottom: insets.bottom }, style]}>
-                <Pressable onPress={closePanel}>
-                    <View style={{ height: HEIGHT_WINDOW - containHeight }} />
-                </Pressable>
-                <Animated.View style={[styles.panel, {
-                    transform: [{ translateY: slideAnim }],
-                    backgroundColor: colors.surface, padding: 20
-                }]} onLayout={(e) => setHeight(e.nativeEvent.layout.height)}>
-                    {children}
-                </Animated.View>
-            </View>
-        </Portal>
+        <View style={[
+            styles.backdrop,
+            { backgroundColor: colors.backdrop, marginBottom: insets.bottom }
+        ]}>
+            <Pressable onPress={closePanel} style={{ flex: 1 }} />
+
+            <Animated.View
+                style={[
+                    styles.panel,
+                    {
+                        backgroundColor: colors.surface,
+                        padding: 20,
+                        alignSelf: position === "center" ? "center" : "stretch",
+                        position: position === "center" ? "absolute" : "relative",
+                        bottom: position === "center" ? undefined : 0,
+                        top: position === "center" ? "50%" : undefined,
+                        transform: position === "center"
+                            ? [{
+                                translateY: slideAnim.interpolate({
+                                    inputRange: [0, HEIGHT_WINDOW],
+                                    outputRange: [0, HEIGHT_WINDOW / 2]
+                                })
+                            }]
+                            : [{ translateY: slideAnim }],
+                    },
+                    style
+                ]}
+                onLayout={(e) => setHeight(e.nativeEvent.layout.height)}
+            >
+                {children}
+            </Animated.View>
+        </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     backdrop: {

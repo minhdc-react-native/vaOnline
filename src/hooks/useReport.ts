@@ -4,7 +4,7 @@ import { useToast } from "@/components/dialog/useToast";
 import { IField } from "@/components/UIEngine/types";
 import { useTranslation } from "@/context/TranslationContext";
 import { IDataSource, IHandleActionConfig } from "@/schema";
-import { ListItemView } from "@/schema/voucher/itemView";
+import { getListItemView, ListItemView } from "@/schema/voucher/itemView";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
 import { router } from "expo-router";
@@ -448,8 +448,26 @@ const TypeEditor = {
     checkbox: 'checkbox',
     radio: 'radio'
 }
+const getItemViewReport = (typeEditor: string, listColumn0: string) => {
+
+    if (!!typeEditor && ['combo', 'richselect'].includes(typeEditor)) return ListItemView.VALUE;
+
+    const listColumn: any[] = isNotEmpty(listColumn0) ? JSON.parse(listColumn0) : null;
+
+    if (!listColumn) return undefined;
+
+    const fixListColumn = listColumn.filter(col0 => !col0.hidden);
+
+    if (fixListColumn.length > 1) {
+        return getListItemView(fixListColumn[0].id, fixListColumn[1].id);
+    } else {
+        return undefined;
+    }
+};
 
 const getConfigView = (item: IData, _: (key?: string) => string, style?: StyleProp<ViewStyle>): IField => {
+
+
     switch (item.TYPE_EDITOR) {
         case TypeEditor.text:
             return {
@@ -463,6 +481,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 type: "selectList",
                 tableWin: "Empty",
                 fValue: 'id',
+                itemView: getItemViewReport(item.TYPE_EDITOR, item.LIST_COLUMN),
                 idRef: item.REF_ID,
                 keySource: item.REF_ID,
                 label: _(item.CAPTION),
@@ -497,6 +516,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 tableWin: "Empty",
                 fValue: 'id',
                 idRef: item.REF_ID,
+                itemView: getItemViewReport(item.TYPE_EDITOR, item.LIST_COLUMN),
                 keySource: item.REF_ID,
                 label: _(item.CAPTION),
                 bind: item.NAME,
@@ -507,6 +527,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 type: "search",
                 tableSearch: "CUSTOM",
                 idRef: item.REF_ID,
+                itemView: getItemViewReport(item.TYPE_EDITOR, item.LIST_COLUMN),
                 fField: 'id',
                 label: _(item.CAPTION),
                 bind: item.NAME,

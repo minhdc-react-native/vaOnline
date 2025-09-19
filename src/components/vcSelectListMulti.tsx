@@ -60,8 +60,8 @@ const VcSelectListMulti = ({
     onChange,
     fDisplay,
     typeDisplay = "value",
-    fId = "id",
-    fValue = "value",
+    fId,
+    fValue,
     style,
     loading,
     tableWin,
@@ -78,8 +78,8 @@ const VcSelectListMulti = ({
     const [searchText, setSearchText] = useState("");
     const [itemSelected, setItemSelected] = useState<IData[]>([]);
 
-    fId = idRef ? ItemViewIdKey[idRef] ?? fId : fId;
-    fValue = idRef ? ItemViewValueKey[idRef] ?? fValue : fValue;
+    fId = fId || (idRef ? ItemViewIdKey[idRef] ?? fId : fId) || 'id';
+    fValue = fValue || (idRef ? ItemViewValueKey[idRef] ?? fValue : fValue) || 'value';
 
     const selectedSet = useMemo(
         () => new Set(itemSelected.map((i) => i[fId].toString())),
@@ -110,7 +110,7 @@ const VcSelectListMulti = ({
     };
 
     itemView = useMemo(() => {
-        return idRef ? (getListItemViewByRefId(idRef) ?? itemView) : itemView;
+        return itemView || (idRef ? (getListItemViewByRefId(idRef) ?? itemView) : itemView);
     }, [idRef, itemView]);
 
     const addItemSelected = (item: IData) => {

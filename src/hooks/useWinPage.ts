@@ -232,7 +232,10 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 result.EXPRESSION[f.COLUMN_NAME] = filter;
                 if (notReplace.length > 0) result.EXPRESSION_If_EMPTY[f.COLUMN_NAME] = notReplace;
             }
-            if (isNotEmpty(f.REF_ID)) result.REF_ID[f.COLUMN_NAME] = f.REF_ID;
+            if (isNotEmpty(f.REF_ID)) result.REF_ID[f.COLUMN_NAME] = {
+                id: f.REF_ID, LIST_COLUMN: isNotEmpty(f.LIST_COLUMN) ? JSON.parse(f.LIST_COLUMN) : undefined,
+                TYPE_EDITOR: f.TYPE_EDITOR
+            };
         });
         return { config: result, display: _getGroup(display, tab.TAB_TABLE), zod };
     }, []);
@@ -302,7 +305,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         // get more data source
         let sourceAdd: IDataSource = {};
         Object.keys(mapSource).map(key => {
-            sourceAdd[key] = getUrlReference(refIds[mapSource[key]]);
+            if (!!refIds[mapSource[key]]?.id) sourceAdd[key] = getUrlReference(refIds[mapSource[key]]?.id);
         });
 
         loadDataBegin(sourceAdd);
@@ -520,9 +523,24 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             if (itemData.MA_CT === 'PCP') {
                 fixTabRequire['PSCF'] = true
             };
+
             for (const tab of tabs) {
                 const isRequire = fixTabRequire[tab.TAB_TABLE] !== undefined ? fixTabRequire[tab.TAB_TABLE] : schemaWin[tab.TAB_TABLE]?.require;
                 const dataDetail = dataItemDetail[tableWin] ? dataItemDetail[tableWin][tab.TAB_TABLE] : [];
+                let addDetail: Record<string, any> | null = null;
+                if (tab.TAB_TABLE === 'CTKT' && !tab.DISPLAY._tkNo) {
+                    if (!isNotEmpty(itemData.MA_HT)) {
+                        showToast(`${isLangVi ? 'Bạn chưa nhập mã hạch toán' : 'You have not entered MA_HT'} [${_(tab.TAB_NAME)}]!`, { type: "warning" });
+                        return;
+                    }
+                    addDetail = {};
+                    // update lại TK_NO, TK_CO
+                    // const sql = encodeURIComponent(`SELECT TK_NO,TK_CO FROM DMHT WHERE DVCS_ID=N'${orgUnit}' AND MA_HT=N'${itemData.MA_HT}'`);
+                    // const res: IData[] = await api.get({ link: `/api/System/ExecuteQuery?sql=${sql}` });
+                    // if (res && res.length > 0) {
+                    //     addDetail = { TK_NO: res[0].TK_NO, TK_CO: res[0].TK_CO };
+                    // }
+                }
                 if (isRequire && dataDetail.length === 0) {
                     showToast(`${isLangVi ? 'Bạn chưa nhập chi tiết' : 'You have not entered details'} [${_(tab.TAB_NAME)}]!`, { type: "warning" });
                     return;
@@ -530,7 +548,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 details.push({
                     TAB_ID: tab.TAB_ID,
                     TAB_TABLE: tab.TAB_TABLE,
-                    data: dataDetail
+                    data: addDetail ? dataDetail.map(detail => ({ ...detail, ...addDetail })) : dataDetail
                 });
             }
         }
@@ -670,7 +688,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         return dataItemDetail[tableWin]?.[currentTab?.TAB_TABLE ?? "Empty"];
     }, [dataItemDetail, currentTab, tableWin]);
 
-    const onNewDetail = useCallback((e: any, addDetailMore?: Record<string, any>) => {
+    const onNewDetail = useCallback(async (e: any, addDetailMore?: Record<string, any>) => {
         if (!addDetailMore) typeNewEdit.current = 'new';
         const typeView = itemMenuWin.typeView ?? {};
         const itemData = dataItems[tableWin]!;
@@ -690,9 +708,19 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             )
         );
 
+        let addTkHt: Record<string, any> | null = null;
+        if (currentTab.TAB_TABLE === 'CTKT' && !currentTab.DISPLAY._tkNo && isNotEmpty(itemData.MA_HT)) {
+            const sql = encodeURIComponent(`SELECT TK_NO,TK_CO FROM DMHT WHERE DVCS_ID=N'${orgUnit}' AND MA_HT=N'${itemData.MA_HT}'`);
+            const res: IData[] = await api.get({ link: `/api/System/ExecuteQuery?sql=${sql}` });
+            if (res && res.length > 0) {
+                addTkHt = { TK_NO: res[0].TK_NO, TK_CO: res[0].TK_CO };
+            }
+        }
+
         const copyFieldDetails = itemMenuWin.copyDetails?.[currentTab.TAB_TABLE] ?? [];
 
-        let copyDetails: any = {};
+        let copyDetails: any = addTkHt || {};
+
         if (dataDetail && dataDetail.length > 0) {
             const itemLast = dataDetail[dataDetail.length - 1];
             copyDetails = Object.fromEntries(

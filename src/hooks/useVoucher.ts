@@ -62,7 +62,7 @@ const LoaiPhi = {
     LP3: 'LP3'
 }
 export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab?: ITabWin,
-    changeOtherDetail?: React.RefObject<boolean>, onNewDetail?: (e: any, addDetailMore?: Record<string, any>) => IData | null) => {
+    changeOtherDetail?: React.RefObject<boolean>, onNewDetail?: (e: any, addDetailMore?: Record<string, any>) => Promise<IData | null>) => {
     const tableCthv = 'CTHV';
     const paramSystem = useDataApp((state) => state.paramSystem);
     const onChangeValue = useDataItemWin((state) => state.onChangeValue);
@@ -170,7 +170,7 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
 
                             const priceInfo: Record<string, any> = await getGiaHv(product.MA_HV, product.DVT);
 
-                            const newItemDetail: IData | null = onNewDetail(null, {
+                            const newItemDetail: IData | null = await onNewDetail(null, {
                                 SO_LUONG: quantity,
                                 MA_KHO: warehouseCode,
                                 ...defaultNew,

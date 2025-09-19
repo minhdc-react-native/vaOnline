@@ -1,6 +1,5 @@
 import { ISchemaWin, ISchemaWinValue } from "@/schema";
 import { theme } from "@/theme/theme";
-import { ListItemView } from "../itemView";
 const colors = theme.colors;
 const ctkt0: ISchemaWin = {
     itemAction: {
@@ -126,7 +125,6 @@ const ctkt0: ISchemaWin = {
                     {
                         type: "search",
                         tableSearch: "DMDT",
-                        itemView: ListItemView.MA_DT,
                         expression: { TEN_DT: 'TEN_DT' },
                         fField: 'MA_DT',
                         label: "MA_DT",
@@ -136,7 +134,6 @@ const ctkt0: ISchemaWin = {
                     {
                         type: "search",
                         tableSearch: "DMDT",
-                        itemView: ListItemView.MA_DT,
                         requiredKeys: ['_maDtBt'],
                         visibleIf: "{{_maDtBt}}",
                         fField: 'MA_DT',

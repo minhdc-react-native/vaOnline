@@ -38,11 +38,12 @@ type IListProps = {
 
 const ViewComponent: React.FC<IListProps> = ({
     label, placeholder, data, value, onChange, fDisplay, typeDisplay = "value", disabled = false,
-    fId = "id", fValue = "value", clean = true, rightIcon, style, loading, tableWin, isError, isNewEdit = false, notFistFilter = true, checkSelected, idRef, itemView
+    fId, fValue, clean = true, rightIcon, style, loading, tableWin, isError, isNewEdit = false, notFistFilter = true, checkSelected, idRef, itemView
 }) => {
-    fId = idRef ? ItemViewIdKey[idRef] ?? fId : fId;
-    fValue = idRef ? ItemViewValueKey[idRef] ?? fValue : fValue;
-    itemView = idRef ? (getListItemViewByRefId(idRef) ?? itemView) : itemView;
+    fId = fId || (idRef ? ItemViewIdKey[idRef] ?? fId : fId) || 'id';
+    fValue = fValue || (idRef ? ItemViewValueKey[idRef] ?? fValue : fValue) || 'value';
+
+    itemView = itemView || (idRef ? (getListItemViewByRefId(idRef) ?? itemView) : itemView);
 
     const colors = useTheme<VACOMTheme>().colors;
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -123,8 +124,8 @@ const ViewComponent: React.FC<IListProps> = ({
                         <View style={styles.label}>
                             <Text style={{ color: colors.inverseSurface, fontSize: 12.7 }}>{label}</Text>
                         </View>
-                        <Text style={{ color: disabled ? colors.elevation.level1 : colors.background, paddingHorizontal: 4 }}>{label}</Text>
-                        <View style={[styles.line, { borderColor: colors.background }]} />
+                        {!Helper.isEmpty(label) && <Text style={{ color: disabled ? colors.elevation.level1 : colors.background, paddingHorizontal: 4 }}>{label}</Text>}
+                        {!Helper.isEmpty(label) && <View style={[styles.line, { borderColor: colors.background }]} />}
                     </View>
                 }
             </Pressable>
