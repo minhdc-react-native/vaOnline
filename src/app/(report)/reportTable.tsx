@@ -65,22 +65,20 @@ export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, re
             dim.height = ROW_HEIGHT;
         }
     );
-    const [currentId, setCurrentId] = useState<any | null>(null);
-    const [visible, setVisible] = useState<Record<string, boolean>>({});
+    const [currentId, setCurrentId] = useState<string | null>(null);
+    const [rowIdShowMenu, setRowIdShowMenu] = useState<string | null>(null);
+
     const { showToast } = useToast();
-    const openMenu = (idRow: string) => setVisible(prev => ({ ...prev, [idRow]: true }));
 
-    const closeMenu = (idRow: string) => setVisible(prev => ({ ...prev, [idRow]: false }));
-
-    const onPressRow = useCallback((itemTable: any) => {
+    const onPressRow = useCallback((itemTable: IData) => {
         setCurrentId(itemTable.idRow);
-        openMenu(itemTable.idRow);
+        setRowIdShowMenu(itemTable.idRow);
     }, []);
-    const onDismiss = useCallback((itemTable: any) => {
-        closeMenu(itemTable.idRow);
+    const onDismiss = useCallback((itemTable: IData) => {
+        setRowIdShowMenu(null);
     }, []);
     const onPressMenu = useCallback(async (menu: IData, item: IData) => {
-        closeMenu(item.idRow);
+        setRowIdShowMenu(null);
         if (menu.id === 'EDIT_VOUCHER') {
             const url = encodeURIComponent(`SELECT TOP 1 a.WINDOW_ID,a.WINDOW_NAME,b.DP FROM VC_WINDOW a INNER JOIN DMCT b ON a.MA_CT=b.MA_CT AND b.DVCS_ID=N'${orgUnit}' WHERE a.ma_ct='${item.MA_CT}'`);
             await api.get({
@@ -133,14 +131,13 @@ export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, re
             return fnVisible(item);
         });
         const isVoucher = isNotEmpty(item.MA_CT) && isNotEmpty(item.DOC_ID);
-        if (item.idRow === 'f5f2d552-e7b0-4875-b8e5-8ca80e12f039') {
-            console.log('newMenu, isVoucher', newMenu, isVoucher, visible[item.idRow]);
-        }
+        const isMenuVisible = rowIdShowMenu === item.idRow;
         return ((newMenu.length > 0 || isVoucher) ? <Menu
             mode='elevated'
+            key={isMenuVisible ? 'true' : 'false'}
             contentStyle={{ backgroundColor: colors.background }}
-            visible={!!visible[item.idRow]}
-            onDismiss={() => closeMenu(item.idRow)}
+            visible={isMenuVisible}
+            onDismiss={() => onDismiss(item.idRow)}
             anchor={
                 <ReportTableItem item={item} groupedColumns={groupedColumns[vnd_nt]} filter={filterKey}
                     paramSystem={paramSystem} onPress={onPressRow} selected={item.idRow === currentId} />
@@ -165,7 +162,7 @@ export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, re
         </Menu> : <ReportTableItem item={item} groupedColumns={groupedColumns[vnd_nt]} filter={filterKey}
             paramSystem={paramSystem} onPress={onPressRow} selected={item.idRow === currentId} />);
 
-    }, [visible, menuRow, groupedColumns, vnd_nt, filterKey, paramSystem, currentId, onPressRow, onPressMenu, colors, _]);
+    }, [menuRow, groupedColumns, vnd_nt, filterKey, paramSystem, currentId, rowIdShowMenu, onPressRow, onPressMenu, colors, _]);
 
     useEffect(() => {
         // eslint-disable-next-line no-unused-expressions

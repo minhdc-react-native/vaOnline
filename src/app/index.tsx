@@ -6,16 +6,13 @@ import { useEffect } from "react";
 import { View } from "react-native";
 
 export default function AppScreen() {
-    const { isLoggedIn, login, setLoggedIn, biometricLogin } = useAuth();
+    const { isLoggedIn, login, setLoggedIn } = useAuth();
     useEffect(() => {
         const checkLogin = async () => {
             const token = await getToken();
             if (!!token) {
                 const remember = await getRemember();
                 await login(remember);
-                // await biometricLogin(async (password) => {
-                //     await login({ ...remember, pass: password });
-                // })
             } else {
                 setLoggedIn(false);
             }

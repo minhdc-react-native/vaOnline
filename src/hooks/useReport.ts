@@ -7,9 +7,9 @@ import { IDataSource, IHandleActionConfig } from "@/schema";
 import { getListItemView, ListItemView } from "@/schema/voucher/itemView";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
-import { router } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleProp, ViewStyle } from "react-native";
+import FileViewer from 'react-native-file-viewer';
 import UUID from 'react-native-uuid';
 import { useDataApp } from "./zustand/useDataApp";
 
@@ -117,7 +117,9 @@ export const useReport = ({ itemMenuWin, reportDefault }: IProgs) => {
             });
             if (file) {
                 if (type === "pdf") {
-                    router.navigate({ pathname: '/viewPdf', params: { title: currentReport!.REPORT_NAME, uriPdf: file.uri } });
+                    FileViewer.open(file.uri) // mở theo trình đọc của thiết bị.
+                        .then(() => console.log('Opened'))
+                        .catch(error => console.log(error));
                 } else {
                     await shareFile({ uri: file.uri, title: currentReport!.REPORT_NAME, type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
                 }
