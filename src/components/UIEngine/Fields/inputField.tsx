@@ -124,7 +124,7 @@ const InputFieldComponent: React.FC<IProps> = ({
                 style={[
                     {
                         height: height || (isMulti ? 100 : 40),
-                        top: -1,
+                        top: -3,
                     },
                     upperCase && { textTransform: "uppercase" },
                 ]}

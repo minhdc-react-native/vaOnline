@@ -68,7 +68,8 @@ npm install --legacy-peer-deps
 
 rm -rf ios/Pods ios/build ios/Podfile.lock node_modules package-lock.json yarn.lock
 
-npm install   # hoặc yarn install
+yarn install cd ios && pod install && cd ..
+
 npx expo-doctor
 
 npx expo install --fix
@@ -80,3 +81,6 @@ rm -rf android/app/build
 
 # run:
 ./gradlew bundleRelease --stacktrace
+
+
+

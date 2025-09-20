@@ -116,13 +116,16 @@ export const useReport = ({ itemMenuWin, reportDefault }: IProgs) => {
                 setLoading: setLoading
             });
             if (file) {
-                if (type === "pdf") {
-                    FileViewer.open(file.uri) // mở theo trình đọc của thiết bị.
-                        .then(() => console.log('Opened'))
-                        .catch(error => console.log(error));
-                } else {
-                    await shareFile({ uri: file.uri, title: currentReport!.REPORT_NAME, type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-                }
+                FileViewer.open(file.uri) // mở theo trình đọc của thiết bị.
+                    .then(() => console.log('Opened'))
+                    .catch(async (error) => {
+                        console.log(error);
+                        await shareFile({
+                            uri: file.uri, title: currentReport!.REPORT_NAME,
+                            type: type === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        }
+                        );
+                    });
             }
         }
     }, [vnd_nt, currentReport, showToast]);

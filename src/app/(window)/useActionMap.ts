@@ -84,7 +84,14 @@ export const useActionMap = ({ handleRefresh, checkLayoutAction }: IProgs) => {
                     if (file) {
                         FileViewer.open(file.uri) // mở theo trình đọc của thiết bị.
                             .then(() => console.log('Opened'))
-                            .catch(error => console.log(error));
+                            .catch(async (error) => {
+                                console.log(error);
+                                await shareFile({
+                                    uri: file.uri, title: values.REPORT_FILE,
+                                    type: "application/pdf"
+                                }
+                                );
+                            });
                     }
                 });
             },
