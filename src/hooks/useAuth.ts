@@ -7,7 +7,6 @@ import { api } from "@/utils/apiMethods";
 import { clearRemember, clearToken, saveOrgUnit, saveRemember, saveToken, saveYear } from "@/utils/vcStorage";
 import { router } from "expo-router";
 import { useState } from "react";
-import * as Keychain from "react-native-keychain";
 import { useFeedback } from "./useFeedback";
 import { useDataApp } from "./zustand/useDataApp";
 const colors = theme.colors, nameIcon = "arrow-right-thin";
@@ -123,48 +122,6 @@ export const useAuth = () => {
     const orgUnit = useDataApp((state) => state.orgUnit);
     const { setTranslations, _ } = useTranslation();
 
-    const saveBiometric = async (password: string) => {
-        const biometryType = await Keychain.getSupportedBiometryType();
-        if (biometryType) {
-            await Keychain.setGenericPassword("user", password, {
-                service: "com.vacom.accountingonline",
-                accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
-                accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
-            });
-        } else {
-            // showToast('❌ Máy của bạn chưa cài đặt sinh trắc học!');
-            await Keychain.setGenericPassword("user", password, {
-                service: "com.vacom.accountingonline",
-                accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
-            });
-        }
-    };
-
-    const biometricLogin = async (callBack: (password: string) => void) => {
-        try {
-            const credentials = await Keychain.getGenericPassword({
-                authenticationPrompt: {
-                    title: "Đăng nhập",
-                    subtitle: "Xác thực bằng Face ID / vân tay",
-                    description: "Sử dụng sinh trắc học để đăng nhập",
-                },
-                service: "com.vacom.accountingonline",
-            });
-            console.log("credentials>>", credentials);
-            if (credentials) {
-                console.log("✅ Lấy token:", credentials.password);
-                callBack(credentials.password);
-                return credentials.password; // password lưu trước đó
-            }
-            return null;
-        } catch (e) {
-            console.log("❌ Lỗi sinh trắc học:", e);
-            logout();
-            showToast("❌ Lỗi sinh trắc học");
-            return null;
-        }
-    };
-
     const logout = async () => {
         showPopup({
             message: _('MUON_THOAT'),
@@ -200,7 +157,6 @@ export const useAuth = () => {
                     _loginError();
                     return;
                 }
-                await saveBiometric(data.pass);
                 await saveToken(res.token);
 
                 setOrgUnit(data.dvcs);
@@ -382,7 +338,6 @@ export const useAuth = () => {
         licenseInfo,
         setLoggedIn,
         getDvcsByUser,
-        biometricLogin,
         login,
         logout,
         getListApp,

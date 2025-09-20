@@ -177,7 +177,7 @@ const ViewComponent: React.FC<IProgs> = ({ tableSearch, idRef, label, placeholde
                         data={data}
                         showsVerticalScrollIndicator={false}
                         keyExtractor={(item: Record<string, any>) => item.id}
-                        renderItem={({ item, index }: { item: IData, index: number }) => <ItemView item={item} onPress={getItemSelected} isSelect={item[fField] === value} tableSearch={tableSearch} checkSelected={checkSelected} itemView={itemView} />}
+                        renderItem={({ item, index }) => <ItemView item={item} onPress={getItemSelected} isSelect={item[fField] === value} tableSearch={tableSearch} checkSelected={checkSelected} itemView={itemView} />}
                         ItemSeparatorComponent={() => <Divider />}
                         ListFooterComponent={() => <View style={{ height: 50 }} />}
                         initialNumToRender={20}

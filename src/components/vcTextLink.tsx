@@ -34,7 +34,7 @@ export const VcTextLink = ({ text, style, variant, typeLink = 'tel', numberOfLin
                 loop
                 style={styles.lottie}
             />}
-            {typeLink !== "tel" && <MaterialCommunityIcons style={{ paddingRight: 5 }} name={typeLink === "web" ? "web" : "email-arrow-right"} size={20} color={colors.secondary} />}
+            {typeLink !== "tel" && <MaterialCommunityIcons style={{ paddingRight: 5 }} name={typeLink === "web" ? "web" : "email-send"} size={20} color={colors.secondary} />}
             <Text numberOfLines={numberOfLines} variant={variant} style={style}>{text}</Text>
         </Pressable>
     );

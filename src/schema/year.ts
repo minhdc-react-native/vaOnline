@@ -1,5 +1,4 @@
 import { theme } from "@/theme/theme";
-import * as z from "zod";
 import { ISchemaWin, ISchemaWinValue } from ".";
 const colors = theme.colors;
 const year0: ISchemaWin = {
@@ -30,5 +29,5 @@ const year0: ISchemaWin = {
 export const year: ISchemaWinValue = {
     config: year0,
     defaultNew: {},
-    zod: z.object()
+    zod: {}
 }

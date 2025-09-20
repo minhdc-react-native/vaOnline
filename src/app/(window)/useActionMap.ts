@@ -3,7 +3,7 @@ import { useLoading } from "@/components/dialog/loadingProvider";
 import { usePopup } from "@/components/dialog/popupProvider";
 import { useToast } from "@/components/dialog/useToast";
 import { api } from "@/utils/apiMethods";
-import { File } from 'expo-file-system';
+import * as FileSystem from 'expo-file-system';
 import { router } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { useMemo } from "react";
@@ -47,8 +47,7 @@ export const shareFile = async ({
     } finally {
         if (isDelete) {
             try {
-                const file = new File(uri);
-                file.delete();
+                await FileSystem.deleteAsync(uri);
                 console.log("✅ Xoá thành công:", uri);
             } catch (err) {
                 console.warn("❌ Lỗi xoá file:", err);
