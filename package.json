@@ -47,6 +47,7 @@
     "react-content-loader": "^7.1.1",
     "react-dom": "19.1.0",
     "react-native": "0.81.4",
+    "react-native-animated-pagination-dots": "^0.1.73",
     "react-native-blob-util": "^0.22.2",
     "react-native-calendars": "^1.1313.0",
     "react-native-camera-kit": "^16.1.2",

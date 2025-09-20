@@ -145,8 +145,6 @@ export const api = {
                 const file = new File(fileUri);
 
                 file.write(uint8);
-
-                console.log('file size, type>>', file.size, file.type);
                 return {
                     uri: fileUri,
                     base64: isBase64 ? base64Str : undefined,
