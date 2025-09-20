@@ -36,8 +36,8 @@ export function CustomDrawerContent({ drawerItems, title }: { drawerItems: Drawe
             style={styles.container}
             locations={[0, 0.3, 0.7, 1]}
         >
-            <Text numberOfLines={1} variant='titleLarge'
-                style={{ textAlign: "center", fontWeight: "bold", color: colors.elevation.level5, paddingVertical: 10, paddingHorizontal: 20 }}>{title}</Text>
+            <Text numberOfLines={2} variant='titleLarge'
+                style={{ textAlign: "center", fontWeight: "bold", color: colors.elevation.level5, paddingVertical: 10, paddingHorizontal: 20 }}>{`${title}`}</Text>
             <View style={styles.avatar} >
                 <Pressable onPress={() => { }} style={{ borderWidth: 2, borderRadius: 50, borderColor: colors.elevation.level5 }}>
                     <Avatar.Image style={{ backgroundColor: colors.backdrop }}

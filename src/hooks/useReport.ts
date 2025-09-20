@@ -394,7 +394,8 @@ const mapLayoutFilter = (dataFilter: IData[], orgUnit: string, userLogin: string
         const isNotListTime = (item.NAME as string).toUpperCase() !== 'P_LIST_TIME';
         if (isNotListTime) {
             const defaultValue = (item.DEFAULTVALUE ?? '').replace('@Default=', '');
-            acc[item.NAME] = arrReplace[defaultValue] !== undefined ? arrReplace[defaultValue] : (item.TYPE_EDITOR === "checkbox" ? Number(defaultValue) : defaultValue);
+            acc[item.NAME] = arrReplace[defaultValue] !== undefined ? arrReplace[defaultValue] : (['checkbox', 'autonumeric'].includes(item.TYPE_EDITOR) ? Number(defaultValue) : defaultValue);
+
             if (item.HIDDEN === "C") paramHidden.push(item.NAME);
 
             if (FROM_DATE.includes((item.NAME as string).toUpperCase())) isSelectTime.from = item.NAME;
@@ -405,7 +406,6 @@ const mapLayoutFilter = (dataFilter: IData[], orgUnit: string, userLogin: string
             if (['gridcombo', 'combo', 'multiselect', 'treesuggest', 'richselect', 'radio'].includes(item.TYPE_EDITOR)) {
                 dataSource[item.REF_ID] = item.TYPE_EDITOR !== 'radio' ? { url: getUrlReference(item.REF_ID) } : { data: JSON.parse(item.LIST_COLUMN) };
             }
-
             if ([...FROM_DATE, ...TO_DATE, ...FROM_DATE0, ...TO_DATE0].includes((item.NAME as string).toUpperCase())) zod[item.NAME] = { type: "string" };
 
         } else {
@@ -448,7 +448,8 @@ const TypeEditor = {
     dateedit: 'dateedit',
     multiselect: 'multiselect',
     checkbox: 'checkbox',
-    radio: 'radio'
+    radio: 'radio',
+    autonumeric: 'autonumeric'
 }
 const getItemViewReport = (typeEditor: string, listColumn0: string) => {
 
@@ -567,6 +568,13 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 label: _(item.CAPTION),
                 bind: item.NAME,
                 keySource: item.REF_ID,
+                style: style
+            };
+        case TypeEditor.autonumeric:
+            return {
+                type: "number",
+                label: _(item.CAPTION),
+                bind: item.NAME,
                 style: style
             };
         default:

@@ -80,12 +80,3 @@ rm -rf android/app/build
 
 # run:
 ./gradlew bundleRelease --stacktrace
-# hiển thị PDF trên ios
-<key>NSAppTransportSecurity</key>
-    <dict>
-      <key>NSAllowsArbitraryLoads</key>
-      <true/>
-      <key>NSAllowsLocalNetworking</key>
-      <true/>
-    </dict>
-
