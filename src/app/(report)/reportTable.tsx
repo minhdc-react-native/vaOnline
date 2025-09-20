@@ -73,8 +73,11 @@ export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, re
     const closeMenu = (idRow: string) => setVisible(prev => ({ ...prev, [idRow]: false }));
 
     const onPressRow = useCallback((itemTable: any) => {
-        setCurrentId(itemTable.idRow)
+        setCurrentId(itemTable.idRow);
         openMenu(itemTable.idRow);
+    }, []);
+    const onDismiss = useCallback((itemTable: any) => {
+        closeMenu(itemTable.idRow);
     }, []);
     const onPressMenu = useCallback(async (menu: IData, item: IData) => {
         closeMenu(item.idRow);
@@ -123,21 +126,24 @@ export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, re
                 params: { report: JSON.stringify(report) }
             })
         }
-    }, [routerNumber, filterKey, vnd_nt]);
+    }, [orgUnit, _, routerNumber, vnd_nt, filterKey, showToast]);
     const rowRenderer = useCallback((__: string | number, item: T) => {
         const newMenu = menuRow.filter(menu => {
             const fnVisible = new Function('parentRow', menu.VISIBLE_WHEN || 'return true');
             return fnVisible(item);
         });
         const isVoucher = isNotEmpty(item.MA_CT) && isNotEmpty(item.DOC_ID);
+        if (item.idRow === 'f5f2d552-e7b0-4875-b8e5-8ca80e12f039') {
+            console.log('newMenu, isVoucher', newMenu, isVoucher, visible[item.idRow]);
+        }
         return ((newMenu.length > 0 || isVoucher) ? <Menu
             mode='elevated'
             contentStyle={{ backgroundColor: colors.background }}
-            visible={visible[item.idRow]}
+            visible={!!visible[item.idRow]}
             onDismiss={() => closeMenu(item.idRow)}
             anchor={
                 <ReportTableItem item={item} groupedColumns={groupedColumns[vnd_nt]} filter={filterKey}
-                    paramSystem={paramSystem} onPress={onPressRow} currentId={currentId} />
+                    paramSystem={paramSystem} onPress={onPressRow} selected={item.idRow === currentId} />
             }>
             {isVoucher && <Pressable style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, paddingHorizontal: 10 }]} onPress={() => onPressMenu({ id: 'EDIT_VOUCHER' }, item)}>
                 <View style={{ flexDirection: "row", gap: 5, paddingVertical: 5 }}>
@@ -157,7 +163,7 @@ export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, re
                 )
             })}
         </Menu> : <ReportTableItem item={item} groupedColumns={groupedColumns[vnd_nt]} filter={filterKey}
-            paramSystem={paramSystem} onPress={onPressRow} currentId={currentId} />);
+            paramSystem={paramSystem} onPress={onPressRow} selected={item.idRow === currentId} />);
 
     }, [visible, menuRow, groupedColumns, vnd_nt, filterKey, paramSystem, currentId, onPressRow, onPressMenu, colors, _]);
 

@@ -16,6 +16,10 @@ const ViewerPdf = () => {
     const { colors } = useTheme<VACOMTheme>();
     const sharePdf = async () => {
         if (uri) {
+            // const file = new File(uri);
+            // file.open();
+            const a = await File.pickFileAsync(uri, "application/pdf");
+            console.log('a>>', a);
             await shareFile({
                 uri: uri,
                 type: "application/pdf",
@@ -57,13 +61,14 @@ const ViewerPdf = () => {
                 <Appbar.Action icon="share-variant" onPress={sharePdf} />
             </Appbar.Header>
             {uri && <Pdf
-                source={{ uri: uri }}
+                source={{ uri: encodeURI(uri), cache: true }}
                 style={styles.pdf}
                 fitPolicy={0}
                 trustAllCerts={false}
                 horizontal={false}
                 enablePaging={false}
                 spacing={4}
+                onPageChanged={(page, pages) => console.log(`page: ${page}/${pages}`)}
                 onLoadComplete={(pages) => console.log(`Tổng trang: ${pages}`)}
                 onError={(error) => console.log(error)}
             />}

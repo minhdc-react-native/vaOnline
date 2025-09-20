@@ -117,7 +117,6 @@ export const api = {
                 const base64Str = Buffer.from(res.data, 'binary').toString('base64');
                 const fileUri = Paths.document.uri + finalName;
                 const file = new File(fileUri);
-
                 file.write(uint8);
 
                 return {
@@ -138,13 +137,16 @@ export const api = {
                 const res = await vcAxios.post(link, data, { responseType: 'arraybuffer' });
                 const contentDisposition = res.headers?.['content-disposition'];
                 const finalName = getFilenameFromContentDisposition(fileName, contentDisposition);
+
                 const uint8 = new Uint8Array(res.data);
+
                 const base64Str = Buffer.from(res.data, 'binary').toString('base64');
                 const fileUri = Paths.document.uri + finalName;
                 const file = new File(fileUri);
 
                 file.write(uint8);
-                console.log('file size>>', file.size)
+
+                console.log('file size, type>>', file.size, file.type);
                 return {
                     uri: fileUri,
                     base64: isBase64 ? base64Str : undefined,

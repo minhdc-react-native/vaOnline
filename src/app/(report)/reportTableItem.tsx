@@ -10,10 +10,10 @@ interface IProgs {
     groupedColumns: IColumnReport[],
     paramSystem: IParamSystem | null,
     onPress?: (item: any) => void,
-    currentId?: any | null,
+    selected?: boolean,
     filter: Record<string, any>
 }
-export const ReportTableItem = ({ item, groupedColumns, paramSystem, onPress, currentId, filter }: IProgs) => {
+export const ReportTableItem = ({ item, groupedColumns, paramSystem, onPress, selected, filter }: IProgs) => {
     const { colors } = useTheme<VACOMTheme>();
     const isBold = item.BOLD === "C";
     return (
@@ -48,7 +48,7 @@ export const ReportTableItem = ({ item, groupedColumns, paramSystem, onPress, cu
                                 borderColor: colors.vacom.borderColor,
                                 justifyContent: 'center',
                                 alignItems: 'center',
-                                backgroundColor: item.idRow === currentId ? colors.elevation.level1 : '#fff',
+                                backgroundColor: selected ? colors.elevation.level1 : '#fff',
                             },
                             index === 0 ? { borderLeftWidth: BORDER_WIDTH } : {},
                         ]}
