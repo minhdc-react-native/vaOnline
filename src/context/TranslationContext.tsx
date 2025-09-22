@@ -14,8 +14,11 @@ type TranslationContextType = {
 const TranslationContext = createContext<TranslationContextType | null>(null);
 
 export const TranslationProvider = ({ children }: { children: React.ReactNode }) => {
-    const [translations, setTranslations] = useState<Translation>({});
+    const [translations, setTrans] = useState<Translation>({});
 
+    const setTranslations = (_t: Translation) => {
+        setTrans(prev => ({ ...prev, ..._t }));
+    }
     const _ = (key?: string) => {
         return key ? (translations[key] || key) : ''; // nếu chưa có dịch thì fallback = key
     };

@@ -119,7 +119,7 @@ const InputFieldComponent: React.FC<IProps> = ({
                     backgroundColor: disabled
                         ? colors.elevation.level1
                         : colors.background,
-                    borderColor: "rgba(119, 86, 81,0.3)",
+                    borderColor: !!msgError ? colors.error : "rgba(119, 86, 81,0.3)",
                 }}
                 style={[
                     {

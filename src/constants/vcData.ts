@@ -41,21 +41,15 @@ export const VcData = {
         { label: 'dashboard', path: '/accounting/dashboard', icon: 'view-dashboard-outline' },
         { label: 'catalog', path: '/accounting/catalog', icon: 'format-list-text' },
         { label: 'voucher', path: '/accounting/voucher', icon: 'file-document-multiple' },
-        // { label: 'invoice', path: '/accounting/invoice', icon: 'file-document-outline' },
-        // { label: 'tool', path: '/accounting/tool', icon: 'cube' },
-        // { label: 'costing', path: '/accounting/costing', icon: 'factory' },
         { label: 'custom', path: '/accounting/custom', icon: 'mother-heart' },
-        { label: 'report', path: '/accounting/report', icon: 'chart-bar' },
-        // { label: 'system', path: '/accounting/system', icon: 'cog' }
+        { label: 'report', path: '/accounting/report', icon: 'chart-bar' }
     ],
     drawerHkd: [
         { label: 'dashboard', path: '/hkd/dashboard', icon: 'view-dashboard-outline' },
         { label: 'catalog', path: '/hkd/catalog', icon: 'format-list-text' },
         { label: 'voucher', path: '/hkd/voucher', icon: 'file-document-multiple' },
-        // { label: 'invoice', path: '/hkd/invoice', icon: 'file-document-outline' },
         { label: 'custom', path: '/hkd/custom', icon: 'mother-heart' },
         { label: 'report', path: '/hkd/report', icon: 'chart-bar' },
-        // { label: 'system', path: '/hkd/system', icon: 'cog' }
     ],
     menuApp: {
         'd72ee2a8-88ff-45b4-9c04-41f71d93e282': DataMenuAccounting,

@@ -152,36 +152,42 @@ export const useAuth = () => {
             },
             data: data,
             callBack: async (res) => {
-                if (res && res.error) {
-                    showToast(res.error, { type: "error" });
-                    _loginError();
-                    return;
-                }
-                await saveToken(res.token);
 
-                setOrgUnit(data.dvcs);
-                setUserLogin(data.username);
+                if (!!res) {
+                    if (res.error) {
+                        showToast(res.error, { type: "error" });
+                        _loginError();
+                        return;
+                    } else {
+                        await saveToken(res.token);
 
-                await saveOrgUnit(data.dvcs);
+                        setOrgUnit(data.dvcs);
+                        setUserLogin(data.username);
 
-                if (data.remember) {
-                    await saveRemember(data);
+                        await saveOrgUnit(data.dvcs);
+
+                        if (data.remember) {
+                            await saveRemember(data);
+                        } else {
+                            await clearRemember();
+                        }
+                        await getRoundNumber();
+                        setYears(res.nam);
+                        saveYear(res.nam?.[0].NAM);
+                        setCurrentYear(res.nam?.[0].NAM);
+
+                        setLang(data.lang ?? 'vi');
+                        await getListVoucher2();
+
+                        await getCurrencies();
+                        await getLangTitle(data.lang ?? 'vi');
+                        setLoggedIn(true);
+                        //
+                        router.replace("/list-app");
+                    }
                 } else {
-                    await clearRemember();
+                    _loginError();
                 }
-                await getRoundNumber();
-                setYears(res.nam);
-                saveYear(res.nam?.[0].NAM);
-                setCurrentYear(res.nam?.[0].NAM);
-
-                setLang(data.lang ?? 'vi');
-                await getListVoucher2();
-
-                await getCurrencies();
-                await getLangTitle(data.lang ?? 'vi');
-                setLoggedIn(true);
-                //
-                router.replace("/list-app");
             },
             setLoading: (loading) => setLoading(loading, false, 'Truy cập...'),
             callError: async (err) => {

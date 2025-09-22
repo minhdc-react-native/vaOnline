@@ -366,7 +366,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             setInfoData({ total: 0, hasMore: true });
             setData([]);
         }
-        stateLoading.current = { ...stateLoading.current, refresh: params?.page === 1 };
+        stateLoading.current = { ...stateLoading.current, refresh: params?.page === 1, loadMore: params?.page !== 1 };
         const domain = await getSubDomain();
         api.post({
             link: `/api/System/GetDataByWindowNo`,
@@ -386,9 +386,9 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 setData(prev => (params?.page === 1 ? dataPage : [...prev, ...dataPage]));
             },
             setLoading: (loading) => {
-                if (params?.page === 1) {
-                    loading ? show("Tải dữ liệu") : hide()
-                }
+                // if (params?.page === 1) {
+                //     loading ? show("Tải dữ liệu") : hide()
+                // }
                 stateLoading.current = { ...stateLoading.current, refresh: false, loadMore: params?.page !== 1 ? loading : false };
             },
             callError: (err) => {

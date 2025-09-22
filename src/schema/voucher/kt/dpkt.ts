@@ -27,7 +27,7 @@ const dpkt0: ISchemaWin = {
                         {
                             type: "date",
                             label: "DEN_NGAY",
-                            bind: 'p_NGAY_CT1',
+                            bind: 'p_NGAY_CT2',
                             style: { flex: 1 }
                         }
                     ]

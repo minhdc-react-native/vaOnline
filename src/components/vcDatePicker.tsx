@@ -42,7 +42,8 @@ interface VcDatePickerProps {
   disabled?: boolean;
   onChange: (date: string) => void;
   placeholder?: string;
-  style?: StyleProp<ViewStyle>
+  style?: StyleProp<ViewStyle>;
+  isError?: boolean
 }
 
 const ViewComponent: React.FC<VcDatePickerProps> = ({
@@ -51,7 +52,8 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
   disabled = false,
   onChange,
   placeholder,
-  style
+  style,
+  isError
 }) => {
   const [visible, setVisible] = useState(false);
   const [currentDate, setCurrentDate] = useState<string | null>(value ? dayjs.utc(value).format("YYYY-MM-DD") : null);
@@ -117,7 +119,7 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
   return (
     <>
       <View style={[{ marginTop: 6 }, style]}>
-        <Pressable style={({ pressed }) => [styles.button, { opacity: pressed ? 0.7 : 1, backgroundColor: disabled ? colors.elevation.level1 : colors.background, borderColor: colors.vacom.borderColor }]} onPress={() => {
+        <Pressable style={({ pressed }) => [styles.button, { opacity: pressed ? 0.7 : 1, backgroundColor: disabled ? colors.elevation.level1 : colors.background, borderColor: isError ? colors.error : colors.vacom.borderColor }]} onPress={() => {
           if (disabled) return;
           setVisible(true);
         }}>
@@ -165,7 +167,7 @@ interface ICalendar {
   selectYear: number;
   setSelectYear: (value: React.SetStateAction<number>) => void;
   hideCalendar: () => void;
-  style?: StyleProp<ViewStyle>
+  style?: StyleProp<ViewStyle>;
 }
 const ShowCalendar: React.FC<ICalendar> = ({
   currentDate, nowDate, initialDate, handleDayPress,

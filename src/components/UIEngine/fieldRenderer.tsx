@@ -166,6 +166,10 @@ const ViewComponent: React.FC<IProps> = ({
         }
     }, [configExpression?.refId, field.bind]);
 
+    const isError = useMemo(() => {
+        return field.bind && errors[field.bind] ? true : false;
+    }, [errors, field.bind])
+
     switch (field.type) {
         case 'rows':
 
@@ -261,21 +265,21 @@ const ViewComponent: React.FC<IProps> = ({
         case 'number':
             return (
                 <View key={`${key}view`} style={field.style}>
-                    <VcNum disabled={disabled} label={_(label)} typeFormat={field.format} key={key} value={value} onChange={setValue} />
+                    <VcNum disabled={disabled} label={_(label)} typeFormat={field.format} key={key} value={value} onChange={setValue} isError={isError} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'date':
             return (
                 <View key={`${key}view`} style={[field.style]}>
-                    <VcDatePicker disabled={disabled} label={_(label)} key={key} value={value} onChange={setValue} />
+                    <VcDatePicker disabled={disabled} label={_(label)} key={key} value={value} onChange={setValue} isError={isError} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case "time":
             return (
                 <View key={`${key}view`} style={[field.style]}>
-                    <VcTimePicker disabled={disabled} label={_(label)} key={key} value={value} onChange={setValue} />
+                    <VcTimePicker disabled={disabled} label={_(label)} key={key} value={value} onChange={setValue} isError={isError} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
@@ -323,14 +327,14 @@ const ViewComponent: React.FC<IProps> = ({
             return (
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
                     <VcSearchList value={value} disabled={disabled} label={_(label)} clean={field.clean} itemView={field.itemView || itemView?.view} numCharSearch={field.numCharSearch}
-                        idRef={field.idRef || itemView?.refId} tableSearch={field.tableSearch} fField={field.fField} checkSelected={field.checkSelected} onChange={onSelectSearch} />
+                        idRef={field.idRef || itemView?.refId} tableSearch={field.tableSearch} fField={field.fField} checkSelected={field.checkSelected} onChange={onSelectSearch} isError={isError} />
                     <ErrorTooltip field={field} errors={errors} />
                 </View>
             );
         case 'selectList':
             return (
                 <View key={`${key}view`} style={[{ paddingVertical: 5 }, field.style]}>
-                    <VcSelectList disabled={disabled} data={dataSource[field.keySource || field.bind!] ?? []} label={_(label)} key={key} clean={field.clean}
+                    <VcSelectList disabled={disabled} data={dataSource[field.keySource || field.bind!] ?? []} label={_(label)} key={key} clean={field.clean} isError={isError}
                         fValue={field.fValue || itemView?.value} fId={field.fId || itemView?.id} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit} checkSelected={field.checkSelected}
                         idRef={field.idRef || itemView?.refId} itemView={field.itemView || itemView?.view} fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={onSelectList} notFistFilter={field.notFistFilter} />
                     <ErrorTooltip field={field} errors={errors} />
@@ -339,7 +343,7 @@ const ViewComponent: React.FC<IProps> = ({
         case 'selectListMulti':
             return (
                 <View key={`${key}view`} style={[field.style]}>
-                    <VcSelectListMulti data={dataSource[field.keySource || field.bind!] ?? []} label={_(label)} key={key}
+                    <VcSelectListMulti data={dataSource[field.keySource || field.bind!] ?? []} label={_(label)} key={key} isError={isError}
                         idRef={field.idRef || itemView?.refId} itemView={field.itemView} fValue={field.fValue} fId={field.fId} value={value} tableWin={field.tableWin} isNewEdit={field.isNewEdit}
                         fDisplay={field.fDisplay} typeDisplay={field.typeDisplay} onChange={setValue} disabled={disabled} />
                     <ErrorTooltip field={field} errors={errors} />
@@ -349,7 +353,7 @@ const ViewComponent: React.FC<IProps> = ({
             const display = getValue(field.fValue);
             return (
                 <View key={`${key}view`} style={field.style}>
-                    <VcSelectPage label={_(label)} key={key} clean={field.clean} disabled={disabled}
+                    <VcSelectPage label={_(label)} key={key} clean={field.clean} disabled={disabled} isError={isError}
                         itemMenuWin={field.itemMenuWin} defaultFilter={field.defaultFilter} isNewEdit={field.isNewEdit}
                         value={value} display={display} onChange={(itemSelected) => {
                             setValues({

@@ -36,7 +36,7 @@ interface IProgs {
     placeholder?: string;
     data: IData[];
     value: string; // Ex: "id1,id2"
-    fDisplay?: { fId: string; fValue: string; field?: string };
+    fDisplay?: { fId?: string; fValue?: string; field?: string };
     onChange: (value: string) => void;
     typeDisplay?: "value" | "both";
     fId?: string;
@@ -49,7 +49,7 @@ interface IProgs {
     isError?: boolean;
     isNewEdit?: boolean;
     separator?: string;
-    disabled?: boolean
+    disabled?: boolean;
 }
 
 const VcSelectListMulti = ({

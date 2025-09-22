@@ -113,7 +113,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
     }, [MA_KHO, detail.changeOtherDetail, groupCode, onScanned, setIsChange, showToast]);
 
     return (
-        <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
+        <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout, marginBottom: insets.bottom }}>
             {(!itemData || detail.loadingDetail) ? <LoadingScreen style={{ marginTop: 100 }} /> : <>
                 <Appbar.Header>
                     <VcHeaderWin edit={true} title={titleWin} onBack={onBack} onPressAction={handleAction.save} />

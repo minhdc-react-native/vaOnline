@@ -161,7 +161,7 @@ export type ISelectListMultiField = IFieldBase & {
     typeDisplay?: 'value' | 'both';
     fId?: string;
     fValue?: string;
-    fDisplay?: { fId: string, fValue: string, field?: string };
+    fDisplay?: { fId?: string, fValue?: string, field?: string };
     style?: StyleProp<ViewStyle>;
     loading?: boolean,
     tableWin: ITableWin;

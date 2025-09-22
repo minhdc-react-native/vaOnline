@@ -550,7 +550,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
             return {
                 type: "selectListMulti",
                 tableWin: "Empty",
-                fValue: 'id',
+                fDisplay: { fValue: 'id' },
                 idRef: item.REF_ID,
                 keySource: item.REF_ID,
                 label: _(item.CAPTION),
