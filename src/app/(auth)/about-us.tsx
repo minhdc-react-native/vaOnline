@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useMemo, useRef } from 'react';
 import { Animated, Dimensions, Image, StyleSheet, View } from 'react-native';
 import {
-    ScalingDot
+    ExpandingDot
 } from 'react-native-animated-pagination-dots';
 import PagerView, { PagerViewOnPageScrollEventData } from 'react-native-pager-view';
 import { Appbar, Divider, Text, useTheme } from 'react-native-paper';
@@ -18,14 +18,14 @@ const INTRO_DATA = [
         img: 'https://vacom.com.vn/uploads/34/tai-sao-chon-vacom/z4875508460449-be8f4266000de9338282c55311f29ee6.jpg',
         title: 'Gìn giữ sự hài lòng',
         description:
-            'Chúng tôi tạo ra khách hàng hài lòng. VACOM luôn cho rằng Mỗi khách hàng là 1 sản phẩm đặc biệt và là 1 lời cam kết',
+            'Chúng tôi tạo ra khách hàng hài lòng. VACOM luôn cho rằng Mỗi khách hàng là 1 sản phẩm đặc biệt và là 1 lời cam kết.',
     },
     {
         key: '2',
         img: 'https://vacom.com.vn/uploads/34/tai-sao-chon-vacom/z4875508460445-546b93255e6f0c562b9debb1c624877b.jpg',
         title: 'Thấu hiểu khách hàng',
         description:
-            "Chúng tôi luôn ưu tiên hiểu được nhu cầu khách hàng, từ đó sẽ luôn có giải pháp tối ưu nhất tư vấn và triển khai cho khách hàng",
+            "Chúng tôi luôn ưu tiên hiểu được nhu cầu khách hàng, từ đó sẽ luôn có giải pháp tối ưu nhất tư vấn và triển khai cho khách hàng.",
     },
     {
         key: '3',
@@ -90,7 +90,7 @@ export default function AboutUs() {
                             alignItems: "center", justifyContent: "center", backgroundColor: '#fff'
                         }}>
                             <Image source={{ uri: info.img }} style={styles.logoSlide} resizeMode='stretch' />
-                            <View style={{ flexShrink: 1, paddingHorizontal: 20, top: -180, width: 276 }}>
+                            <View style={{ flexShrink: 1, paddingHorizontal: 20, top: -180, width: 276, gap: 10 }}>
                                 <Text variant='titleSmall' style={{ fontWeight: "bold", color: colors.secondary }}>{info.title}</Text>
                                 <Text variant='bodySmall' >{info.description}</Text>
                             </View>
@@ -99,14 +99,22 @@ export default function AboutUs() {
                 })}
             </PagerView>
             <View style={styles.dotContainer}>
-                <ScalingDot
-                    testID={'scaling-dot'}
+                <ExpandingDot
                     data={INTRO_DATA}
-                    //@ts-ignore
+                    expandingDotWidth={30}
+                    //@ts-ignore:next-line
                     scrollX={scrollX}
+                    inActiveDotColor={colors.primary}
+                    inActiveDotOpacity={0.2}
+                    activeDotColor={colors.primary}
+                    dotStyle={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: 5,
+                        marginHorizontal: 5
+                    }}
                 />
             </View>
-
         </View>
     );
 }

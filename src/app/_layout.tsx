@@ -17,9 +17,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider } from 'react-native-paper';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import { enableScreens } from 'react-native-screens';
+
 enableScreens();
 
 export default function RootLayout() {
+
   return (
     <TranslationProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
