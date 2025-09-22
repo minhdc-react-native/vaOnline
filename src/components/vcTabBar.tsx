@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { LayoutChangeEvent, ScrollView, StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
-import { useTheme } from "react-native-paper";
+import { Badge, useTheme } from "react-native-paper";
 
 interface IProgs {
     value: string | number | null,
@@ -67,7 +67,7 @@ export const VcTabBar = ({ value, data, onPress, style }: IProgs) => {
                             <Text style={[styles.tabText, isFocused && [styles.activeTabText, { color: colors.background, backgroundColor: colors.primary }]]}>
                                 {item.value}
                             </Text>
-                            {/* {isFocused && <View style={{ width: "100%", borderWidth: 1, borderColor: colors.primary }} />} */}
+                            {!!item.badge && <Badge style={{ position: "absolute", borderColor: colors.primary, borderWidth: 1, backgroundColor: colors.elevation.level4, color: colors.secondary }}>{getTextBadge(Number(item.badge))}</Badge>}
                         </TouchableOpacity>
                     );
                 })}
@@ -75,7 +75,9 @@ export const VcTabBar = ({ value, data, onPress, style }: IProgs) => {
         </View>
     );
 }
-
+const getTextBadge = (badge: number) => {
+    return badge < 100 ? badge.toString() : '99+';
+}
 const styles = StyleSheet.create({
     tabBarScroll: {
         flexDirection: 'row',

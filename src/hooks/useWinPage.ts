@@ -314,8 +314,9 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     }, [_, getConfigTab, pageSize, setDataTags, tableWin, typeWin, windowId])
 
     const tabs = useMemo(() => {
-        return dataTags[tableWin] ?? [];
-    }, [tableWin, dataTags]);
+        const _tags = dataTags[tableWin] ?? [];
+        return _tags.map(t => ({ ...t, badge: dataItemDetail[tableWin]?.[t.TAB_TABLE]?.length ?? 0 }));
+    }, [tableWin, dataTags, dataItemDetail]);
 
     const [currentTab, setCurrentTab] = useState<ITabWin>(tabs?.[0]);
 
