@@ -197,20 +197,25 @@ export const useReport = ({ itemMenuWin, reportDefault }: IProgs) => {
                 const url = (configSource.url as string).replace('#DVCS_ID#', encodeURIComponent(orgUnit!));
 
                 const apiGetPost = configSource.type === "post" ? api.post : api.get;
-                await apiGetPost({
-                    link: url, data: configSource.dataPost,
-                    callBack: (res => {
-                        if (res) {
-                            setSource(res, source, key);
-                            if (configSource?.tableWin) {
-                                setTableRefresh(prev => ({
-                                    ...prev,
-                                    [configSource.tableWin]: { url: configSource.url, type: configSource.type, dataPost: configSource.dataPost, key: key }
-                                }));
+                try {
+                    await apiGetPost({
+                        link: url, data: configSource.dataPost,
+                        callBack: (res => {
+                            if (res) {
+                                setSource(res, source, key);
+                                if (configSource?.tableWin) {
+                                    setTableRefresh(prev => ({
+                                        ...prev,
+                                        [configSource.tableWin]: { url: configSource.url, type: configSource.type, dataPost: configSource.dataPost, key: key }
+                                    }));
+                                }
                             }
-                        }
-                    })
-                });
+                        })
+                    });
+                } catch (error) {
+                    setSource([], source, key);
+                }
+
             }
         });
         await Promise.all(promises);

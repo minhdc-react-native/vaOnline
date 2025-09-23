@@ -1,5 +1,4 @@
 import { useTranslation } from '@/context/TranslationContext';
-import { useDataApp } from '@/hooks/zustand/useDataApp';
 import { ListItemView } from '@/schema/voucher/itemView';
 import { VACOMTheme } from '@/theme/theme';
 import { Helper } from '@/utils/Helper';
@@ -8,7 +7,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { Calendar, LocaleConfig } from 'react-native-calendars';
+import { Calendar } from 'react-native-calendars';
 import { Pressable } from 'react-native-gesture-handler';
 import { Divider, IconButton, Portal, Text, useTheme } from 'react-native-paper';
 import { PopupProvider } from './dialog/popupProvider';
@@ -16,48 +15,6 @@ import ShowBottom from './dialog/showBottom';
 import { VcNum } from './vcNum';
 import VcSelectList from './vcSelectList';
 dayjs.extend(utc);
-
-LocaleConfig.locales['vi'] = {
-  monthNames: [
-    'Tháng 1',
-    'Tháng 2',
-    'Tháng 3',
-    'Tháng 4',
-    'Tháng 5',
-    'Tháng 6',
-    'Tháng 7',
-    'Tháng 8',
-    'Tháng 9',
-    'Tháng 10',
-    'Tháng 11',
-    'Tháng 12'
-  ],
-  monthNamesShort: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
-  dayNames: ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'],
-  dayNamesShort: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
-  today: "Hôm nay"
-};
-
-LocaleConfig.locales['en'] = {
-  monthNames: [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ],
-  monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-  dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-  dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-  today: "Today"
-};
 
 interface VcDatePickerProps {
   label?: string;
@@ -85,8 +42,6 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
   const [selectMonth, setSelectMonth] = useState<number>(parseInt((currentDate || nowDate).split('-')[1]));
   const { colors } = useTheme<VACOMTheme>();
   const [initialDate, setInitialDate] = useState<string | null>(currentDate);
-  const lang = useDataApp(state => state.lang);
-  LocaleConfig.defaultLocale = (lang === 'vi' ? 'vi' : 'en');
   const handleDayPress = (day: any) => {
     onChange(`${day.dateString} 00:00:00`);
     setCurrentDate(day.dateString);

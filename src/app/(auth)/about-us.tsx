@@ -59,6 +59,9 @@ export default function AboutUs() {
     const scrollOffsetAnimatedValue = useRef(new Animated.Value(0)).current;
     const positionAnimatedValue = useRef(new Animated.Value(0)).current;
     const inputRange = [0, INTRO_DATA.length];
+
+    const scrollOffset = useRef(new Animated.Value(0)).current;
+
     const scrollX = Animated.add(
         scrollOffsetAnimatedValue,
         positionAnimatedValue
@@ -74,7 +77,7 @@ export default function AboutUs() {
                     {
                         nativeEvent: {
                             offset: scrollOffsetAnimatedValue,
-                            position: positionAnimatedValue,
+                            position: positionAnimatedValue
                         },
                     },
                 ],
@@ -97,7 +100,7 @@ export default function AboutUs() {
                 {INTRO_DATA.map(info => {
                     return (
                         <View key={info.key} style={{
-                            borderWidth: 1, borderColor: colors.secondary, borderRadius: 20,
+                            borderWidth: StyleSheet.hairlineWidth, borderColor: colors.secondary, borderRadius: 20,
                             margin: 20, backgroundColor: colors.background,
                             gap: 20, alignItems: "center", justifyContent: "center"
                         }}>

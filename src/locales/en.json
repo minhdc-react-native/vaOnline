@@ -1,0 +1,61 @@
+{
+    "app-label": {
+        "Link": "Link",
+        "User Name": "User Name",
+        "Password": "Password",
+        "Select OrgUnit": "Select OrgUnit",
+        "Remember": "Remember",
+        "Forgot Password": "Forgot Password",
+        "Login": "Login",
+        "SEARCH": "Search"
+    },
+    "calendar": {
+        "monthNames": [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ],
+        "monthNamesShort": [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+        ],
+        "dayNames": [
+            "Sunday",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+        ],
+        "dayNamesShort": [
+            "Sun",
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat"
+        ],
+        "today": "Today"
+    }
+}

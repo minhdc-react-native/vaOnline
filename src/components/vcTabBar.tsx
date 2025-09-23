@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { LayoutChangeEvent, ScrollView, StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
-import { Badge, useTheme } from "react-native-paper";
+import { LayoutChangeEvent, ScrollView, StyleProp, StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
+import { Text, useTheme } from "react-native-paper";
 
 interface IProgs {
     value: string | number | null,
@@ -64,10 +64,11 @@ export const VcTabBar = ({ value, data, onPress, style }: IProgs) => {
                                 tabLayouts.current[item.id] = { x, width };
                             }}
                         >
-                            <Text style={[styles.tabText, isFocused && [styles.activeTabText, { color: colors.background, backgroundColor: colors.primary }]]}>
+                            <Text style={[styles.tabText,
+                            isFocused && [styles.activeTabText, { color: colors.background, backgroundColor: colors.primary }]]}>
                                 {item.value}
                             </Text>
-                            {!!item.badge && <Badge style={{ position: "absolute", borderColor: colors.primary, borderWidth: 1, backgroundColor: colors.elevation.level4, color: colors.secondary }}>{getTextBadge(Number(item.badge))}</Badge>}
+                            {!!item.badge && <Text style={{ fontSize: 10, borderRadius: 10, position: "absolute", paddingHorizontal: 5, paddingVertical: 2, right: 5, borderColor: colors.primary, borderWidth: 1, backgroundColor: colors.elevation.level4, color: colors.secondary }}>{getTextBadge(Number(item.badge))}</Text>}
                         </TouchableOpacity>
                     );
                 })}
@@ -92,12 +93,16 @@ const styles = StyleSheet.create({
     },
     tabText: {
         fontSize: 14,
+        padding: 5,
         color: '#999',
+        borderRadius: 10
     },
     activeTabText: {
         // fontWeight: 'bold',
+        fontSize: 15,
         textAlign: "center",
-        padding: 5,
-        borderRadius: 10
-    }
+        // paddingHorizontal: 5,
+        // paddingVertical: 2,
+        // borderRadius: 10
+    },
 });

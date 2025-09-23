@@ -5,6 +5,7 @@ import { SchemaUIEngine } from '@/components/UIEngine/schemaUIEngine';
 import { IRowsColsField } from '@/components/UIEngine/types';
 import { useTranslation } from '@/context/TranslationContext';
 import { useAuth } from '@/hooks/useAuth';
+import { infoLocale } from '@/locales/locale';
 import { loginForm } from '@/schemaUI/loginForm';
 import { VACOMTheme } from '@/theme/theme';
 import { Helper } from '@/utils/Helper';
@@ -15,28 +16,7 @@ import { Image, StyleSheet, View } from 'react-native';
 import { Button, Card, Text, ToggleButton, useTheme } from 'react-native-paper';
 
 const sloganVacom = require('@/assets/images/splash.png') // Logo
-const loginTranslations = {
-    vi: {
-        'Link': 'Liên kết',
-        'User Name': 'Tên truy cập',
-        'Password': 'Mật khẩu',
-        'Select OrgUnit': 'Chọn đơn vị',
-        'Remember': 'Ghi nhớ',
-        'Forgot Password': 'Quên mật khẩu',
-        'Login': 'Đăng nhập',
-        'SEARCH': 'Tìm kiếm'
-    },
-    en: {
-        'Link': 'Link',
-        'User Name': 'User Name',
-        'Password': 'Password',
-        'Select OrgUnit': 'Select OrgUnit',
-        'Remember': 'Remember',
-        'Forgot Password': 'Forgot Password',
-        'Login': 'Login',
-        'SEARCH': 'Search'
-    }
-}
+
 const infoVacom: IRowsColsField = {
     type: "rows",
     style: { justifyContent: "center", alignItems: "center" },
@@ -63,7 +43,7 @@ export default function LoginScreen() {
     const { login, listDvcs, getDvcsByUser } = useAuth();
     const { setTranslations } = useTranslation();
     const onChangeLang = async (lang: 'vi' | 'en') => {
-        setTranslations(loginTranslations[lang]);
+        setTranslations(infoLocale[lang]['app-label']);
         onChangeItemData({ lang: lang });
     }
     const onChangeItemData = (valueChange: any) => {
@@ -123,7 +103,7 @@ export default function LoginScreen() {
             const remember = await getRemember();
             const domain = await getSubDomain();
             const lang: 'vi' | 'en' = remember ? remember.lang : _data.lang;
-            setTranslations(loginTranslations[lang ?? 'vi']);
+            setTranslations(infoLocale[lang ?? 'vi']['app-label']);
             setData({ ..._data, ...remember, domain: domain || '' });
         }
         getStorage();

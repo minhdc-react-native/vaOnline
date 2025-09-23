@@ -2,6 +2,7 @@ import { DataMenuAccounting, WindowAccounting } from "@/constants/dataMenuAccoun
 import { DataMenuHkd, WindowHkd } from "@/constants/dataMenuHkd";
 import { IConfigDateMenuWin, VcData } from "@/constants/vcData";
 import { useTranslation } from "@/context/TranslationContext";
+import { setupCalendarLocales } from "@/locales/locale";
 import { theme } from "@/theme/theme";
 import { api } from "@/utils/apiMethods";
 import { clearRemember, clearToken, saveOrgUnit, saveRemember, saveToken, saveYear } from "@/utils/vcStorage";
@@ -177,6 +178,9 @@ export const useAuth = () => {
                         setCurrentYear(res.nam?.[0].NAM);
 
                         setLang(data.lang ?? 'vi');
+
+                        setupCalendarLocales(data.lang === 'vi' ? 'vi' : 'en');
+
                         await getListVoucher2();
 
                         await getCurrencies();
