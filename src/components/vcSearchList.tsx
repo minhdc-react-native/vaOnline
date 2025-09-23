@@ -190,7 +190,7 @@ const ViewComponent: React.FC<IProgs> = ({ tableSearch, idRef, label, placeholde
         </>
     );
 }
-export const VcSearchList = React.memo(ViewComponent);
+const VcSearchList = React.memo(ViewComponent);
 
 type IProps = {
     tableSearch: ITableSearch;

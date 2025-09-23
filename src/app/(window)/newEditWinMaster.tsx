@@ -159,7 +159,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                         width: 55,
                         height: 55,
                         borderRadius: 55,
-                        bottom: insets.bottom + 20,
+                        bottom: 20,
                         right: 20,
                         position: 'absolute',
                     }}

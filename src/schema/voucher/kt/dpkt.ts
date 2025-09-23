@@ -345,6 +345,7 @@ const dpkt0: ISchemaWin = {
                         type: "selectList",
                         tableWin: "Empty",
                         clean: false,
+                        fDisplay: { fValue: 'id' },
                         label: "MA_NT",
                         bind: "MA_NT",
                         expression: { TY_GIA: 'TY_GIA' },

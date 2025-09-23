@@ -172,7 +172,6 @@ const ViewComponent: React.FC<IProps> = ({
 
     switch (field.type) {
         case 'rows':
-
             const fieldsRows = field.fields?.filter((child) => {
                 return child.visibleIf ? evalExpr(child.visibleIf, child.requiredKeys) : true;
             }) ?? [];

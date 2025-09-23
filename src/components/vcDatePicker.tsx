@@ -1,9 +1,12 @@
+import { useTranslation } from '@/context/TranslationContext';
+import { useDataApp } from '@/hooks/zustand/useDataApp';
+import { ListItemView } from '@/schema/voucher/itemView';
 import { VACOMTheme } from '@/theme/theme';
 import { Helper } from '@/utils/Helper';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { Pressable } from 'react-native-gesture-handler';
@@ -11,9 +14,10 @@ import { Divider, IconButton, Portal, Text, useTheme } from 'react-native-paper'
 import { PopupProvider } from './dialog/popupProvider';
 import ShowBottom from './dialog/showBottom';
 import { VcNum } from './vcNum';
+import VcSelectList from './vcSelectList';
 dayjs.extend(utc);
 
-LocaleConfig.locales['vi-VN'] = {
+LocaleConfig.locales['vi'] = {
   monthNames: [
     'Tháng 1',
     'Tháng 2',
@@ -34,7 +38,26 @@ LocaleConfig.locales['vi-VN'] = {
   today: "Hôm nay"
 };
 
-LocaleConfig.defaultLocale = 'vi-VN';
+LocaleConfig.locales['en'] = {
+  monthNames: [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ],
+  monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+  today: "Today"
+};
 
 interface VcDatePickerProps {
   label?: string;
@@ -62,7 +85,8 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
   const [selectMonth, setSelectMonth] = useState<number>(parseInt((currentDate || nowDate).split('-')[1]));
   const { colors } = useTheme<VACOMTheme>();
   const [initialDate, setInitialDate] = useState<string | null>(currentDate);
-
+  const lang = useDataApp(state => state.lang);
+  LocaleConfig.defaultLocale = (lang === 'vi' ? 'vi' : 'en');
   const handleDayPress = (day: any) => {
     onChange(`${day.dateString} 00:00:00`);
     setCurrentDate(day.dateString);
@@ -175,6 +199,15 @@ const ShowCalendar: React.FC<ICalendar> = ({
   hideCalendar, style
 }) => {
   const { colors } = useTheme();
+  const { _ } = useTranslation();
+
+  const months = useMemo(() => {
+    return Array.from({ length: 12 }, (__, i) => ({
+      id: i + 1,
+      value: `${_('THANG')} ${i + 1}`,
+    }));
+  }, [_]);
+
   return (
     <Portal>
       <PopupProvider>
@@ -182,8 +215,9 @@ const ShowCalendar: React.FC<ICalendar> = ({
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <IconButton icon={'close'} style={{ left: -10 }} onPress={() => hideCalendar()} iconColor={colors.secondary} />
             <View style={{ flex: 1 }} />
-            <VcNum value={selectMonth} minValue={1} maxValue={12} onChange={(value) => value && setSelectMonth(value)}
-              ignoreFormat={true} showMinusPlus={true} style={{ width: 100, marginRight: 5 }} />
+            <VcSelectList value={selectMonth} placeholder={_('THANG')} clean={false} data={months} itemView={ListItemView.VALUE} onChange={(month) => setSelectMonth(Number(month?.id))} style={{ height: 35, top: -3, marginRight: 10, width: 100 }} fValue='id' />
+            {/* <VcNum value={selectMonth} minValue={1} maxValue={12} onChange={(value) => value && setSelectMonth(value)}
+              ignoreFormat={true} showMinusPlus={true} style={{ width: 100, marginRight: 5 }} /> */}
             <VcNum value={selectYear} minValue={1000} maxValue={9999} onChange={(value) => value && setSelectYear(value)}
               ignoreFormat={true} showMinusPlus={true} style={{ width: 120 }} />
           </View>

@@ -1,50 +1,61 @@
 // app/welcome.tsx
 import { VACOMTheme } from '@/theme/theme';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import LottieView from 'lottie-react-native';
 import { useMemo, useRef } from 'react';
-import { Animated, Dimensions, Image, StyleSheet, View } from 'react-native';
+import { Animated, Dimensions, StyleSheet, View } from 'react-native';
 import {
     ExpandingDot
 } from 'react-native-animated-pagination-dots';
 import PagerView, { PagerViewOnPageScrollEventData } from 'react-native-pager-view';
 import { Appbar, Divider, Text, useTheme } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const width = Dimensions.get('window').width;
-const tyLe = (width - 40) / 276;
 
 const INTRO_DATA = [
     {
         key: '1',
-        img: 'https://vacom.com.vn/uploads/34/tai-sao-chon-vacom/z4875508460449-be8f4266000de9338282c55311f29ee6.jpg',
-        title: 'Gìn giữ sự hài lòng',
+        img: require('@/assets/animations/about-us1.json'),
+        title: 'Gìn giữ sự hài lòng', titleE: 'Maintaining satisfaction',
         description:
             'Chúng tôi tạo ra khách hàng hài lòng. VACOM luôn cho rằng Mỗi khách hàng là 1 sản phẩm đặc biệt và là 1 lời cam kết.',
+        descriptionE:
+            'We create satisfied customers. VACOM always believes that each customer is a special product and a commitment.',
     },
     {
         key: '2',
-        img: 'https://vacom.com.vn/uploads/34/tai-sao-chon-vacom/z4875508460445-546b93255e6f0c562b9debb1c624877b.jpg',
-        title: 'Thấu hiểu khách hàng',
+        img: require('@/assets/animations/about-us2.json'),
+        title: 'Thấu hiểu khách hàng', titleE: 'Understanding customers',
         description:
             "Chúng tôi luôn ưu tiên hiểu được nhu cầu khách hàng, từ đó sẽ luôn có giải pháp tối ưu nhất tư vấn và triển khai cho khách hàng.",
+        descriptionE:
+            "We always prioritize understanding customer needs, from which we will always have the best solution to advise and implement for customers.",
     },
     {
         key: '3',
-        img: 'https://vacom.com.vn/uploads/34/tai-sao-chon-vacom/z4875508466853-07ad63b60dcfd53d184c8cb858a8b4f0.jpg',
-        title: 'Triển khai chuyên nghiệp',
+        img: require('@/assets/animations/about-us3.json'),
+        title: 'Triển khai chuyên nghiệp', titleE: 'Professional implementation',
         description:
             'Đội ngũ triển khai có chuyên môn cao, đáp ứng tuyệt đối nhu cầu của khách hàng.',
+        descriptionE:
+            'Highly qualified implementation team, absolutely meeting customer needs.',
     },
     {
         key: '4',
-        img: 'https://vacom.com.vn/uploads/34/tai-sao-chon-vacom/z4889492514482-895ce7a324abae0be44d9a65a04e4383.jpg',
-        title: 'Bào hành tận tình',
+        img: require('@/assets/animations/about-us4.json'),
+        title: 'Bào hành tận tình', titleE: 'Wholehearted warranty',
         description:
             'Bảo hành, bảo trì trong quá trình sử dụng. Sẵn sàng mở rộng các chức năng theo nhu cầu quản trị trong tương lai.',
+        descriptionE:
+            'Warranty and maintenance during use. Ready to expand functions according to future administrative needs.',
     },
 ];
 
 export default function AboutUs() {
+    const { lang } = useLocalSearchParams();
     const { colors } = useTheme<VACOMTheme>();
+    const insets = useSafeAreaInsets();
     const scrollOffsetAnimatedValue = useRef(new Animated.Value(0)).current;
     const positionAnimatedValue = useRef(new Animated.Value(0)).current;
     const inputRange = [0, INTRO_DATA.length];
@@ -76,7 +87,7 @@ export default function AboutUs() {
     );
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, paddingBottom: insets.bottom, backgroundColor: colors.vacom.backLayout }}>
             <Appbar.Header>
                 <Appbar.BackAction onPress={() => router.back()} />
                 <Appbar.Content title='VACOM' />
@@ -86,13 +97,19 @@ export default function AboutUs() {
                 {INTRO_DATA.map(info => {
                     return (
                         <View key={info.key} style={{
-                            gap: 20,
-                            alignItems: "center", justifyContent: "center", backgroundColor: '#fff'
+                            borderWidth: 1, borderColor: colors.secondary, borderRadius: 20,
+                            margin: 20, backgroundColor: colors.background,
+                            gap: 20, alignItems: "center", justifyContent: "center"
                         }}>
-                            <Image source={{ uri: info.img }} style={styles.logoSlide} resizeMode='stretch' />
-                            <View style={{ flexShrink: 1, paddingHorizontal: 20, top: -180, width: 276, gap: 10 }}>
-                                <Text variant='titleSmall' style={{ fontWeight: "bold", color: colors.secondary }}>{info.title}</Text>
-                                <Text variant='bodySmall' >{info.description}</Text>
+                            <LottieView
+                                source={info.img}
+                                autoPlay
+                                loop
+                                style={styles.lottie}
+                            />
+                            <View style={{ flexShrink: 1, paddingHorizontal: 50, top: -50, gap: 10 }}>
+                                <Text variant='headlineSmall' style={{ fontWeight: "bold", color: colors.secondary }}>{lang?.toString() === "vi" ? info.title : info.titleE}</Text>
+                                <Text variant='titleMedium' >{lang?.toString() === "vi" ? info.description : info.descriptionE}</Text>
                             </View>
                         </View>
                     );
@@ -120,19 +137,22 @@ export default function AboutUs() {
 }
 
 const styles = StyleSheet.create({
+    lottie: {
+        width: 300,
+        height: 300
+    },
+    logo: {
+        width: 400,
+        height: 150,
+    },
     pagerView: {
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        justifyContent: "center"
     },
     dotContainer: {
         justifyContent: 'center',
         alignSelf: 'center',
-        marginBottom: 20,
-        top: -150
-    },
-    logoSlide: {
-        width: 276,
-        height: 459,
+        top: -50
     }
 });

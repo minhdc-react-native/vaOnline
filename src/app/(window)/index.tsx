@@ -203,7 +203,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
                     width: 55,
                     height: 55,
                     borderRadius: 55,
-                    bottom: (!menuWin0 ? insets.bottom : 0) + 20,
+                    bottom: 20,
                     right: 20,
                     position: 'absolute',
                 }}

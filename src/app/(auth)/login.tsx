@@ -146,7 +146,7 @@ export default function LoginScreen() {
                 <Image source={sloganVacom} style={styles.logo} />
             </View>
             <View style={{ alignSelf: "flex-end", marginBottom: 20 }}>
-                <Button icon={'arrow-right-bold-hexagon-outline'} onPress={() => router.navigate('/(auth)/about-us')}>{data.lang === 'vi' ? 'Về chúng tôi' : 'About us'}</Button>
+                <Button icon={'arrow-right-bold-hexagon-outline'} onPress={() => router.navigate({ pathname: '/(auth)/about-us', params: { lang: data.lang } })}>{data.lang === 'vi' ? 'Về chúng tôi' : 'About us'}</Button>
             </View>
             <Card style={{ padding: 20, backgroundColor: colors.background }} contentStyle={{ gap: 20 }}>
                 <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
