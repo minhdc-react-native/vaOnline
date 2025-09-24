@@ -100,7 +100,6 @@ const ViewComponent: React.FC<IListProps> = ({
         if (notFistFilter) return;
         setSearchText(value?.toString());
     }, []);
-
     return (
         <>
             <Pressable

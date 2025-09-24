@@ -124,12 +124,12 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                     {schemaUI.action?.showEditMaster !== false && <IconButton style={{ position: "absolute", bottom: 0, right: 10, backgroundColor: colors.backdrop }} icon={'pencil'} iconColor={colors.background} onPress={() => setShowEditMaster(true)} />}
                 </View>
                 {detail.tabs.length > 0 && <VcTabBar style={{ borderRadius: 0, borderWidth: 0 }} value={detail.currentTab?.id ?? ''} data={detail.tabs} onPress={(tab: any) => detail.setCurrentTab(tab)} />}
-                <Divider />
+                {/* <Divider /> */}
                 {detail.currentTab?.TAB_TABLE === "CTHV" &&
                     <>
                         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, backgroundColor: colors.background }}>
                             <VcCheckBox label={_('GOP_MA')} type="switch" value={groupCode} onChange={(value) => setGroupCode(typeof value === "boolean" ? value : value === "C")} />
-                            <VcSearchList style={{ flex: 1 }} label={_('MA_KHO')} tableSearch="DMKHO" fField="MA_KHO" value={MA_KHO} onChange={(item) => setMA_KHO(item?.id)} />
+                            <VcSearchList style={{ flex: 1, height: 35 }} placeholder={_('MA_KHO')} tableSearch="DMKHO" fField="MA_KHO" value={MA_KHO} onChange={(item) => setMA_KHO(item?.id)} />
                             <VcButtonScanner onScanned={onScanBarCode} />
                         </View>
                         <Divider />

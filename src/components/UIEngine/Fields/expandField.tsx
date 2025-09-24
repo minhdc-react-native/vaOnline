@@ -1,5 +1,6 @@
 import ExpandableView from "@/components/expandableView";
 import { IExpand, IField } from "@/components/UIEngine/types";
+import { VACOMTheme } from "@/theme/theme";
 import React, { useMemo } from "react";
 import { useTheme } from "react-native-paper";
 import { useContextSelector } from "use-context-selector";
@@ -18,7 +19,7 @@ const InputFieldComponent: React.FC<IProps> = ({
     _
 }) => {
     const evalExpr = useContextSelector(FormContext, (ctx) => ctx!.evalExpr);
-    const { colors } = useTheme();
+    const { colors } = useTheme<VACOMTheme>();
 
     const fieldsExpand = useMemo(() => {
         return field.fields?.filter((child) =>
@@ -63,9 +64,9 @@ const InputFieldComponent: React.FC<IProps> = ({
             defaultExpanded={field.defaultExpanded}
             disabled={disabled}
             expanded={field.expanded}
-            style={[{ borderColor: colors.elevation.level5 }, field.style]}
+            style={[{ borderColor: colors.vacom.borderColor }, field.style]}
             containerStyle={[{ padding: 10 }, field.containerStyle]}
-            styleHeader={[{ paddingVertical: 5, paddingHorizontal: 10, backgroundColor: colors.elevation.level1 }, field.styleHeader]}
+            styleHeader={[{ paddingVertical: 5, paddingHorizontal: 10, backgroundColor: '#f5f5f5' }, field.styleHeader]}
             type={field.typeExpand}
             titleStyle={{ fontWeight: "normal" }}
         >

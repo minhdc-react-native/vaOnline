@@ -89,14 +89,12 @@ export default function ScannerCode({ onScanned, scannerVisible, setScannerVisib
                         cameraType={CameraType.Back}
                     />
                 )}
-                {/* Overlay mờ */}
+
                 <View style={StyleSheet.absoluteFill}>
                     <Svg height="100%" width="100%">
                         <Defs>
                             <Mask id="mask" x="0" y="0" width="100%" height="100%">
-                                {/* Full opaque mask */}
                                 <Rect x="0" y="0" width="100%" height="100%" fill="white" />
-                                {/* Transparent hole */}
                                 <Rect
                                     x={(width - SCAN_SIZE) / 2}
                                     y={(SCREEN_HEIGHT - SCAN_SIZE) / 2}
@@ -108,7 +106,6 @@ export default function ScannerCode({ onScanned, scannerVisible, setScannerVisib
                                 />
                             </Mask>
                         </Defs>
-                        {/* Apply the mask */}
                         <Rect
                             x="0"
                             y="0"
@@ -118,7 +115,6 @@ export default function ScannerCode({ onScanned, scannerVisible, setScannerVisib
                             mask="url(#mask)"
                         />
                     </Svg>
-                    {/* Border khung quét */}
                     <View
                         style={{
                             position: 'absolute',

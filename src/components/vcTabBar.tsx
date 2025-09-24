@@ -37,7 +37,7 @@ export const VcTabBar = ({ value, data, onPress, style }: IProgs) => {
     }, [value, layoutReady]);
 
     return (
-        <View style={[{ height: 50, backgroundColor: colors.background, borderRadius: 20, borderWidth: 0.5, borderColor: colors.backdrop }, style]} onLayout={(event: LayoutChangeEvent) => {
+        <View style={[{ height: 50, backgroundColor: colors.background, borderWidth: 0.5, borderColor: colors.backdrop, borderBottomWidth: 1, borderBottomColor: colors.primary }, style]} onLayout={(event: LayoutChangeEvent) => {
             const { x, width } = event.nativeEvent.layout;
             setWidthView(width);
             requestAnimationFrame(() => {
@@ -50,25 +50,28 @@ export const VcTabBar = ({ value, data, onPress, style }: IProgs) => {
                 horizontal
                 ref={scrollRef}
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.tabBarScroll}
+                contentContainerStyle={[styles.tabBarScroll]}
             >
                 {data.map((item, i) => {
                     const isFocused = item.id === value;
                     return (
                         <TouchableOpacity
                             key={item.id}
-                            style={styles.tabItem}
+                            style={[styles.tabItem, isFocused && { backgroundColor: colors.primary }]}
                             onPress={() => onTabPress(item)}
                             onLayout={(event: LayoutChangeEvent) => {
                                 const { x, width } = event.nativeEvent.layout;
                                 tabLayouts.current[item.id] = { x, width };
                             }}
                         >
-                            <Text style={[styles.tabText,
-                            isFocused && [styles.activeTabText, { color: colors.background, backgroundColor: colors.primary }]]}>
+                            <Text numberOfLines={1} style={[styles.tabText,
+                            isFocused && [styles.activeTabText, { color: colors.background }]]}>
                                 {item.value}
                             </Text>
-                            {!!item.badge && <Text style={{ fontSize: 10, borderRadius: 10, position: "absolute", paddingHorizontal: 5, paddingVertical: 2, right: 5, borderColor: colors.primary, borderWidth: 1, backgroundColor: colors.elevation.level4, color: colors.secondary }}>{getTextBadge(Number(item.badge))}</Text>}
+                            {!!item.badge && <Text style={[
+                                styles.badge,
+                                isFocused ? { backgroundColor: colors.background, color: colors.secondary } : { backgroundColor: colors.backdrop, color: colors.background }
+                            ]}>{getTextBadge(Number(item.badge))}</Text>}
                         </TouchableOpacity>
                     );
                 })}
@@ -80,26 +83,38 @@ const getTextBadge = (badge: number) => {
     return badge < 100 ? badge.toString() : '99+';
 }
 const styles = StyleSheet.create({
+    badge: {
+        fontSize: 10,
+        paddingHorizontal: 5,
+        paddingVertical: 2,
+        borderRadius: 10
+    },
     tabBarScroll: {
         flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 8,
+        alignItems: 'flex-end',
+        paddingHorizontal: 20,
     },
     tabItem: {
-        paddingHorizontal: 12,
-        paddingVertical: 8,
+        // marginHorizontal: 10,
+        // marginVertical: 8,
+        paddingHorizontal: 10,
         alignItems: 'center',
-        borderRadius: 10
+        // borderRadius: 10,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        // maxWidth: 120,
+        gap: 5,
+        flexDirection: "row"
     },
     tabText: {
+        flexShrink: 1,
         fontSize: 14,
-        padding: 5,
-        color: '#999',
-        borderRadius: 10
+        paddingVertical: 5,
+        color: '#999'
     },
     activeTabText: {
         // fontWeight: 'bold',
-        fontSize: 15,
+        // fontSize: 15,
         textAlign: "center",
         // paddingHorizontal: 5,
         // paddingVertical: 2,

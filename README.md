@@ -82,5 +82,7 @@ rm -rf android/app/build
 # run:
 ./gradlew bundleRelease --stacktrace
 
+./gradlew buildEnvironment
+
 
 

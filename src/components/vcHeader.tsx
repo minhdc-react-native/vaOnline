@@ -86,7 +86,7 @@ export const VcHeader = ({ title, numRow, placeholder, titleView, backgroundColo
                             </>}
                         </View>
                         {onSearch && showSearch && <IconButton icon={() => <Feather name="search" size={24} color={colors.secondary} />} onPress={() => setIsSearch(true)} />}
-                        {onFilter && showFilter && <IconButton icon={'filter-outline'} onPress={onFilter} iconColor={'darkgreen'} />}
+                        {onFilter && showFilter && <IconButton icon={'filter-outline'} onPress={onFilter} iconColor={colors.primary} />}
                     </View>}
             </View>}
             {!isFastView && <Divider />}
