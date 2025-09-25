@@ -107,7 +107,7 @@ const TextFieldComponent: React.FC<IProps> = ({
 
     const renderRating = () => {
         if (!field.bind) {
-            valueText = labelText;
+            valueText = _(labelText);
             labelText = undefined;
         }
 
@@ -164,7 +164,7 @@ const TextFieldComponent: React.FC<IProps> = ({
 
     const renderLink = () => {
         if (!field.bind) {
-            valueText = labelText;
+            valueText = _(labelText);
             labelText = undefined;
         }
 
@@ -189,7 +189,7 @@ const TextFieldComponent: React.FC<IProps> = ({
         let addLabelStyle: StyleProp<TextStyle> = null;
         let addTextStyle: StyleProp<TextStyle> = null;
         if (!field.bind) {
-            valueText = labelText;
+            valueText = _(labelText);
             labelText = undefined;
         }
 
@@ -215,14 +215,14 @@ const TextFieldComponent: React.FC<IProps> = ({
                 if (!Helper.isEmpty(value)) {
                     valueText =
                         dataSourceMap.get(field.keySource || field.bind!)
-                            ?.get(value)?.[field.format.fValue ?? "value"] || "???";
+                            ?.get(value)?.[field.format.fValue ?? "value"] || "...";
                 }
                 break;
             case "tag":
                 if (!Helper.isEmpty(value)) {
                     const itemTag = dataSourceMap.get(field.keySource || field.bind!)
                         ?.get(value);
-                    valueText = itemTag?.[field.format.fValue ?? "value"] || "???";
+                    valueText = itemTag?.[field.format.fValue ?? "value"] || "...";
                     addStyle = {
                         paddingVertical: 2,
                         paddingHorizontal: 5,

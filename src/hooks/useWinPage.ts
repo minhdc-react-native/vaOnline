@@ -388,9 +388,9 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 setData(prev => (params?.page === 1 ? dataPage : [...prev, ...dataPage]));
             },
             setLoading: (loading) => {
-                if (params?.page === 1) {
-                    loading ? show("Tải dữ liệu") : hide()
-                }
+                // if (params?.page === 1) {
+                //     loading ? show("Tải dữ liệu") : hide()
+                // }
                 stateLoading.current = { ...stateLoading.current, refresh: false, loadMore: params?.page !== 1 ? loading : false };
             },
             callError: (err) => {
@@ -953,7 +953,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         // lấy các dữ liệu reference liên quan
         await loadDataBegin();
         hide();
-    }, [colors, extractWinConfig, hide, loadDataBegin, show, windowId]);
+    }, [colors, extractWinConfig, hide, loadDataBegin, setLayoutData, setWinConfig, show, tableWin, windowId]);
 
     const onBack = useCallback(() => {
         if (isChange) {
