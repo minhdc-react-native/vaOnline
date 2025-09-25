@@ -2,21 +2,15 @@ import { TextZoomIn } from '@/components/vcTextAnimation';
 import { router } from 'expo-router';
 import LottieView from 'lottie-react-native';
 import { Image, StyleSheet, View } from 'react-native';
-import { Button, Text, useTheme } from 'react-native-paper';
+import { Button, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 const sloganVacom = require('@/assets/images/splash.png') // Logo
 
 export default function WelcomeScreen() {
-    const { colors } = useTheme();
     return (
         <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 20, paddingBottom: 50 }}>
-            {/* <TextCrm text='CRM' /> */}
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
                 <Image source={sloganVacom} style={styles.logo} />
-                {/* <Text variant='headlineMedium' style={[styles.textProduct, {
-                    backgroundColor: colors.elevation.level2,
-                    borderColor: colors.elevation.level5
-                }]}>Acounting</Text> */}
                 <TextZoomIn text='Ứng dụng quản lý kế toán Online' />
             </View>
             <View style={{ justifyContent: 'flex-end', alignItems: 'center', paddingHorizontal: 50 }}>

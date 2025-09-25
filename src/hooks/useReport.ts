@@ -7,9 +7,9 @@ import { IDataSource, IHandleActionConfig } from "@/schema";
 import { getListItemView, ListItemView } from "@/schema/voucher/itemView";
 import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
-import { router } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleProp, ViewStyle } from "react-native";
+import FileViewer from 'react-native-file-viewer';
 import UUID from 'react-native-uuid';
 import { useDataApp } from "./zustand/useDataApp";
 
@@ -116,11 +116,16 @@ export const useReport = ({ itemMenuWin, reportDefault }: IProgs) => {
                 setLoading: setLoading
             });
             if (file) {
-                if (type === "pdf") {
-                    router.navigate({ pathname: '/viewPdf', params: { title: currentReport!.REPORT_NAME, uriPdf: file.uri } });
-                } else {
-                    await shareFile({ uri: file.uri, title: currentReport!.REPORT_NAME, type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-                }
+                FileViewer.open(file.uri) // mở theo trình đọc của thiết bị.
+                    .then(() => console.log('Opened'))
+                    .catch(async (error) => {
+                        console.log(error);
+                        await shareFile({
+                            uri: file.uri, title: currentReport!.REPORT_NAME,
+                            type: type === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        }
+                        );
+                    });
             }
         }
     }, [vnd_nt, currentReport, showToast]);
@@ -192,20 +197,25 @@ export const useReport = ({ itemMenuWin, reportDefault }: IProgs) => {
                 const url = (configSource.url as string).replace('#DVCS_ID#', encodeURIComponent(orgUnit!));
 
                 const apiGetPost = configSource.type === "post" ? api.post : api.get;
-                await apiGetPost({
-                    link: url, data: configSource.dataPost,
-                    callBack: (res => {
-                        if (res) {
-                            setSource(res, source, key);
-                            if (configSource?.tableWin) {
-                                setTableRefresh(prev => ({
-                                    ...prev,
-                                    [configSource.tableWin]: { url: configSource.url, type: configSource.type, dataPost: configSource.dataPost, key: key }
-                                }));
+                try {
+                    await apiGetPost({
+                        link: url, data: configSource.dataPost,
+                        callBack: (res => {
+                            if (res) {
+                                setSource(res, source, key);
+                                if (configSource?.tableWin) {
+                                    setTableRefresh(prev => ({
+                                        ...prev,
+                                        [configSource.tableWin]: { url: configSource.url, type: configSource.type, dataPost: configSource.dataPost, key: key }
+                                    }));
+                                }
                             }
-                        }
-                    })
-                });
+                        })
+                    });
+                } catch (error) {
+                    setSource([], source, key);
+                }
+
             }
         });
         await Promise.all(promises);
@@ -392,7 +402,8 @@ const mapLayoutFilter = (dataFilter: IData[], orgUnit: string, userLogin: string
         const isNotListTime = (item.NAME as string).toUpperCase() !== 'P_LIST_TIME';
         if (isNotListTime) {
             const defaultValue = (item.DEFAULTVALUE ?? '').replace('@Default=', '');
-            acc[item.NAME] = arrReplace[defaultValue] !== undefined ? arrReplace[defaultValue] : (item.TYPE_EDITOR === "checkbox" ? Number(defaultValue) : defaultValue);
+            acc[item.NAME] = arrReplace[defaultValue] !== undefined ? arrReplace[defaultValue] : (['checkbox', 'autonumeric'].includes(item.TYPE_EDITOR) ? Number(defaultValue) : defaultValue);
+
             if (item.HIDDEN === "C") paramHidden.push(item.NAME);
 
             if (FROM_DATE.includes((item.NAME as string).toUpperCase())) isSelectTime.from = item.NAME;
@@ -403,7 +414,6 @@ const mapLayoutFilter = (dataFilter: IData[], orgUnit: string, userLogin: string
             if (['gridcombo', 'combo', 'multiselect', 'treesuggest', 'richselect', 'radio'].includes(item.TYPE_EDITOR)) {
                 dataSource[item.REF_ID] = item.TYPE_EDITOR !== 'radio' ? { url: getUrlReference(item.REF_ID) } : { data: JSON.parse(item.LIST_COLUMN) };
             }
-
             if ([...FROM_DATE, ...TO_DATE, ...FROM_DATE0, ...TO_DATE0].includes((item.NAME as string).toUpperCase())) zod[item.NAME] = { type: "string" };
 
         } else {
@@ -446,7 +456,8 @@ const TypeEditor = {
     dateedit: 'dateedit',
     multiselect: 'multiselect',
     checkbox: 'checkbox',
-    radio: 'radio'
+    radio: 'radio',
+    autonumeric: 'autonumeric'
 }
 const getItemViewReport = (typeEditor: string, listColumn0: string) => {
 
@@ -544,7 +555,7 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
             return {
                 type: "selectListMulti",
                 tableWin: "Empty",
-                fValue: 'id',
+                fDisplay: { fValue: 'id' },
                 idRef: item.REF_ID,
                 keySource: item.REF_ID,
                 label: _(item.CAPTION),
@@ -565,6 +576,13 @@ const getConfigView = (item: IData, _: (key?: string) => string, style?: StylePr
                 label: _(item.CAPTION),
                 bind: item.NAME,
                 keySource: item.REF_ID,
+                style: style
+            };
+        case TypeEditor.autonumeric:
+            return {
+                type: "number",
+                label: _(item.CAPTION),
+                bind: item.NAME,
                 style: style
             };
         default:

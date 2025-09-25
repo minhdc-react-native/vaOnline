@@ -37,8 +37,8 @@ const cthv0: ISchemaWin = {
             {
                 type: "rows",
                 style: { justifyContent: "space-between" },
-                requiredKeys: ['_tkNo2'],
-                visibleIf: "{{_tkNo2}}",
+                requiredKeys: ['_tkNo2', 'TY_GIA'],
+                visibleIf: "{{_tkNo2 && TY_GIA===1}}",
                 fields: [
                     {
                         type: "text",
@@ -66,8 +66,37 @@ const cthv0: ISchemaWin = {
             {
                 type: "rows",
                 style: { justifyContent: "space-between" },
-                requiredKeys: ['_tkNo2'],
-                visibleIf: "{{!_tkNo2}}",
+                requiredKeys: ['_tkNo2', 'TY_GIA'],
+                visibleIf: "{{_tkNo2 && TY_GIA!==1}}",
+                fields: [
+                    {
+                        type: "text",
+                        label: 'SO_LUONG',
+                        bind: 'SO_LUONG',
+                        format: { type: "number", roundNumber: "rQuantity" },
+                        textStyle: { fontWeight: "bold" }
+                    },
+                    {
+                        type: "text",
+                        label: 'GIA_NT2',
+                        bind: 'GIA_NT2',
+                        format: { type: "number", roundNumber: "rPriceNt" },
+                        textStyle: { fontWeight: "bold" }
+                    },
+                    {
+                        type: "text",
+                        label: 'TIEN_NT2',
+                        bind: 'TIEN_NT2',
+                        format: { type: "number", roundNumber: "rAmountNt" },
+                        textStyle: { fontWeight: "bold" }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { justifyContent: "space-between" },
+                requiredKeys: ['_tkNo2', 'TY_GIA'],
+                visibleIf: "{{!_tkNo2 && TY_GIA===1}}",
                 fields: [
                     {
                         type: "text",
@@ -89,6 +118,198 @@ const cthv0: ISchemaWin = {
                         bind: 'TIEN',
                         format: { type: "number", roundNumber: "rAmount" },
                         textStyle: { fontWeight: "bold" }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { justifyContent: "space-between" },
+                requiredKeys: ['_tkNo2', 'TY_GIA'],
+                visibleIf: "{{!_tkNo2 && TY_GIA!==1}}",
+                fields: [
+                    {
+                        type: "text",
+                        label: 'SO_LUONG',
+                        bind: 'SO_LUONG',
+                        format: { type: "number", roundNumber: "rQuantity" },
+                        textStyle: { fontWeight: "bold" }
+                    },
+                    {
+                        type: "text",
+                        label: 'GIA_NT',
+                        bind: 'GIA_NT',
+                        format: { type: "number", roundNumber: "rPriceNt" },
+                        textStyle: { fontWeight: "bold" }
+                    },
+                    {
+                        type: "text",
+                        label: 'TIEN_NT',
+                        bind: 'TIEN_NT',
+                        format: { type: "number", roundNumber: "rAmountNt" },
+                        textStyle: { fontWeight: "bold" }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { justifyContent: "space-between" },
+                requiredKeys: ['T_CK_NT', 'TY_GIA'],
+                visibleIf: "{{isNotEmpty(T_CK_NT) && TY_GIA!==1}}",
+                fields: [
+                    { type: "text", label: "T_CK", variant: "bodySmall", style: { flex: 1 }, textStyle: { color: colors.secondary } },
+                    {
+                        type: "text",
+                        bind: 'PT_CK',
+                        format: { type: "number", roundNumber: "rPercentage" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "text",
+                        bind: 'T_CK_NT',
+                        format: { type: "number", roundNumber: "rAmountNt" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { justifyContent: "space-between" },
+                requiredKeys: ['T_CK', 'TY_GIA'],
+                visibleIf: "{{isNotEmpty(T_CK) && TY_GIA===1}}",
+                fields: [
+                    { type: "text", label: "T_CK", variant: "bodySmall", style: { flex: 1 }, textStyle: { color: colors.secondary } },
+                    {
+                        type: "text",
+                        bind: 'PT_CK',
+                        format: { type: "number", roundNumber: "rPercentage" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "text",
+                        bind: 'T_CK',
+                        format: { type: "number", roundNumber: "rAmount" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { justifyContent: "space-between" },
+                requiredKeys: ['T_NK_NT', 'TY_GIA'],
+                visibleIf: "{{isNotEmpty(T_NK_NT) && TY_GIA!==1}}",
+                fields: [
+                    { type: "text", label: "T_NK", variant: "bodySmall", style: { flex: 1 }, textStyle: { color: colors.secondary } },
+                    {
+                        type: "text",
+                        bind: 'PT_NK',
+                        format: { type: "number", roundNumber: "rPercentage" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "text",
+                        bind: 'T_NK_NT',
+                        format: { type: "number", roundNumber: "rAmountNt" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { justifyContent: "space-between" },
+                requiredKeys: ['T_NK', 'TY_GIA'],
+                visibleIf: "{{isNotEmpty(T_NK) && TY_GIA===1}}",
+                fields: [
+                    { type: "text", label: "T_NK", variant: "bodySmall", style: { flex: 1 }, textStyle: { color: colors.secondary } },
+                    {
+                        type: "text",
+                        bind: 'PT_NK',
+                        format: { type: "number", roundNumber: "rPercentage" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "text",
+                        bind: 'T_NK',
+                        format: { type: "number", roundNumber: "rAmount" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { justifyContent: "space-between" },
+                requiredKeys: ['T_DB_NT', 'TY_GIA'],
+                visibleIf: "{{isNotEmpty(T_DB_NT) && TY_GIA!==1}}",
+                fields: [
+                    { type: "text", label: "T_DB", variant: "bodySmall", style: { flex: 1 }, textStyle: { color: colors.secondary } },
+                    {
+                        type: "text",
+                        bind: 'PT_DB',
+                        format: { type: "number", roundNumber: "rPercentage" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "text",
+                        bind: 'T_DB_NT',
+                        format: { type: "number", roundNumber: "rAmountNt" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { justifyContent: "space-between" },
+                requiredKeys: ['T_DB', 'TY_GIA'],
+                visibleIf: "{{isNotEmpty(T_DB) && TY_GIA===1}}",
+                fields: [
+                    { type: "text", label: "T_DB", variant: "bodySmall", style: { flex: 1 }, textStyle: { color: colors.secondary } },
+                    {
+                        type: "text",
+                        bind: 'PT_DB',
+                        format: { type: "number", roundNumber: "rPercentage" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "text",
+                        bind: 'T_DB',
+                        format: { type: "number", roundNumber: "rAmount" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    }
+                ]
+            },
+            {
+                type: "rows",
+                style: { justifyContent: "space-between" },
+                requiredKeys: ['T_CP'],
+                visibleIf: "{{isNotEmpty(T_CP)}}",
+                fields: [
+                    { type: "text", label: "T_CP", variant: "bodySmall", style: { flex: 1 }, textStyle: { color: colors.secondary } },
+                    {
+                        type: "text",
+                        requiredKeys: ['T_CP_NT'],
+                        visibleIf: "{{isNotEmpty(T_CP_NT)}}",
+                        bind: 'T_CP_NT',
+                        format: { type: "number", roundNumber: "rAmountNt" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
+                    },
+                    {
+                        type: "text",
+                        bind: 'T_CP',
+                        format: { type: "number", roundNumber: "rAmount" },
+                        textStyle: { fontWeight: "bold", color: colors.secondary }, variant: "bodySmall",
+                        style: { flex: 1 }
                     }
                 ]
             }

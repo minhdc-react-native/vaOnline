@@ -5,6 +5,7 @@ import { VACOMTheme } from "@/theme/theme";
 import { Helper } from "@/utils/Helper";
 import { EvilIcons, FontAwesome } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import debounce from "lodash.debounce";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Keyboard, Pressable, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { ActivityIndicator, Divider, IconButton, Portal, Text, TextInput, useTheme } from "react-native-paper";
@@ -51,6 +52,15 @@ const ViewComponent: React.FC<IListProps> = ({
     const [searchText, setSearchText] = useState('');
     const [itemSelected, setItemSelected] = useState<IData | null>(data.find(item => item[fId] === value) || null);
     const { _ } = useTranslation();
+
+    const debouncedSearch = useMemo(
+        () =>
+            debounce((txt: string) => {
+                setSearchText(txt);
+            }, 300),
+        []
+    );
+
     const filteredList = useMemo(() => {
         if (!searchText) return data;
         const _searchText = Helper.rmTone(searchText).toLowerCase();
@@ -90,7 +100,6 @@ const ViewComponent: React.FC<IListProps> = ({
         if (notFistFilter) return;
         setSearchText(value?.toString());
     }, []);
-
     return (
         <>
             <Pressable
@@ -148,7 +157,7 @@ const ViewComponent: React.FC<IListProps> = ({
                     keyboardBlurBehavior="restore"
                     containerStyle={{ marginTop: 60 }}
                 >
-                    <HeaderView setSearchText={setSearchText} txtSearch={notFistFilter ? '' : value?.toString()} label={label || placeholder} tableWin={tableWin} closeModal={closeModal} isNewEdit={isNewEdit} />
+                    <HeaderView setSearchText={debouncedSearch} txtSearch={notFistFilter ? '' : value?.toString()} label={label || placeholder} tableWin={tableWin} closeModal={closeModal} isNewEdit={isNewEdit} />
                     <BottomSheetFlatList
                         data={filteredList}
                         keyExtractor={(item: IData) => item[fId].toString()}
@@ -169,8 +178,8 @@ const ViewComponent: React.FC<IListProps> = ({
         </>
     );
 };
-export const VcSelectList = React.memo(ViewComponent);
-
+const VcSelectList = React.memo(ViewComponent);
+export default VcSelectList;
 type IProps = {
     item: IData;
     onPress: (item: IData) => void;
@@ -301,4 +310,3 @@ const styles = StyleSheet.create({
         zIndex: 2
     }
 });
-export default VcSelectList;

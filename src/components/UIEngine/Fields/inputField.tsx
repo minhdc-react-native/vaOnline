@@ -119,12 +119,12 @@ const InputFieldComponent: React.FC<IProps> = ({
                     backgroundColor: disabled
                         ? colors.elevation.level1
                         : colors.background,
-                    borderColor: "rgba(119, 86, 81,0.3)",
+                    borderColor: !!msgError ? colors.error : "rgba(119, 86, 81,0.3)",
                 }}
                 style={[
                     {
                         height: height || (isMulti ? 100 : 40),
-                        top: -1,
+                        top: -3,
                     },
                     upperCase && { textTransform: "uppercase" },
                 ]}

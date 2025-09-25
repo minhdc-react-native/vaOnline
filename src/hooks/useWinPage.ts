@@ -314,8 +314,9 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     }, [_, getConfigTab, pageSize, setDataTags, tableWin, typeWin, windowId])
 
     const tabs = useMemo(() => {
-        return dataTags[tableWin] ?? [];
-    }, [tableWin, dataTags]);
+        const _tags = dataTags[tableWin] ?? [];
+        return _tags.map(t => ({ ...t, badge: dataItemDetail[tableWin]?.[t.TAB_TABLE]?.length ?? 0 }));
+    }, [tableWin, dataTags, dataItemDetail]);
 
     const [currentTab, setCurrentTab] = useState<ITabWin>(tabs?.[0]);
 
@@ -366,7 +367,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             setInfoData({ total: 0, hasMore: true });
             setData([]);
         }
-        stateLoading.current = { ...stateLoading.current, refresh: params?.page === 1 };
+        stateLoading.current = { ...stateLoading.current, refresh: params?.page === 1, loadMore: params?.page !== 1 };
         const domain = await getSubDomain();
         api.post({
             link: `/api/System/GetDataByWindowNo`,
@@ -377,18 +378,19 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
                 }
             },
             callBack: (res: { data: IData[], total_count: number }) => {
-                const dataPage = typeWin === "(winTree)" ? Helper.sortTreeFlat(res.data, itemMenuWin.codeField) : res.data
+                // const dataPage = typeWin === "(winTree)" ? Helper.sortTreeFlat(res.data, itemMenuWin.codeField) : res.data
+                const dataPage = res.data;
                 setInfoData(prev => ({
                     ...prev,
                     total: params?.page === 1 ? res.total_count : infoData.total,
-                    hasMore: dataPage.length > 0
+                    hasMore: dataPage.length === (params?.count ?? 0)
                 }));
                 setData(prev => (params?.page === 1 ? dataPage : [...prev, ...dataPage]));
             },
             setLoading: (loading) => {
-                if (params?.page === 1) {
-                    loading ? show("Tải dữ liệu") : hide()
-                }
+                // if (params?.page === 1) {
+                //     loading ? show("Tải dữ liệu") : hide()
+                // }
                 stateLoading.current = { ...stateLoading.current, refresh: false, loadMore: params?.page !== 1 ? loading : false };
             },
             callError: (err) => {
@@ -637,18 +639,22 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         const typeView = itemMenuWin.typeView ?? {};
         const promises = tabs.map(async (tab) => {
             if (id) {
-                await api.get({
-                    link: `/api/System/GetDataDetailsByTabTable?window_id=${itemMenuWin.id}&id=${id}&tab_table=${tab.TAB_TABLE}`,
-                    callBack: (res: IData[]) => {
-                        res = res.map((item, index) => ({
-                            ...item,
-                            ...addDetails,
-                            ...typeView,
-                            ...currentTab?.DISPLAY,
-                        }));
-                        setDataItemDetail(tableWin, tab.TAB_TABLE, res);
-                    }
-                })
+                try {
+                    await api.get({
+                        link: `/api/System/GetDataDetailsByTabTable?window_id=${itemMenuWin.id}&id=${id}&tab_table=${tab.TAB_TABLE}`,
+                        callBack: (res: IData[]) => {
+                            res = res.map((item, index) => ({
+                                ...item,
+                                ...addDetails,
+                                ...typeView,
+                                ...currentTab?.DISPLAY,
+                            }));
+                            setDataItemDetail(tableWin, tab.TAB_TABLE, res);
+                        }
+                    })
+                } catch (error) {
+                    setDataItemDetail(tableWin, tab.TAB_TABLE, []);
+                }
             } else {
                 setDataItemDetail(tableWin, tab.TAB_TABLE, []);
             }
@@ -867,20 +873,24 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
             if (configSource?.url) {
                 const url = key === "DVT_CB" ? configSource.url.replace('#ExtraFilter#', encodeURIComponent("MA_HV=N'***'")) : configSource.url;
                 const apiGetPost = configSource.type === "post" ? api.post : api.get;
-                await apiGetPost({
-                    link: url, data: configSource.dataPost,
-                    callBack: (res => {
-                        if (res) {
-                            setSource(res, source, key, defaultSource);
-                            if (configSource.tableWin) {
-                                setTableRefresh(prev => ({
-                                    ...prev,
-                                    [configSource.tableWin]: { url: configSource.url, type: configSource.type, dataPost: configSource.dataPost, key: key }
-                                }));
+                try {
+                    await apiGetPost({
+                        link: url, data: configSource.dataPost,
+                        callBack: (res => {
+                            if (res) {
+                                setSource(res, source, key, defaultSource);
+                                if (configSource.tableWin) {
+                                    setTableRefresh(prev => ({
+                                        ...prev,
+                                        [configSource.tableWin]: { url: configSource.url, type: configSource.type, dataPost: configSource.dataPost, key: key }
+                                    }));
+                                }
                             }
-                        }
-                    })
-                });
+                        })
+                    });
+                } catch (error) {
+                    setSource([], source, key, defaultSource);
+                }
             }
         });
         await Promise.all(promises);
@@ -943,7 +953,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         // lấy các dữ liệu reference liên quan
         await loadDataBegin();
         hide();
-    }, [colors, extractWinConfig, hide, loadDataBegin, show, windowId]);
+    }, [colors, extractWinConfig, hide, loadDataBegin, setLayoutData, setWinConfig, show, tableWin, windowId]);
 
     const onBack = useCallback(() => {
         if (isChange) {

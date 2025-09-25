@@ -123,24 +123,11 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
                     DVT_CB: DVT
                 }
             },
-            // callBack: (res) => {
-            //     if (res && res.data && res.data.length > 0) {
-            //         const price = res.data[0];
-            //         const change = valueChange(newItemDetail!, {
-            //             ...(dataMaster?.TY_GIA === 1 && { [_fGia]: price[_fGia] }),
-            //             ...(dataMaster?.TY_GIA !== 1 && { [_fGia_nt]: price[_fGia_nt] })
-            //         });
-            //         // thêm vào.
-            //         onAddDetail(tableWin, tableCthv, { ...newItemDetail, ...change });
-            //         afterChange();
-            //     }
-
-            // }
         });
         const price = res.data[0];
         return {
-            ...(dataMaster?.TY_GIA === 1 && { [_fGia]: price[_fGia] }),
-            ...(dataMaster?.TY_GIA !== 1 && { [_fGia_nt]: price[_fGia_nt] })
+            ...(dataMaster?.TY_GIA === 1 && { [_fGia]: price?.[_fGia] ?? 0 }),
+            ...(dataMaster?.TY_GIA !== 1 && { [_fGia_nt]: price?.[_fGia_nt] ?? 0 })
         };
 
     }, [dataMaster, isHt2]);

@@ -5,35 +5,18 @@ import { SchemaUIEngine } from '@/components/UIEngine/schemaUIEngine';
 import { IRowsColsField } from '@/components/UIEngine/types';
 import { useTranslation } from '@/context/TranslationContext';
 import { useAuth } from '@/hooks/useAuth';
+import { infoLocale } from '@/locales/locale';
 import { loginForm } from '@/schemaUI/loginForm';
+import { VACOMTheme } from '@/theme/theme';
 import { Helper } from '@/utils/Helper';
 import { getRemember, getSubDomain, saveSubDomain } from '@/utils/vcStorage';
+import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import { Card, Text, ToggleButton, useTheme } from 'react-native-paper';
+import { Button, Card, Text, ToggleButton, useTheme } from 'react-native-paper';
+
 const sloganVacom = require('@/assets/images/splash.png') // Logo
-const loginTranslations = {
-    vi: {
-        'Link': 'Liên kết',
-        'User Name': 'Tên truy cập',
-        'Password': 'Mật khẩu',
-        'Select OrgUnit': 'Chọn đơn vị',
-        'Remember': 'Ghi nhớ',
-        'Forgot Password': 'Quên mật khẩu',
-        'Login': 'Đăng nhập',
-        'SEARCH': 'Tìm kiếm'
-    },
-    en: {
-        'Link': 'Link',
-        'User Name': 'User Name',
-        'Password': 'Password',
-        'Select OrgUnit': 'Select OrgUnit',
-        'Remember': 'Remember',
-        'Forgot Password': 'Forgot Password',
-        'Login': 'Login',
-        'SEARCH': 'Search'
-    }
-}
+
 const infoVacom: IRowsColsField = {
     type: "rows",
     style: { justifyContent: "center", alignItems: "center" },
@@ -53,14 +36,14 @@ const infoVacom: IRowsColsField = {
     ]
 }
 export default function LoginScreen() {
-    const { colors } = useTheme();
+    const { colors } = useTheme<VACOMTheme>();
     const { view, zod, dataDefault } = loginForm;
     const [data, setData] = useState<Record<string, string>>({});
     const { validate, errors, setErrors } = useZodValidation(data, zod);
     const { login, listDvcs, getDvcsByUser } = useAuth();
     const { setTranslations } = useTranslation();
     const onChangeLang = async (lang: 'vi' | 'en') => {
-        setTranslations(loginTranslations[lang]);
+        setTranslations(infoLocale[lang]['app-label']);
         onChangeItemData({ lang: lang });
     }
     const onChangeItemData = (valueChange: any) => {
@@ -120,7 +103,7 @@ export default function LoginScreen() {
             const remember = await getRemember();
             const domain = await getSubDomain();
             const lang: 'vi' | 'en' = remember ? remember.lang : _data.lang;
-            setTranslations(loginTranslations[lang ?? 'vi']);
+            setTranslations(infoLocale[lang ?? 'vi']['app-label']);
             setData({ ..._data, ...remember, domain: domain || '' });
         }
         getStorage();
@@ -133,14 +116,18 @@ export default function LoginScreen() {
             lastLoad.current = { domain: data.domain, username: data.username };
             getDvcsByUser(data.username);
         }
-    }, [data, getDvcsByUser])
+    }, [data, getDvcsByUser]);
+
+
+
     return (
         <FormWrapper style={{ justifyContent: "flex-end", padding: 20 }}>
-            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center", marginTop: 50 }}>
                 <Image source={sloganVacom} style={styles.logo} />
-                {/* <TextDrop text='Accounting' heightDrop={400} /> */}
             </View>
-
+            <View style={{ alignSelf: "flex-end", marginBottom: 20 }}>
+                <Button icon={'arrow-right-bold-hexagon-outline'} onPress={() => router.navigate({ pathname: '/(auth)/about-us', params: { lang: data.lang } })}>{data.lang === 'vi' ? 'Về chúng tôi' : 'About us'}</Button>
+            </View>
             <Card style={{ padding: 20, backgroundColor: colors.background }} contentStyle={{ gap: 20 }}>
                 <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
                     <Text variant='titleLarge' style={{ flex: 1, textAlign: "center" }}>{data.lang === 'vi' ? 'Đăng nhập' : 'Login'}</Text>
@@ -181,7 +168,7 @@ const styles = StyleSheet.create({
         height: 300
     },
     logo: {
-        width: 400,
-        height: 150,
+        width: "100%",
+        height: "100%",
     }
 });

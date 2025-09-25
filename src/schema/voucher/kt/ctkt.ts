@@ -63,7 +63,6 @@ const ctkt0: ISchemaWin = {
                 fields: [
                     {
                         type: "text",
-                        label: "TEN_DT",
                         bind: 'TEN_DT',
                         style: { flex: 1 }
                     },
@@ -79,6 +78,7 @@ const ctkt0: ISchemaWin = {
             },
             {
                 type: "text",
+                textStyle: { color: colors.secondary },
                 bind: "GHI_CHU"
             }
         ]

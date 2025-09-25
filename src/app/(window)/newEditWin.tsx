@@ -7,11 +7,13 @@ import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { Appbar, Button, Card } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const NewEditWin = () => {
     const { sItemMenuWin, id, title, sDataMaster, sAction } = useLocalSearchParams();
     const titleWin = title?.toString();
     const actionNewEdit = JSON.parse(sAction?.toString());
+    const insets = useSafeAreaInsets();
     const navigation = useNavigation();
     const itemMenuWin: IMenuWin = JSON.parse(sItemMenuWin.toString());
     const { _ } = useTranslation();
@@ -38,7 +40,7 @@ const NewEditWin = () => {
         return unsubscribe;
     }, [navigation]);
     return (
-        <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
+        <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout, marginBottom: insets.bottom }}>
             <Appbar.Header>
                 <VcHeaderWin title={titleWin} edit={edit} onPressAction={onPressAction} onBack={onBack} isEdit={actionNewEdit.edit} />
             </Appbar.Header>

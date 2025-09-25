@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { LayoutChangeEvent, ScrollView, StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
-import { useTheme } from "react-native-paper";
+import { LayoutChangeEvent, ScrollView, StyleProp, StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
+import { Text, useTheme } from "react-native-paper";
 
 interface IProgs {
     value: string | number | null,
@@ -37,7 +37,7 @@ export const VcTabBar = ({ value, data, onPress, style }: IProgs) => {
     }, [value, layoutReady]);
 
     return (
-        <View style={[{ height: 50, backgroundColor: colors.background, borderRadius: 20, borderWidth: 0.5, borderColor: colors.backdrop }, style]} onLayout={(event: LayoutChangeEvent) => {
+        <View style={[{ height: 50, backgroundColor: colors.background, borderWidth: 0.5, borderColor: colors.backdrop, borderBottomWidth: 1, borderBottomColor: colors.primary }, style]} onLayout={(event: LayoutChangeEvent) => {
             const { x, width } = event.nativeEvent.layout;
             setWidthView(width);
             requestAnimationFrame(() => {
@@ -50,24 +50,28 @@ export const VcTabBar = ({ value, data, onPress, style }: IProgs) => {
                 horizontal
                 ref={scrollRef}
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.tabBarScroll}
+                contentContainerStyle={[styles.tabBarScroll]}
             >
                 {data.map((item, i) => {
                     const isFocused = item.id === value;
                     return (
                         <TouchableOpacity
                             key={item.id}
-                            style={styles.tabItem}
+                            style={[styles.tabItem, isFocused && { backgroundColor: colors.primary }]}
                             onPress={() => onTabPress(item)}
                             onLayout={(event: LayoutChangeEvent) => {
                                 const { x, width } = event.nativeEvent.layout;
                                 tabLayouts.current[item.id] = { x, width };
                             }}
                         >
-                            <Text style={[styles.tabText, isFocused && [styles.activeTabText, { color: colors.background, backgroundColor: colors.primary }]]}>
+                            <Text numberOfLines={1} style={[styles.tabText,
+                            isFocused && [styles.activeTabText, { color: colors.background }]]}>
                                 {item.value}
                             </Text>
-                            {/* {isFocused && <View style={{ width: "100%", borderWidth: 1, borderColor: colors.primary }} />} */}
+                            {!!item.badge && <Text style={[
+                                styles.badge,
+                                isFocused ? { backgroundColor: colors.background, color: colors.secondary } : { backgroundColor: colors.backdrop, color: colors.background }
+                            ]}>{getTextBadge(Number(item.badge))}</Text>}
                         </TouchableOpacity>
                     );
                 })}
@@ -75,27 +79,45 @@ export const VcTabBar = ({ value, data, onPress, style }: IProgs) => {
         </View>
     );
 }
-
+const getTextBadge = (badge: number) => {
+    return badge < 100 ? badge.toString() : '99+';
+}
 const styles = StyleSheet.create({
-    tabBarScroll: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 8,
-    },
-    tabItem: {
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        alignItems: 'center',
+    badge: {
+        fontSize: 10,
+        paddingHorizontal: 5,
+        paddingVertical: 2,
         borderRadius: 10
     },
+    tabBarScroll: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        paddingHorizontal: 20,
+    },
+    tabItem: {
+        // marginHorizontal: 10,
+        // marginVertical: 8,
+        paddingHorizontal: 10,
+        alignItems: 'center',
+        // borderRadius: 10,
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+        // maxWidth: 120,
+        gap: 5,
+        flexDirection: "row"
+    },
     tabText: {
+        flexShrink: 1,
         fontSize: 14,
-        color: '#999',
+        paddingVertical: 5,
+        color: '#999'
     },
     activeTabText: {
         // fontWeight: 'bold',
+        // fontSize: 15,
         textAlign: "center",
-        padding: 5,
-        borderRadius: 10
-    }
+        // paddingHorizontal: 5,
+        // paddingVertical: 2,
+        // borderRadius: 10
+    },
 });

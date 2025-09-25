@@ -1,6 +1,7 @@
 import EmptyView from '@/app/empty-view';
 import MenuScreen from '@/app/menu';
 import { CustomTabBar } from '@/components/customTabBar';
+import LoadingScreen from '@/components/loadingScreen';
 import { useDataApp } from '@/hooks/zustand/useDataApp';
 import { useMemo, useState } from 'react';
 import { useWindowDimensions, View } from 'react-native';
@@ -24,6 +25,10 @@ export default function CatalogAccounting() {
         { key: 'other', title: lang === 'vi' ? 'Khác' : 'Other', keyMenuWin: 'acCatalogOther' },
     ];
 
+    const LazyPlaceholder = useMemo(() => {
+        return <LoadingScreen />
+    }, []);
+
     const hasPermission = (keyMenuWin: IKeyMenuWin) => {
         return !!dataMenuWin[menuMain]?.[keyMenuWin];
     };
@@ -41,6 +46,8 @@ export default function CatalogAccounting() {
             {routes.length === 0 ? <EmptyView /> : <TabView
                 navigationState={{ index, routes }}
                 renderScene={renderScene}
+                lazy
+                renderLazyPlaceholder={() => LazyPlaceholder}
                 renderTabBar={(pros: any) => <CustomTabBar {...pros} setIndex={setIndex} />}
                 onIndexChange={setIndex}
                 initialLayout={{ width: layout.width }}

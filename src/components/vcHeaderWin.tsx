@@ -1,3 +1,4 @@
+import { useTranslation } from "@/context/TranslationContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { View } from "react-native";
@@ -12,6 +13,7 @@ interface IProgs {
 }
 export const VcHeaderWin = ({ title, edit, onPressAction, onBack, isEdit = true }: IProgs) => {
     const { colors } = useTheme();
+    const { _ } = useTranslation();
     return (
         <>
             <StatusBarOnFocus backgroundColor={colors.background} />
@@ -26,7 +28,7 @@ export const VcHeaderWin = ({ title, edit, onPressAction, onBack, isEdit = true 
                         <IconButton icon={() => <MaterialIcons name="keyboard-arrow-left" size={30} color={colors.secondary} />} onPress={onBack} />
                         <Text variant='titleLarge' numberOfLines={1} style={{ flexShrink: 1 }}>{title}</Text>
                     </View>
-                    {isEdit && <Button onPress={onPressAction}>{edit ? "Lưu lại" : "Sửa"}</Button>}
+                    {isEdit && <Button onPress={onPressAction}>{edit ? _('SAVE') : _('EDIT')}</Button>}
                 </View>
             </View>
             <Divider />

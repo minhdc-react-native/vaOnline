@@ -10,16 +10,18 @@ import '@/utils/globalFunctions';
 import { attachInterceptors } from '@/utils/vcAxios';
 import { PortalProvider } from '@gorhom/portal';
 import { useBackHandler } from '@react-native-community/hooks';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import React, { useEffect } from 'react';
 import { BackHandler } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider } from 'react-native-paper';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import { enableScreens } from 'react-native-screens';
+
 enableScreens();
 
 export default function RootLayout() {
+
   return (
     <TranslationProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -60,9 +62,26 @@ const StackApp = () => {
 }
 const BackHandlerView = () => {
   const { showPopup } = usePopup();
+  const pathname = usePathname();
   const backHandlerQuestion = useDataApp((state) => state.backHandlerQuestion);
   const setBackHandlerQuestion = useDataApp((state) => state.setBackHandlerQuestion);
   useBackHandler(() => {
+    // Nếu đang ở bất kỳ screen nào khác trong /accounting -> về dashboard
+    if (pathname.startsWith("/accounting") && pathname !== '/accounting/dashboard' && pathname !== '/accounting') {
+      router.navigate("/accounting/dashboard");
+      return true;
+    }
+    // Nếu đang ở bất kỳ screen nào khác trong /hkd -> về dashboard
+    if (pathname.startsWith("/hkd") && pathname !== '/hkd/dashboard' && pathname !== '/hkd') {
+      router.navigate("/hkd/dashboard");
+      return true;
+    }
+    // Nếu đang ở 1 app nào đó
+    if (pathname.startsWith('/accounting') || pathname.startsWith('/hkd') || pathname.startsWith('/admin')) {
+      router.replace("/list-app");
+      return true;
+    }
+
     if (router.canGoBack()) {
       if (backHandlerQuestion) {
         showPopup({
@@ -78,7 +97,6 @@ const BackHandlerView = () => {
       } else {
         router.back();
       }
-      return true;
     } else {
       showPopup({
         title: "Thoát ứng dụng",
@@ -87,8 +105,8 @@ const BackHandlerView = () => {
         onConfirm: () => BackHandler.exitApp(),
         iconType: "question"
       });
-      return true;
     }
+    return true;
   });
   return null;
 }

@@ -142,7 +142,7 @@ const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, con
                         <Button onPress={() => closePanel(true, dataItem ?? undefined)}>{titleButton || _('SAVE')}</Button>
                     </View>
                 </View>
-                <View style={[styles.content, { height: schemaEdit.height ?? "80%", backgroundColor: colors.vacom.backLayout }]}>
+                <View style={[styles.content, { maxHeight: schemaEdit.height ?? HEIGHT_WINDOW / 1.2, backgroundColor: colors.vacom.backLayout }]}>
                     <FormWrapper>
                         <SchemaUIEngine
                             schema={schemaEdit}
@@ -152,7 +152,7 @@ const ViewComponent: React.FC<IProps> = ({ title, titleButton, onSave, data, con
                             errors={errors}
                             dataSource={dataSource}
                         />
-                        <View style={{ height: 100 }} />
+                        <View style={{ height: 20 }} />
                     </FormWrapper>
                 </View>
             </Animated.View>

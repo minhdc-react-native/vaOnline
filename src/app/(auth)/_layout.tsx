@@ -3,7 +3,8 @@ import LayoutStack from "@/components/layoutStack";
 const LayoutLogin = () => {
     return (
         <LayoutStack data={{
-            login: { headerShown: false }
+            login: { headerShown: false },
+            'about-us': { headerShown: false }
         }} />
     );
 }

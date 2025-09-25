@@ -1,0 +1,89 @@
+diff --git a/node_modules/react-native-camera-kit/src/Camera.android.tsx b/node_modules/react-native-camera-kit/src/Camera.android.tsx
+index 17309e9..075682b 100644
+--- a/node_modules/react-native-camera-kit/src/Camera.android.tsx
++++ b/node_modules/react-native-camera-kit/src/Camera.android.tsx
+@@ -1,9 +1,9 @@
+ import React from 'react';
+ import { findNodeHandle, processColor } from 'react-native';
+-import type { CameraApi } from './types';
+ import type { CameraProps } from './CameraProps';
+ import NativeCamera from './specs/CameraNativeComponent';
+ import NativeCameraKitModule from './specs/NativeCameraKitModule';
++import type { CameraApi } from './types';
+ 
+ const Camera = React.forwardRef<CameraApi, CameraProps>((props, ref) => {
+   const nativeRef = React.useRef(null);
+@@ -11,9 +11,11 @@ const Camera = React.forwardRef<CameraApi, CameraProps>((props, ref) => {
+   // RN doesn't support optional view props yet (sigh)
+   // so we have to use -1 to indicate 'undefined'
+   // All int/float/double props from src/specs/CameraNativeComponent.ts need be mentioned here
+-  props.zoom = props.zoom ?? -1;
+-  props.maxZoom = props.maxZoom ?? -1;
+-  props.scanThrottleDelay = props.scanThrottleDelay ?? -1;
++  const clonedProps: CameraProps = { ...props };
++
++  clonedProps.zoom = clonedProps.zoom ?? -1;
++  clonedProps.maxZoom = clonedProps.maxZoom ?? -1;
++  clonedProps.scanThrottleDelay = clonedProps.scanThrottleDelay ?? -1;
+ 
+   React.useImperativeHandle(ref, () => ({
+     capture: async (options = {}) => {
+@@ -27,10 +29,10 @@ const Camera = React.forwardRef<CameraApi, CameraProps>((props, ref) => {
+     },
+   }));
+ 
+-  const transformedProps: CameraProps = { ...props };
+-  transformedProps.ratioOverlayColor = processColor(props.ratioOverlayColor) as any;
+-  transformedProps.frameColor = processColor(props.frameColor) as any;
+-  transformedProps.laserColor = processColor(props.laserColor) as any;
++  const transformedProps: CameraProps = { ...clonedProps };
++  transformedProps.ratioOverlayColor = processColor(clonedProps.ratioOverlayColor) as any;
++  transformedProps.frameColor = processColor(clonedProps.frameColor) as any;
++  transformedProps.laserColor = processColor(clonedProps.laserColor) as any;
+ 
+   // @ts-expect-error props for codegen differ a bit from the user-facing ones
+   return <NativeCamera style={{ minWidth: 100, minHeight: 100 }} ref={nativeRef} {...transformedProps} />;
+diff --git a/node_modules/react-native-camera-kit/src/Camera.ios.tsx b/node_modules/react-native-camera-kit/src/Camera.ios.tsx
+index 2c5c970..1ffc3f5 100644
+--- a/node_modules/react-native-camera-kit/src/Camera.ios.tsx
++++ b/node_modules/react-native-camera-kit/src/Camera.ios.tsx
+@@ -1,9 +1,9 @@
+ import React from 'react';
+ import { findNodeHandle } from 'react-native';
+-import type { CameraApi } from './types';
+ import type { CameraProps } from './CameraProps';
+ import NativeCamera from './specs/CameraNativeComponent';
+ import NativeCameraKitModule from './specs/NativeCameraKitModule';
++import type { CameraApi } from './types';
+ 
+ const Camera = React.forwardRef<CameraApi, CameraProps>((props, ref) => {
+   const nativeRef = React.useRef(null);
+@@ -11,12 +11,14 @@ const Camera = React.forwardRef<CameraApi, CameraProps>((props, ref) => {
+   // RN doesn't support optional view props yet (sigh)
+   // so we have to use -1 to indicate 'undefined'
+   // All int/float/double props from src/specs/CameraNativeComponent.ts need be mentioned here
+-  props.zoom = props.zoom ?? -1;
+-  props.maxZoom = props.maxZoom ?? -1;
+-  props.scanThrottleDelay = props.scanThrottleDelay ?? -1;
++  const clonedProps: CameraProps = { ...props };
++
++  clonedProps.zoom = clonedProps.zoom ?? -1;
++  clonedProps.maxZoom = clonedProps.maxZoom ?? -1;
++  clonedProps.scanThrottleDelay = clonedProps.scanThrottleDelay ?? -1;
+ 
+-  props.resetFocusTimeout = props.resetFocusTimeout ?? 0;
+-  props.resetFocusWhenMotionDetected = props.resetFocusWhenMotionDetected ?? true;
++  clonedProps.resetFocusTimeout = clonedProps.resetFocusTimeout ?? 0;
++  clonedProps.resetFocusWhenMotionDetected = clonedProps.resetFocusWhenMotionDetected ?? true;
+ 
+   React.useImperativeHandle(ref, () => ({
+     capture: async () => {
+@@ -31,7 +33,7 @@ const Camera = React.forwardRef<CameraApi, CameraProps>((props, ref) => {
+   }));
+ 
+   // @ts-expect-error props for codegen differ a bit from the user-facing ones
+-  return <NativeCamera style={{ minWidth: 100, minHeight: 100 }} ref={nativeRef} {...props} />;
++  return <NativeCamera style={{ minWidth: 100, minHeight: 100 }} ref={nativeRef} {...clonedProps} />;
+ });
+ 
+ export default Camera;

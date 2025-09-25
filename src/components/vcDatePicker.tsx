@@ -1,40 +1,20 @@
+import { useTranslation } from '@/context/TranslationContext';
+import { ListItemView } from '@/schema/voucher/itemView';
 import { VACOMTheme } from '@/theme/theme';
 import { Helper } from '@/utils/Helper';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { Calendar, LocaleConfig } from 'react-native-calendars';
+import { Calendar } from 'react-native-calendars';
 import { Pressable } from 'react-native-gesture-handler';
 import { Divider, IconButton, Portal, Text, useTheme } from 'react-native-paper';
 import { PopupProvider } from './dialog/popupProvider';
 import ShowBottom from './dialog/showBottom';
 import { VcNum } from './vcNum';
+import VcSelectList from './vcSelectList';
 dayjs.extend(utc);
-
-LocaleConfig.locales['vi-VN'] = {
-  monthNames: [
-    'Tháng 1',
-    'Tháng 2',
-    'Tháng 3',
-    'Tháng 4',
-    'Tháng 5',
-    'Tháng 6',
-    'Tháng 7',
-    'Tháng 8',
-    'Tháng 9',
-    'Tháng 10',
-    'Tháng 11',
-    'Tháng 12'
-  ],
-  monthNamesShort: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
-  dayNames: ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'],
-  dayNamesShort: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
-  today: "Hôm nay"
-};
-
-LocaleConfig.defaultLocale = 'vi-VN';
 
 interface VcDatePickerProps {
   label?: string;
@@ -42,7 +22,8 @@ interface VcDatePickerProps {
   disabled?: boolean;
   onChange: (date: string) => void;
   placeholder?: string;
-  style?: StyleProp<ViewStyle>
+  style?: StyleProp<ViewStyle>;
+  isError?: boolean
 }
 
 const ViewComponent: React.FC<VcDatePickerProps> = ({
@@ -51,7 +32,8 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
   disabled = false,
   onChange,
   placeholder,
-  style
+  style,
+  isError
 }) => {
   const [visible, setVisible] = useState(false);
   const [currentDate, setCurrentDate] = useState<string | null>(value ? dayjs.utc(value).format("YYYY-MM-DD") : null);
@@ -60,7 +42,6 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
   const [selectMonth, setSelectMonth] = useState<number>(parseInt((currentDate || nowDate).split('-')[1]));
   const { colors } = useTheme<VACOMTheme>();
   const [initialDate, setInitialDate] = useState<string | null>(currentDate);
-
   const handleDayPress = (day: any) => {
     onChange(`${day.dateString} 00:00:00`);
     setCurrentDate(day.dateString);
@@ -117,7 +98,7 @@ const ViewComponent: React.FC<VcDatePickerProps> = ({
   return (
     <>
       <View style={[{ marginTop: 6 }, style]}>
-        <Pressable style={({ pressed }) => [styles.button, { opacity: pressed ? 0.7 : 1, backgroundColor: disabled ? colors.elevation.level1 : colors.background, borderColor: colors.vacom.borderColor }]} onPress={() => {
+        <Pressable style={({ pressed }) => [styles.button, { opacity: pressed ? 0.7 : 1, backgroundColor: disabled ? colors.elevation.level1 : colors.background, borderColor: isError ? colors.error : colors.vacom.borderColor }]} onPress={() => {
           if (disabled) return;
           setVisible(true);
         }}>
@@ -165,7 +146,7 @@ interface ICalendar {
   selectYear: number;
   setSelectYear: (value: React.SetStateAction<number>) => void;
   hideCalendar: () => void;
-  style?: StyleProp<ViewStyle>
+  style?: StyleProp<ViewStyle>;
 }
 const ShowCalendar: React.FC<ICalendar> = ({
   currentDate, nowDate, initialDate, handleDayPress,
@@ -173,6 +154,15 @@ const ShowCalendar: React.FC<ICalendar> = ({
   hideCalendar, style
 }) => {
   const { colors } = useTheme();
+  const { _ } = useTranslation();
+
+  const months = useMemo(() => {
+    return Array.from({ length: 12 }, (__, i) => ({
+      id: i + 1,
+      value: `${_('THANG')} ${i + 1}`,
+    }));
+  }, [_]);
+
   return (
     <Portal>
       <PopupProvider>
@@ -180,8 +170,9 @@ const ShowCalendar: React.FC<ICalendar> = ({
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <IconButton icon={'close'} style={{ left: -10 }} onPress={() => hideCalendar()} iconColor={colors.secondary} />
             <View style={{ flex: 1 }} />
-            <VcNum value={selectMonth} minValue={1} maxValue={12} onChange={(value) => value && setSelectMonth(value)}
-              ignoreFormat={true} showMinusPlus={true} style={{ width: 100, marginRight: 5 }} />
+            <VcSelectList value={selectMonth} placeholder={_('THANG')} clean={false} data={months} itemView={ListItemView.VALUE} onChange={(month) => setSelectMonth(Number(month?.id))} style={{ height: 35, top: -3, marginRight: 10, width: 100 }} fValue='id' />
+            {/* <VcNum value={selectMonth} minValue={1} maxValue={12} onChange={(value) => value && setSelectMonth(value)}
+              ignoreFormat={true} showMinusPlus={true} style={{ width: 100, marginRight: 5 }} /> */}
             <VcNum value={selectYear} minValue={1000} maxValue={9999} onChange={(value) => value && setSelectYear(value)}
               ignoreFormat={true} showMinusPlus={true} style={{ width: 120 }} />
           </View>

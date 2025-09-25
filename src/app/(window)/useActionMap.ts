@@ -3,10 +3,9 @@ import { useLoading } from "@/components/dialog/loadingProvider";
 import { usePopup } from "@/components/dialog/popupProvider";
 import { useToast } from "@/components/dialog/useToast";
 import { api } from "@/utils/apiMethods";
-import * as FileSystem from 'expo-file-system';
-import { router } from "expo-router";
 import * as Sharing from "expo-sharing";
 import { useMemo } from "react";
+import FileViewer from 'react-native-file-viewer';
 interface IShareFile {
     uri: string;
     title?: string;
@@ -81,7 +80,16 @@ export const useActionMap = ({ handleRefresh, checkLayoutAction }: IProgs) => {
                     });
                     hide();
                     if (file) {
-                        router.navigate({ pathname: '/viewPdf', params: { title: values.NAME, uriPdf: file.uri } });
+                        FileViewer.open(file.uri) // mở theo trình đọc của thiết bị.
+                            .then(() => console.log('Opened'))
+                            .catch(async (error) => {
+                                console.log(error);
+                                await shareFile({
+                                    uri: file.uri, title: values.REPORT_FILE,
+                                    type: "application/pdf"
+                                }
+                                );
+                            });
                     }
                 });
             },

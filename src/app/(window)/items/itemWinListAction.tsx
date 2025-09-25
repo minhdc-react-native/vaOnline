@@ -20,7 +20,7 @@ const ItemViewComponent: React.FC<IProps> = ({ schemaView, item, height, actionM
     }, [height]);
     return (
         <SchemaUIEngine schema={schemaView} actionMap={actionMap} dataActionMap={item} data={item}
-            style={[styles.container, { height: fixHeight ?? "auto", marginHorizontal: 10, marginVertical: 5, }]} />
+            style={[styles.container, { height: fixHeight ?? "auto", marginHorizontal: 10, marginVertical: 5 }]} />
     )
 };
 export const ItemWinListAction = React.memo(ItemViewComponent);

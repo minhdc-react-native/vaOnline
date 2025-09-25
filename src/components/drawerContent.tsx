@@ -6,8 +6,8 @@ import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, usePathname } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Avatar, Card, IconButton, useTheme } from 'react-native-paper';
+import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Avatar, IconButton, Text, useTheme } from 'react-native-paper';
 import VcSelectList from './vcSelectList';
 
 export function CustomDrawerContent({ drawerItems, title }: { drawerItems: DrawerItem[], title: string }) {
@@ -36,9 +36,8 @@ export function CustomDrawerContent({ drawerItems, title }: { drawerItems: Drawe
             style={styles.container}
             locations={[0, 0.3, 0.7, 1]}
         >
-            <Card mode='contained' style={{ paddingTop: 10, margin: 10, paddingBottom: 10 }}>
-                <Text numberOfLines={1} style={{ textAlign: "center", fontSize: 15, fontWeight: "bold", color: colors.secondary }}>{title}</Text>
-            </Card>
+            <Text numberOfLines={2} variant='titleLarge'
+                style={{ textAlign: "center", fontWeight: "bold", color: colors.elevation.level5, paddingVertical: 10, paddingHorizontal: 20 }}>{`${title}`}</Text>
             <View style={styles.avatar} >
                 <Pressable onPress={() => { }} style={{ borderWidth: 2, borderRadius: 50, borderColor: colors.elevation.level5 }}>
                     <Avatar.Image style={{ backgroundColor: colors.backdrop }}

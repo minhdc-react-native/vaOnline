@@ -9,7 +9,6 @@ export default function LayoutHkd() {
     const { colors } = useTheme();
     const lang = useDataApp((state) => state.lang);
     const dataTitle = lang === 'vi' ? VcData.drawerTitle : VcData.drawerTitleE;
-
     return (
         <Drawer
             initialRouteName="dashboard"

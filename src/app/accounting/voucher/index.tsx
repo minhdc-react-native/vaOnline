@@ -1,5 +1,6 @@
 import MenuScreen from '@/app/menu';
 import { CustomTabBar } from '@/components/customTabBar';
+import LoadingScreen from '@/components/loadingScreen';
 import { useDataApp } from '@/hooks/zustand/useDataApp';
 import { useMemo, useState } from 'react';
 import { useWindowDimensions, View } from 'react-native';
@@ -32,12 +33,16 @@ export default function VoucherAccounting() {
     const renderScene = ({ route }: { route: any }) => {
         return <MenuScreen menuMain={menuMain} keyMenuWin={route.keyMenuWin} />;
     };
-
+    const LazyPlaceholder = useMemo(() => {
+        return <LoadingScreen />
+    }, []);
     return (
         <View style={{ flex: 1, gap: 10, backgroundColor: colors.background }}>
             <TabView
                 navigationState={{ index, routes }}
                 renderScene={renderScene}
+                lazy
+                renderLazyPlaceholder={() => LazyPlaceholder}
                 renderTabBar={(pros: any) => <CustomTabBar {...pros} setIndex={setIndex} />}
                 onIndexChange={setIndex}
                 initialLayout={{ width: layout.width }}

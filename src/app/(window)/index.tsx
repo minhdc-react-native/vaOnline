@@ -47,14 +47,14 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
     } = useWinPage({ itemMenuWin: itemMenuWin });
 
     const renderFooter = useCallback(() => {
-        if (!loading.loadMore || loading.refresh) return <View style={{ height: 100 }} />
+        if (!infoData.hasMore) return <View style={{ height: 100 }} />
         return (
-            <ActivityIndicator
-                size='large'
+            <View style={{ backgroundColor: colors.background, alignSelf: "center", borderRadius: 50, marginBottom: 10 }}><ActivityIndicator
+                size='small'
                 style={{ margin: 10 }}
-            />
+            /></View>
         )
-    }, [loading]);
+    }, [infoData.hasMore]);
 
     useEffect(() => {
         getConfigWin();
@@ -157,7 +157,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
         return unsubscribe;
     }, [navigation]);
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, marginBottom: insets.bottom }}>
             <Appbar.Header>
                 <VcHeader title={lang === 'vi' ? itemMenuWin.label : itemMenuWin.labelE} numRow={infoData.total} onSearch={setTextSearch}
                     showSearch={showFilter.showSearch}
@@ -203,7 +203,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
                     width: 55,
                     height: 55,
                     borderRadius: 55,
-                    bottom: (!menuWin0 ? insets.bottom : 0) + 20,
+                    bottom: 20,
                     right: 20,
                     position: 'absolute',
                 }}

@@ -22,6 +22,9 @@
       "hooks/*": [
         "src/hooks/*"
       ],
+      "locales/*": [
+        "src/locales/*"
+      ],
       "schema/*": [
         "src/schema/*"
       ],

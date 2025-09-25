@@ -87,7 +87,7 @@ const ViewComponent: React.FC<NumericInputProps> = ({
     return (
         <>
             <View style={[{
-                flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+                flexDirection: "row", justifyContent: "space-between", alignItems: "center", top: -3,
                 borderWidth: showMinusPlus ? 0.5 : 0, borderColor: colors.vacom.borderColor, borderRadius: 6, height: height ?? (showMinusPlus || mode === "line" ? 35 : 48)
             }, showMinusPlus && { backgroundColor: disabled ? colors.elevation.level1 : colors.background }, width ? { width: width } : {}, style]}>
                 {showMinusPlus && <IconButton icon="minus" iconColor={iconColors.minus} size={20} onPress={() => handleMinusPlus(-1)} style={{ margin: 0, padding: 0 }} />}

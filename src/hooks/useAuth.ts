@@ -2,6 +2,7 @@ import { DataMenuAccounting, WindowAccounting } from "@/constants/dataMenuAccoun
 import { DataMenuHkd, WindowHkd } from "@/constants/dataMenuHkd";
 import { IConfigDateMenuWin, VcData } from "@/constants/vcData";
 import { useTranslation } from "@/context/TranslationContext";
+import { setupCalendarLocales } from "@/locales/locale";
 import { theme } from "@/theme/theme";
 import { api } from "@/utils/apiMethods";
 import { clearRemember, clearToken, saveOrgUnit, saveRemember, saveToken, saveYear } from "@/utils/vcStorage";
@@ -157,6 +158,7 @@ export const useAuth = () => {
                     _loginError();
                     return;
                 }
+                await saveBiometric(data.pass);
                 await saveToken(res.token);
 
                 setOrgUnit(data.dvcs);
@@ -175,6 +177,9 @@ export const useAuth = () => {
                 setCurrentYear(res.nam?.[0].NAM);
 
                 setLang(data.lang ?? 'vi');
+
+                setupCalendarLocales(data.lang === 'vi' ? 'vi' : 'en');
+
                 await getListVoucher2();
 
                 await getCurrencies();
@@ -182,167 +187,171 @@ export const useAuth = () => {
                 setLoggedIn(true);
                 //
                 router.replace("/list-app");
+            }
+        } else {
+            _loginError();
+        }
             },
-            setLoading: (loading) => setLoading(loading, false, 'Truy cập...'),
+        setLoading: (loading) => setLoading(loading, false, 'Truy cập...'),
             callError: async (err) => {
                 console.log("error>>", JSON.stringify(err));
                 _loginError();
             }
-        });
+});
     }
-    const getRoundNumber = async () => {
-        await api.get({
-            link: `/api/System/GetConfigNumber`,
-            callBack: (res) => {
-                const item = res?.[0];
-                setParamSystem({
-                    rQuantity: item?.SL ?? 2,
-                    rPrice: item?.GIA ?? 2,
-                    rPriceNt: item?.GIA_NT ?? 2,
-                    rAmount: item?.TIEN ?? 2,
-                    rAmountNt: item?.TIEN_NT ?? 2,
-                    rPercentage: item?.PT ?? 2,
-                    rExchangeRate: item?.TY_GIA ?? 2,
-                    rRate: item?.TY_LE ?? 2,
-                    minAmountChange: 1000,
-                    TK: {
-                        TK_PTHU: '131',
-                        TK_PTRA: '331',
-                        TK_CK: '5211'
-                    }
-                });
+const getRoundNumber = async () => {
+    await api.get({
+        link: `/api/System/GetConfigNumber`,
+        callBack: (res) => {
+            const item = res?.[0];
+            setParamSystem({
+                rQuantity: item?.SL ?? 2,
+                rPrice: item?.GIA ?? 2,
+                rPriceNt: item?.GIA_NT ?? 2,
+                rAmount: item?.TIEN ?? 2,
+                rAmountNt: item?.TIEN_NT ?? 2,
+                rPercentage: item?.PT ?? 2,
+                rExchangeRate: item?.TY_GIA ?? 2,
+                rRate: item?.TY_LE ?? 2,
+                minAmountChange: 1000,
+                TK: {
+                    TK_PTHU: '131',
+                    TK_PTRA: '331',
+                    TK_CK: '5211'
+                }
+            });
+        }
+    })
+}
+const getLangTitle = async (lang: string) => {
+    await api.get({
+        link: `/api/System/GetLanguagesByMa?lang=${lang}`,
+        callBack: (res) => {
+            const dict: Record<string, string> = {};
+            res.forEach((item: any) => {
+                dict[item.KEY_LANG] = item.VALUES_LANG;
+            });
+            setTranslations(dict);
+        }
+    })
+}
+const getDvcsByUser = async (username: string) => {
+    api.get({
+        link: `/api/System/GetDvcsByUser?username=${username}`,
+        callBack: (res) => {
+            setListDvcs(res);
+        },
+        setLoading: setLoading
+    })
+}
+const getLicenseInfo = async () => {
+    api.get({
+        link: `/api/License/Info`,
+        callBack: (res) => {
+            setLicenseInfo(res)
+        }
+    })
+}
+const getListApp = async () => {
+    await api.post({
+        link: `/api/System/Command`,
+        data: {
+            command: 'G_APP_ICON',
+            parameter: {}
+        },
+        callBack: (res: any) => {
+            if (res && res.error) {
+                showToast(res.error, { type: "error" });
+                return;
             }
-        })
-    }
-    const getLangTitle = async (lang: string) => {
-        await api.get({
-            link: `/api/System/GetLanguagesByMa?lang=${lang}`,
-            callBack: (res) => {
-                const dict: Record<string, string> = {};
-                res.forEach((item: any) => {
-                    dict[item.KEY_LANG] = item.VALUES_LANG;
-                });
-                setTranslations(dict);
+            setListApp(res.data.filter((item: any) => VcData.listApp.includes(item.id)));
+        },
+        // setLoading: setLoading
+    });
+}
+
+const getCurrencies = async () => {
+    await api.get({
+        link: `/api/System/GetDataByReferencesId?id=98665935-a3db-487e-8bc5-2a63515972b5`,
+        callBack: (res: any[]) => {
+            if (res && res.length > 0) {
+                setCurrencies(Object.fromEntries(
+                    res.map(({ MA_NT, CONG_THUC, TY_GIA }) => [MA_NT, { isMultiplication: CONG_THUC === 1, TY_GIA }])
+                ))
             }
-        })
-    }
-    const getDvcsByUser = async (username: string) => {
-        api.get({
-            link: `/api/System/GetDvcsByUser?username=${username}`,
-            callBack: (res) => {
-                setListDvcs(res);
-            },
-            setLoading: setLoading
-        })
-    }
-    const getLicenseInfo = async () => {
-        api.get({
-            link: `/api/License/Info`,
-            callBack: (res) => {
-                setLicenseInfo(res)
+        },
+        // setLoading: setLoading
+    });
+}
+
+const getListVoucher2 = async () => {
+    const sql = encodeURIComponent("SELECT LIST_CT FROM TYPE_CT WHERE TYPE_CT= '000'");
+    await api.get({
+        link: `/api/System/ExecuteQuery?sql=${sql}`,
+        callBack: (res: any[]) => {
+            if (res && res.length > 0) {
+                setListVoucher2(res[0].LIST_CT);
             }
-        })
-    }
-    const getListApp = async () => {
-        await api.post({
-            link: `/api/System/Command`,
-            data: {
-                command: 'G_APP_ICON',
-                parameter: {}
-            },
-            callBack: (res: any) => {
-                if (res && res.error) {
-                    showToast(res.error, { type: "error" });
-                    return;
-                }
-                setListApp(res.data.filter((item: any) => VcData.listApp.includes(item.id)));
-            },
-            // setLoading: setLoading
-        });
-    }
+        },
+        // setLoading: setLoading
+    });
+}
 
-    const getCurrencies = async () => {
-        await api.get({
-            link: `/api/System/GetDataByReferencesId?id=98665935-a3db-487e-8bc5-2a63515972b5`,
-            callBack: (res: any[]) => {
-                if (res && res.length > 0) {
-                    setCurrencies(Object.fromEntries(
-                        res.map(({ MA_NT, CONG_THUC, TY_GIA }) => [MA_NT, { isMultiplication: CONG_THUC === 1, TY_GIA }])
-                    ))
-                }
-            },
-            // setLoading: setLoading
-        });
-    }
+const getInfoDvcs = async (setLoading?: (loading: boolean) => void) => {
+    await api.get({
+        link: `/api/System/GetInfoDvcs`,
+        callBack: (res: any[]) => {
+            if (res && res.length > 0) {
+                setInfoDvcs(res[0]);
+            }
+        },
+        setLoading: setLoading
+    });
+}
 
-    const getListVoucher2 = async () => {
-        const sql = encodeURIComponent("SELECT LIST_CT FROM TYPE_CT WHERE TYPE_CT= '000'");
-        await api.get({
-            link: `/api/System/ExecuteQuery?sql=${sql}`,
-            callBack: (res: any[]) => {
-                if (res && res.length > 0) {
-                    setListVoucher2(res[0].LIST_CT);
-                }
-            },
-            // setLoading: setLoading
-        });
-    }
+const onSelectApp = async (id: string) => {
+    // lấy những chứng tự đặc thù.
+    const listVoucher = [...windowIds.goods, ...windowIds.accounting];
 
-    const getInfoDvcs = async (setLoading?: (loading: boolean) => void) => {
-        await api.get({
-            link: `/api/System/GetInfoDvcs`,
-            callBack: (res: any[]) => {
-                if (res && res.length > 0) {
-                    setInfoDvcs(res[0]);
-                }
-            },
-            setLoading: setLoading
-        });
-    }
+    const url = encodeURIComponent(`SELECT a.id,a.WINDOW_ID,a.WINDOW_NAME,b.MA_CT,b.DP ` +
+        `FROM VC_WINDOW a INNER JOIN DMCT b ON a.MA_CT=b.MA_CT AND b.DVCS_ID=N'${orgUnit}' AND CharIndex(b.DP,'HV,KT')>0 ` +
+        `ORDER BY b.DP desc,b.STT_CT,b.MA_CT`);
+    const res: IData[] = await api.get({
+        link: `/api/System/ExecuteQuery?sql=${url}`
+    });
 
-    const onSelectApp = async (id: string) => {
-        // lấy những chứng tự đặc thù.
-        const listVoucher = [...windowIds.goods, ...windowIds.accounting];
+    const resVoucher = res.filter(i => !listVoucher.includes(i.WINDOW_ID));
 
-        const url = encodeURIComponent(`SELECT a.id,a.WINDOW_ID,a.WINDOW_NAME,b.MA_CT,b.DP ` +
-            `FROM VC_WINDOW a INNER JOIN DMCT b ON a.MA_CT=b.MA_CT AND b.DVCS_ID=N'${orgUnit}' AND CharIndex(b.DP,'HV,KT')>0 ` +
-            `ORDER BY b.DP desc,b.STT_CT,b.MA_CT`);
-        const res: IData[] = await api.get({
-            link: `/api/System/ExecuteQuery?sql=${url}`
-        });
+    await api.get({
+        link: `/api/System/GetAppMenu?id=${id}`,
+        callBack: (res: any[]) => {
+            if (res && res.length > 0) {
+                const ids = collectAllIds(res, resVoucher);
+                setMenuIds(ids);
+                const filtered = filterDataMenu((VcData.menuApp as any)[id], ids);
+                setDataMenuWin(filtered);
+            } else {
+                setDataMenuWin((VcData.menuApp as any)[id]);
+            }
+            router.replace((VcData.routerApp as any)[id]);
+        },
+        setLoading: setLoading
+    });
+}
 
-        const resVoucher = res.filter(i => !listVoucher.includes(i.WINDOW_ID));
-
-        await api.get({
-            link: `/api/System/GetAppMenu?id=${id}`,
-            callBack: (res: any[]) => {
-                if (res && res.length > 0) {
-                    const ids = collectAllIds(res, resVoucher);
-                    setMenuIds(ids);
-                    const filtered = filterDataMenu((VcData.menuApp as any)[id], ids);
-                    setDataMenuWin(filtered);
-                } else {
-                    setDataMenuWin((VcData.menuApp as any)[id]);
-                }
-                router.replace((VcData.routerApp as any)[id]);
-            },
-            setLoading: setLoading
-        });
-    }
-
-    return {
-        isLoggedIn,
-        listApp,
-        listDvcs,
-        infoDvcs,
-        licenseInfo,
-        setLoggedIn,
-        getDvcsByUser,
-        login,
-        logout,
-        getListApp,
-        getInfoDvcs,
-        getLicenseInfo,
-        onSelectApp
-    }
+return {
+    isLoggedIn,
+    listApp,
+    listDvcs,
+    infoDvcs,
+    licenseInfo,
+    setLoggedIn,
+    getDvcsByUser,
+    login,
+    logout,
+    getListApp,
+    getInfoDvcs,
+    getLicenseInfo,
+    onSelectApp
+}
 }

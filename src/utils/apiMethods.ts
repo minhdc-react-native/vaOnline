@@ -142,9 +142,7 @@ export const api = {
                 const base64Str = Buffer.from(res.data, 'binary').toString('base64');
                 const fileUri = FileSystem.documentDirectory + finalName;
 
-                await FileSystem.writeAsStringAsync(fileUri, base64Str, {
-                    encoding: FileSystem.EncodingType.Base64
-                });
+                file.write(uint8);
                 return {
                     uri: fileUri,
                     base64: isBase64 ? base64Str : undefined,

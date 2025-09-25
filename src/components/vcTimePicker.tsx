@@ -19,9 +19,10 @@ interface IProgs {
     value: string | null;
     onChange: (value: string) => void;
     disabled?: boolean;
-    style?: StyleProp<ViewStyle>
+    style?: StyleProp<ViewStyle>;
+    isError?: boolean
 }
-const ViewComponent = ({ label, value, onChange, disabled, style, placeholder }: IProgs) => {
+const ViewComponent = ({ label, value, onChange, disabled, style, placeholder, isError }: IProgs) => {
     const { colors } = useTheme<VACOMTheme>();
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedTime, setSelectedTime] = useState(value ?? "");
@@ -33,7 +34,7 @@ const ViewComponent = ({ label, value, onChange, disabled, style, placeholder }:
     return (
         <>
             <View style={[{ marginTop: 5 }, style]}>
-                <Pressable style={[styles.button, { backgroundColor: colors.background, borderColor: colors.vacom.borderColor }]} onPress={() => {
+                <Pressable style={[styles.button, { backgroundColor: colors.background, borderColor: isError ? colors.error : colors.vacom.borderColor }]} onPress={() => {
                     if (disabled) return;
                     setModalVisible(true);
                 }}>
