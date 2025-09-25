@@ -1,9 +1,9 @@
 
+
 import { useLoading } from "@/components/dialog/loadingProvider";
 import { usePopup } from "@/components/dialog/popupProvider";
 import { useToast } from "@/components/dialog/useToast";
 import { api } from "@/utils/apiMethods";
-import * as Sharing from "expo-sharing";
 import { useMemo } from "react";
 import FileViewer from 'react-native-file-viewer';
 interface IShareFile {
