@@ -60,19 +60,18 @@ https://snack.expo.dev/@react-native-paper/react-native-paper-example_v5
 https://callstack.github.io/react-native-paper/docs/components/ActivityIndicator
 
 # update last version
-
-npm install -g npm-check-updates
-ncu -u
-npm install --legacy-peer-deps
-
-
-rm -rf ios/Pods ios/build ios/Podfile.lock node_modules package-lock.json yarn.lock
-
-yarn install cd ios && pod install && cd ..
-
-npx expo-doctor
-
+yarn add expo@latest
 npx expo install --fix
+npx expo-doctor
+// kiểm tra các thư viện expo liên kết
+npx expo install --check
+
+# các gói khác expo:
+1. kiểm tra cũ chưa?
+yarn outdated
+2. update lên version mới nhất:
+yarn add <package-name>@latest
+
 
 # chạy ./gradlew clean lỗi:
 rm -rf android/.cxx
@@ -83,6 +82,7 @@ rm -rf android/app/build
 ./gradlew bundleRelease --stacktrace
 
 ./gradlew buildEnvironment
+
 
 
 
