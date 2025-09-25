@@ -1,4 +1,5 @@
-import { shareFile } from "@/app/(window)/useActionMap";
+
+import { openFile } from "@/app/(window)/useActionMap";
 import { useLoading } from "@/components/dialog/loadingProvider";
 import { useToast } from "@/components/dialog/useToast";
 import { IField } from "@/components/UIEngine/types";
@@ -9,7 +10,6 @@ import { api } from "@/utils/apiMethods";
 import { Helper } from "@/utils/Helper";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleProp, ViewStyle } from "react-native";
-import FileViewer from 'react-native-file-viewer';
 import UUID from 'react-native-uuid';
 import { useDataApp } from "./zustand/useDataApp";
 
@@ -116,16 +116,10 @@ export const useReport = ({ itemMenuWin, reportDefault }: IProgs) => {
                 setLoading: setLoading
             });
             if (file) {
-                FileViewer.open(file.uri) // mở theo trình đọc của thiết bị.
-                    .then(() => console.log('Opened'))
-                    .catch(async (error) => {
-                        console.log(error);
-                        await shareFile({
-                            uri: file.uri, title: currentReport!.REPORT_NAME,
-                            type: type === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                        }
-                        );
-                    });
+                await openFile({
+                    uri: file.uri, title: currentReport!.REPORT_NAME,
+                    type: type === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
             }
         }
     }, [vnd_nt, currentReport, showToast]);

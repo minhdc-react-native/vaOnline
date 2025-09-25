@@ -1,0 +1,7 @@
+
+org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m
+
+MYAPP_UPLOAD_STORE_FILE=vacom-crm-key.keystore
+MYAPP_UPLOAD_KEY_ALIAS=vacom-crm
+MYAPP_UPLOAD_STORE_PASSWORD=Vacom@123
+MYAPP_UPLOAD_KEY_PASSWORD=Vacom@123

@@ -22,7 +22,7 @@ export const VcData = {
         invoice: 'Hoá đơn',
         tool: 'TSCĐ - CCDC',
         costing: 'Giá thành',
-        custom: 'Phân hệ khác',
+        custom: 'Tuỳ chỉnh',
         report: 'Báo cáo',
         system: 'Hệ thống'
     },
@@ -33,7 +33,7 @@ export const VcData = {
         invoice: 'Invoice',
         tool: 'Assets - Tools',
         costing: 'Costing',
-        custom: 'Other systems',
+        custom: 'Customize',
         report: 'Reports',
         system: 'System'
     },

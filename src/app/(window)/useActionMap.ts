@@ -3,10 +3,11 @@ import { useLoading } from "@/components/dialog/loadingProvider";
 import { usePopup } from "@/components/dialog/popupProvider";
 import { useToast } from "@/components/dialog/useToast";
 import { api } from "@/utils/apiMethods";
+import { viewDocument } from '@react-native-documents/viewer';
 import { File } from 'expo-file-system';
 import * as Sharing from "expo-sharing";
 import { useMemo } from "react";
-import FileViewer from 'react-native-file-viewer';
+
 interface IShareFile {
     uri: string;
     title?: string;
@@ -31,7 +32,18 @@ function getUTI(type: string): string {
     }
 }
 
-export const shareFile = async ({
+export const openFile = async (param: IShareFile) => {
+    await viewDocument({ uri: param.uri })
+        .then(() => {
+            // mở thành công
+            console.log("Document opened");
+        })
+        .catch(async (error) => {
+            await shareFile(param);
+        });
+}
+
+const shareFile = async ({
     uri,
     title = "Chia sẻ file ...",
     type = "application/pdf",
@@ -82,16 +94,10 @@ export const useActionMap = ({ handleRefresh, checkLayoutAction }: IProgs) => {
                     });
                     hide();
                     if (file) {
-                        FileViewer.open(file.uri) // mở theo trình đọc của thiết bị.
-                            .then(() => console.log('Opened'))
-                            .catch(async (error) => {
-                                console.log(error);
-                                await shareFile({
-                                    uri: file.uri, title: values.REPORT_FILE,
-                                    type: "application/pdf"
-                                }
-                                );
-                            });
+                        await openFile({
+                            uri: file.uri, title: values.REPORT_FILE,
+                            type: "application/pdf"
+                        });
                     }
                 });
             },
