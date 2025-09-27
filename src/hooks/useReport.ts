@@ -106,7 +106,7 @@ export const useReport = ({ itemMenuWin, reportDefault }: IProgs) => {
             });
         } else {
             if (!filtered.current) {
-                showToast('Bạn chưa xác nhận bộ lọc', { type: "warning" });
+                showToast(lang === 'vi' ? 'Bạn chưa xác nhận bộ lọc' : 'You have not confirmed the filter', { type: "warning" });
                 return;
             }
             const file = await api.file.post({
@@ -139,7 +139,7 @@ export const useReport = ({ itemMenuWin, reportDefault }: IProgs) => {
 
     const onRefresh = useCallback((filter?: Record<string, any>) => {
         if (!filtered.current) {
-            showToast('Bạn chưa xác nhận bộ lọc', { type: "warning" });
+            showToast(lang === 'vi' ? 'Bạn chưa xác nhận bộ lọc' : 'You have not confirmed the filter', { type: "warning" });
             return;
         }
         onFilter(filter || dataFilter);

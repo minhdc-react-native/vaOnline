@@ -63,14 +63,16 @@ const ViewComponent: React.FC<NumericInputProps> = ({
     const defaultIconColors = useMemo(() => ({ minus: "red", plus: "blue" }), []);
     iconColors = iconColors || defaultIconColors;
     const paramSystem = useDataApp((state) => state.paramSystem);
+    const lang = useDataApp(state => state.lang);
     const { showPopup } = usePopup();
     const decimalLimit = paramSystem?.[typeFormat] ?? 0;
     const inputRef = useRef<any>(null);
     const { colors } = useTheme<VACOMTheme>();
     const { showToast } = useToast();
     const messMinMaxValue = useMemo(() => {
-        return `Giới hạn: ${minValue !== undefined ? ` nhỏ nhất ${minValue}` : ''} ${maxValue !== undefined ? `, lớn nhất ${maxValue}` : ''}`;
-    }, [minValue, maxValue])
+        return (lang === 'vi') ? `Giới hạn: ${minValue !== undefined ? ` nhỏ nhất ${minValue}` : ''} ${maxValue !== undefined ? `, lớn nhất ${maxValue}` : ''}` :
+            `Limits: ${minValue !== undefined ? ` smallest ${minValue}` : ''} ${maxValue !== undefined ? `, largest ${maxValue}` : ''}`;
+    }, [minValue, maxValue, lang])
     const numberFormatter = useMemo(() => new Intl.NumberFormat(locale, {
         minimumFractionDigits: 0,
         maximumFractionDigits: 5,

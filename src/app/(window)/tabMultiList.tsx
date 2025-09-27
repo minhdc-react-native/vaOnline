@@ -1,3 +1,4 @@
+import VcSwipeList from '@/components/vcSwipeList';
 import { VcTabBar } from '@/components/vcTabBar';
 import { useTranslation } from '@/context/TranslationContext';
 import { useWinMulti } from '@/hooks/useWinMulti';
@@ -9,12 +10,11 @@ import { StyleSheet, View } from 'react-native';
 import { RefreshControl } from 'react-native-gesture-handler';
 import { Divider, FAB, IconButton, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SwipeListView } from 'react-native-swipe-list-view';
 import { IHandleActionConfig } from '../../schema';
 import { layoutHandleAction } from '../../schema/layoutHandleAction';
 import { ItemWinList } from './items/itemWinList';
 import { ItemWinListAction } from './items/itemWinListAction';
-import NewEditWinMulti from './newEditWinMulti';
+import { NewEditWinMulti } from './newEditWinMulti';
 import ParamScreen from './paramScreen';
 import { useActionMap } from './useActionMap';
 
@@ -99,16 +99,14 @@ const TabMultiList = () => {
             <VcTabBar style={{ borderRadius: 0, borderWidth: 0 }} value={currentTab?.id as any} data={tabs} onPress={(tab: any) => setCurrentTab(tab)} />
             <Divider />
             <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
-                <SwipeListView
+                <VcSwipeList<IData>
                     data={data[currentTab.TAB_TABLE] || []}
+                    itemKey={(item, index) => item.id.toString()}
                     style={{ paddingTop: 5 }}
-                    keyExtractor={(item: IData, index) => item.id + index.toString()}
-                    renderItem={({ item, index }) => <ItemWinList item={item} schemaView={schemaUI.config.itemList}
+                    renderItemContent={(item, index) => <ItemWinList item={item} schemaView={schemaUI.config.itemList}
                         onLayout={handleLayout} onPress={(id) => handleAction.itemSelect(index)} dataSource={dataSource} isHideIcon={numberAction === 0} />}
-                    renderHiddenItem={({ item }) => <ItemWinListAction item={item} actionMap={actionMapAll}
+                    renderRightActions={(item, index) => <ItemWinListAction item={item} actionMap={actionMapAll}
                         schemaView={schemaUI.config.itemAction} height={rowHeights[item.id]} />}
-                    rightOpenValue={-70 * numberAction}
-                    disableLeftSwipe={numberAction === 0}
                     refreshControl={
                         <RefreshControl
                             key={String(isLoading)}
@@ -116,11 +114,7 @@ const TabMultiList = () => {
                             onRefresh={refreshData}
                         />
                     }
-                    disableRightSwipe
                     showsVerticalScrollIndicator={false}
-                    initialNumToRender={20}
-                    maxToRenderPerBatch={20}
-                    windowSize={10}
                 />
             </View>
             {(schemaUI.action?.new !== false) && <FAB
@@ -141,7 +135,7 @@ const TabMultiList = () => {
                 paramKey={typeParam.current === 'filter' ? currentValue.current : undefined}
                 timeItem={typeParam.current === 'filter' ? currentValue.current?.timeItem : undefined} />}
 
-            {showNewEdit && <NewEditWinMulti title={_(currentTab.TAB_NAME)} data={dataItem} schemaUi={schemaUI} dataSource={dataSource} onSave={handleAction.post} />}
+            {showNewEdit && <NewEditWinMulti tableWin='Empty' title={_(currentTab.TAB_NAME)} data={dataItem} schemaUi={schemaUI} dataSource={dataSource} onSave={handleAction.post} />}
 
         </SafeAreaView>
     );

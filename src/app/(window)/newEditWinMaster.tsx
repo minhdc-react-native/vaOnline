@@ -4,6 +4,7 @@ import { VcButtonScanner } from "@/components/vcButtonScanner";
 import VcCheckBox from "@/components/vcCheckbox";
 import { VcHeaderWin } from "@/components/vcHeaderWin";
 import VcSearchList from "@/components/vcSearchList";
+import VcSwipeList from "@/components/vcSwipeList";
 import { VcTabBar } from "@/components/vcTabBar";
 import { useTranslation } from "@/context/TranslationContext";
 import { useVoucher } from "@/hooks/useVoucher";
@@ -13,7 +14,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import { Appbar, Divider, FAB, IconButton } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SwipeListView } from "react-native-swipe-list-view";
 import { ItemWinList } from "./items/itemWinList";
 import { ItemWinListAction } from "./items/itemWinListAction";
 import { NewEditWinMulti } from "./newEditWinMulti";
@@ -35,7 +35,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
     const { _ } = useTranslation();
     const {
         colors, schemaUI, resetItem, handleAction, setIsChange, configExpression,
-        itemData, dataSource, onChangeItemData, onBack, detail, getDataById, resetTableWin
+        itemData, dataSource, onChangeItemData, onBack, detail, getDataById, resetTableWin, isLangVi
     } = useWinPage({
         itemMenuWin: itemMenuWin
     });
@@ -103,7 +103,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
 
     const onScanBarCode = useCallback((value: string, quantity?: number | null) => {
         if (!isNotEmpty(MA_KHO)) {
-            showToast('Bạn cần nhập mã kho trước!', { type: "warning" });
+            showToast(isLangVi ? 'Bạn cần nhập mã kho trước!' : 'You need to enter the warehouse code first!', { type: "warning" });
             return;
         }
         onScanned(value, quantity ?? 1, MA_KHO, groupCode, () => {
@@ -136,21 +136,16 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                     </>
                 }
                 <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
-                    <SwipeListView
+                    <VcSwipeList<IData>
+                        key={detail.currentTab?.TAB_TABLE}
                         data={detail.dataDetail ?? []}
+                        itemKey={(item, index) => item.id.toString()}
                         style={{ paddingTop: 5 }}
-                        keyExtractor={(item: IData, index) => (item.id ?? '') + index.toString()}
-                        renderItem={({ item, index }) => <ItemWinList item={item} schemaView={detail.schemaWinDetail.config.itemList}
+                        renderItemContent={(item, index) => <ItemWinList item={item} schemaView={detail.schemaWinDetail.config.itemList}
                             onLayout={detail.handleLayoutDetail} onPress={(id) => detail.handleActionDetail.select(index)} dataSource={dataSource} isHideIcon={detail.numberActionDetail === 0} />}
-                        renderHiddenItem={({ item }) => <ItemWinListAction item={item} actionMap={actionMap}
-                            schemaView={detail.schemaWinDetail.config.itemAction} height={detail.rowHeightDetails[item.id ?? '']} />}
-                        rightOpenValue={-70 * detail.numberActionDetail}
-                        disableLeftSwipe={detail.numberActionDetail === 0}
-                        disableRightSwipe
+                        renderRightActions={(item, index) => <ItemWinListAction item={item} actionMap={actionMap}
+                            schemaView={detail.schemaWinDetail.config.itemAction} height={detail.rowHeightDetails[item?.id ?? '']} />}
                         showsVerticalScrollIndicator={false}
-                        initialNumToRender={20}
-                        maxToRenderPerBatch={20}
-                        windowSize={10}
                     />
                 </View>
                 {(detail.schemaWinDetail.action?.new !== false) && <FAB

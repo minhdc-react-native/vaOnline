@@ -130,6 +130,7 @@ const dmdt0: ISchemaWin = {
                         clean: false,
                         tableWin: "Empty",
                         label: "MA_NH_DT",
+                        fDisplay: { fValue: "id" },
                         bind: "MA_NH_DT",
                         style: { flex: 1 }
                     },

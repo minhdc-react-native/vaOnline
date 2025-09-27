@@ -1,4 +1,5 @@
 import { VcHeader } from "@/components/vcHeader";
+import VcSwipeList from "@/components/vcSwipeList";
 import { useWinPage } from "@/hooks/useWinPage";
 import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { useLocalSearchParams, useNavigation } from "expo-router";
@@ -6,7 +7,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RefreshControl, View } from "react-native";
 import { ActivityIndicator, Appbar, Divider, FAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SwipeListView } from "react-native-swipe-list-view";
 import { IHandleActionConfig } from "../../schema";
 import { layoutHandleAction } from "../../schema/layoutHandleAction";
 import { ItemWinList } from "./items/itemWinList";
@@ -157,7 +157,7 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
         return unsubscribe;
     }, [navigation]);
     return (
-        <View style={{ flex: 1, marginBottom: insets.bottom }}>
+        <>
             <Appbar.Header>
                 <VcHeader title={lang === 'vi' ? itemMenuWin.label : itemMenuWin.labelE} numRow={infoData.total} onSearch={setTextSearch}
                     showSearch={showFilter.showSearch}
@@ -170,50 +170,47 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
                     isFastView={menuWin0 !== undefined} />
             </Appbar.Header>
             <Divider />
-            <SwipeListView
-                data={data}
-                style={{ backgroundColor: colors.vacom.backLayout, paddingTop: 5 }}
-                keyExtractor={(item: IData, index) => item.id + index.toString()}
-                renderItem={({ item }) => <ItemWinList item={item} schemaView={schemaUI.config.itemList}
-                    onLayout={handleLayout} onPress={handleAction.edit} dataSource={dataSource} isHideIcon={numberAction === 0} />}
-                renderHiddenItem={({ item }) => <ItemWinListAction item={item} actionMap={actionMapAll}
-                    schemaView={schemaUI.config.itemAction} height={rowHeights[item.id ?? '']} />}
-                rightOpenValue={-70 * numberAction}
-                disableLeftSwipe={numberAction === 0}
-                disableRightSwipe
-                showsVerticalScrollIndicator={false}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
-                refreshControl={
-                    <RefreshControl
-                        key={String(loading.refresh)} // ép re-render
-                        refreshing={loading.refresh}
-                        onRefresh={handleRefresh}
-                    />
-                }
-                // ItemSeparatorComponent={() => <Divider style={{ marginHorizontal: 20 }} />}
-                ListFooterComponent={renderFooter}
-                initialNumToRender={20}
-                maxToRenderPerBatch={20}
-                windowSize={10}
-            />
-            {(schemaUI.action?.new !== false && !!permissions?.NEW) && <FAB
-                icon="plus"
-                style={{
-                    width: 55,
-                    height: 55,
-                    borderRadius: 55,
-                    bottom: 20,
-                    right: 20,
-                    position: 'absolute',
-                }}
-                onPress={handleAction.new}
-                variant='primary'
-            />}
-            {showParam && layoutAction && <ParamScreen onConfirm={runActionWithParam} schemaConfig={layoutAction}
-                paramKey={typeParam.current === 'filter' ? currentValue.current : undefined}
-                timeItem={typeParam.current === 'filter' ? currentValue.current?.timeItem : undefined} />}
-        </View>
+            <View style={{ flex: 1, marginBottom: insets.bottom, paddingHorizontal: 10 }}>
+                <VcSwipeList<IData>
+                    data={data}
+                    itemKey={(item, index) => item.id.toString()}
+                    style={{ backgroundColor: colors.vacom.backLayout, paddingTop: 5 }}
+                    renderItemContent={(item) => <ItemWinList item={item} schemaView={schemaUI.config.itemList}
+                        onLayout={handleLayout} onPress={handleAction.edit} dataSource={dataSource} isHideIcon={numberAction === 0} />}
+                    renderRightActions={(item) => <ItemWinListAction item={item} actionMap={actionMapAll}
+                        schemaView={schemaUI.config.itemAction} height={rowHeights[item.id ?? '']} />}
+
+                    showsVerticalScrollIndicator={false}
+                    onEndReached={handleLoadMore}
+                    onEndReachedThreshold={0.5}
+                    refreshControl={
+                        <RefreshControl
+                            key={String(loading.refresh)} // ép re-render
+                            refreshing={loading.refresh}
+                            onRefresh={handleRefresh}
+                        />
+                    }
+                    // ItemSeparatorComponent={() => <Divider style={{ marginHorizontal: 20 }} />}
+                    ListFooterComponent={renderFooter}
+                />
+                {(schemaUI.action?.new !== false && !!permissions?.NEW) && <FAB
+                    icon="plus"
+                    style={{
+                        width: 55,
+                        height: 55,
+                        borderRadius: 55,
+                        bottom: 20,
+                        right: 20,
+                        position: 'absolute',
+                    }}
+                    onPress={handleAction.new}
+                    variant='primary'
+                />}
+                {showParam && layoutAction && <ParamScreen onConfirm={runActionWithParam} schemaConfig={layoutAction}
+                    paramKey={typeParam.current === 'filter' ? currentValue.current : undefined}
+                    timeItem={typeParam.current === 'filter' ? currentValue.current?.timeItem : undefined} />}
+            </View>
+        </>
     );
 }
 export default WindowScreen;

@@ -2,6 +2,7 @@
 import { useLoading } from "@/components/dialog/loadingProvider";
 import { usePopup } from "@/components/dialog/popupProvider";
 import { useToast } from "@/components/dialog/useToast";
+import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { api } from "@/utils/apiMethods";
 import { viewDocument } from '@react-native-documents/viewer';
 import { File } from 'expo-file-system';
@@ -73,6 +74,7 @@ interface IProgs {
     checkLayoutAction: (actionName: string, callBack: (values: Record<string, any>) => void, data?: Record<string, any>) => void
 }
 export const useActionMap = ({ handleRefresh, checkLayoutAction }: IProgs) => {
+    const lang = useDataApp(state => state.lang);
     const { show, hide } = useLoading();
     const { showToast } = useToast();
     const { showPopup } = usePopup();
@@ -102,9 +104,13 @@ export const useActionMap = ({ handleRefresh, checkLayoutAction }: IProgs) => {
                 });
             },
             exportInvoice: (param?: Record<string, any>) => {
+                const message = lang === 'vi' ? `Bạn có muốn đẩy chứng từ [${param?.data?.SO_CT}]? (chỉ hỗ trợ sang M-Invoice)` :
+                    `Do you want to push document [${param?.data?.SO_CT}]? (only supported to M-Invoice)`;
+                const msgSuccess = lang === 'vi' ? `Đã đẩy chứng từ [${param?.data?.SO_CT}] sang M-Invoice!` :
+                    `Pushed document [${param?.data?.SO_CT}] to M-Invoice!`;
                 checkLayoutAction('exportInvoice', async (values: Record<string, any>) => {
                     showPopup({
-                        message: `Bạn có muốn đẩy chứng từ [${param?.data?.SO_CT}]? (chỉ hỗ trợ sang M-Invoice)`,
+                        message: message,
                         showCancel: true,
                         onConfirm: () => {
                             api.post({
@@ -117,7 +123,7 @@ export const useActionMap = ({ handleRefresh, checkLayoutAction }: IProgs) => {
                                     if (res && res.error) {
                                         showToast(res.error?.error, { type: "error" });
                                     } else {
-                                        showToast(`Đã đẩy chứng từ [${param?.data?.SO_CT}] sang M-Invoice!`);
+                                        showToast(msgSuccess);
                                         handleRefresh();
                                     }
                                 },

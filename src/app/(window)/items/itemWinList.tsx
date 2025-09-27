@@ -23,7 +23,6 @@ const ItemViewComponent: React.FC<IProps> = ({ schemaView, item, onLayout, onPre
                 borderRadius: 10,
                 overflow: 'hidden',
                 paddingHorizontal: 10,
-                marginHorizontal: 10,
                 marginVertical: 5
             }}>
             <TouchableOpacity onPress={() => onPress?.(item)}>

@@ -814,7 +814,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
 
     const onDeleteDetail = useCallback((itemDetail: IData) => {
         showPopup({
-            message: "Bạn có muốn xoá dữ liệu",
+            message: _('MUON_XOA'),
             iconType: "question",
             showCancel: true,
             onConfirm: () => {
@@ -921,7 +921,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
     //
     const [printSamples, setPrintSamples] = useState<IData[]>([]);
     const getConfigWin = useCallback(async () => {
-        show("...");
+        // show("...");
         // lấy cấu hình layout từ data
         try {
             const sql = encodeURIComponent(`SELECT LAYOUT_MOBILE FROM VC_WINDOW WHERE WINDOW_ID='${windowId}'`);
@@ -952,8 +952,8 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         });
         // lấy các dữ liệu reference liên quan
         await loadDataBegin();
-        hide();
-    }, [colors, extractWinConfig, hide, loadDataBegin, setLayoutData, setWinConfig, show, tableWin, windowId]);
+        // hide();
+    }, [colors, extractWinConfig, loadDataBegin, setLayoutData, setWinConfig, tableWin, windowId]);
 
     const onBack = useCallback(() => {
         if (isChange) {
@@ -1021,6 +1021,7 @@ export const useWinPage = ({ itemMenuWin, pageSize = 20, loadingBegin = false }:
         handleRefresh,
         handleLoadMore,
         getDataById,
+        isLangVi,
         detail: {
             tabs,
             loadingDetail,

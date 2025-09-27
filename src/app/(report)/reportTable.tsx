@@ -50,6 +50,7 @@ interface IProgs<T> {
 export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, reportSchema, data, filterKey, onRefresh, loading }: IProgs<T>) => {
     const paramSystem = useDataApp((state) => state.paramSystem);
     const orgUnit = useDataApp((state) => state.orgUnit);
+    const lang = useDataApp(state => state.lang);
     const { show, hide } = useLoading();
     const { colors } = useTheme();
     const scrollX = useRef(new Animated.Value(0)).current;
@@ -115,7 +116,7 @@ export const ReportTable = <T extends IData>({ vnd_nt, routerNumber, menuRow, re
                 vnd_nt: vnd_nt
             };
             if (routerNumber + 1 > 3) {
-                showToast('Ứng dụng đang không cho phép truy vấn sâu hơn 4 cấp !', { type: "info" })
+                showToast(lang === 'vi' ? 'Ứng dụng đang không cho phép truy vấn sâu hơn 4 cấp !' : 'The application is not allowing queries deeper than 4 levels!', { type: "info" })
                 return;
             } // chưa có...
             router.navigate({

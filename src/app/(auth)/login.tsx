@@ -1,4 +1,6 @@
 // app/welcome.tsx
+import FlagEn from '@/assets/images/united-kingdom.svg';
+import FlagVi from '@/assets/images/vietnam.svg';
 import FormWrapper from '@/components/formWrapper';
 import { useZodValidation } from '@/components/UIEngine/hooks/useZodValidation';
 import { SchemaUIEngine } from '@/components/UIEngine/schemaUIEngine';
@@ -12,9 +14,8 @@ import { Helper } from '@/utils/Helper';
 import { getRemember, getSubDomain, saveSubDomain } from '@/utils/vcStorage';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
-import { Button, Card, Text, ToggleButton, useTheme } from 'react-native-paper';
-
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Button, Card, Text, useTheme } from 'react-native-paper';
 const sloganVacom = require('@/assets/images/splash.png') // Logo
 
 const infoVacom: IRowsColsField = {
@@ -118,35 +119,37 @@ export default function LoginScreen() {
         }
     }, [data, getDvcsByUser]);
 
-
-
     return (
         <FormWrapper style={{ justifyContent: "flex-end", padding: 20 }}>
             <View style={{ flex: 1, justifyContent: "center", alignItems: "center", marginTop: 50 }}>
                 <Image source={sloganVacom} style={styles.logo} />
             </View>
             <View style={{ alignSelf: "flex-end", marginBottom: 20 }}>
-                <Button icon={'arrow-right-bold-hexagon-outline'} onPress={() => router.navigate({ pathname: '/(auth)/about-us', params: { lang: data.lang } })}>{data.lang === 'vi' ? 'Về chúng tôi' : 'About us'}</Button>
+                <Button icon={'arrow-right-bold-hexagon-outline'} onPress={() => router.navigate({ pathname: '/(auth)/swipe-listview', params: { lang: data.lang } })}>{data.lang === 'vi' ? 'Về chúng tôi' : 'About us'}</Button>
             </View>
             <Card style={{ padding: 20, backgroundColor: colors.background }} contentStyle={{ gap: 20 }}>
                 <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
                     <Text variant='titleLarge' style={{ flex: 1, textAlign: "center" }}>{data.lang === 'vi' ? 'Đăng nhập' : 'Login'}</Text>
-                    <ToggleButton.Group
-                        onValueChange={onChangeLang}
-                        value={data.lang as any}>
-                        <ToggleButton icon="alpha-v" value="vi" iconColor={colors.primary}
-                            style={[data.lang === "vi" && {
-                                backgroundColor: colors.elevation.level1,
-                                borderColor: colors.elevation.level5,
-                                borderWidth: 5
-                            }]} />
-                        <ToggleButton icon="alpha-e" value="en" iconColor={'green'}
-                            style={[data.lang === "en" && {
-                                backgroundColor: colors.elevation.level1,
-                                borderColor: colors.elevation.level5,
-                                borderWidth: 5
-                            }]} />
-                    </ToggleButton.Group>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                        <Pressable style={({ pressed }) => [
+                            {
+                                opacity: pressed ? 0.7 : (data?.lang === 'vi' ? 1 : 0.5),
+                                borderWidth: 1, borderColor: data?.lang === 'vi' ? colors.primary : colors.backdrop,
+                                borderRadius: 5, overflow: "hidden"
+                            }
+                        ]} onPress={() => onChangeLang('vi')}>
+                            <FlagVi width={30} height={30} />
+                        </Pressable>
+                        <Pressable style={({ pressed }) => [
+                            {
+                                opacity: pressed ? 0.7 : (data?.lang === 'en' ? 1 : 0.5),
+                                borderWidth: 1, borderColor: data?.lang === 'en' ? colors.primary : colors.secondary,
+                                borderRadius: 5, overflow: "hidden"
+                            }
+                        ]} onPress={() => onChangeLang('en')}>
+                            <FlagEn width={30} height={30} />
+                        </Pressable>
+                    </View>
                 </View>
 
                 <SchemaUIEngine schema={view} data={data} errors={errors} onChangeItemData={onChangeItemData} actionMap={actionMap} dataSource={dataSource} />

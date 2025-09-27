@@ -4,7 +4,8 @@ const LayoutLogin = () => {
     return (
         <LayoutStack data={{
             login: { headerShown: false },
-            'about-us': { headerShown: false }
+            'about-us': { headerShown: false },
+            'swipe-listview': { headerShown: false }
         }} />
     );
 }

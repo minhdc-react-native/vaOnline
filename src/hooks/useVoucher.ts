@@ -65,6 +65,7 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
     changeOtherDetail?: React.RefObject<boolean>, onNewDetail?: (e: any, addDetailMore?: Record<string, any>) => Promise<IData | null>) => {
     const tableCthv = 'CTHV';
     const paramSystem = useDataApp((state) => state.paramSystem);
+    const lang = useDataApp(state => state.lang);
     const onChangeValue = useDataItemWin((state) => state.onChangeValue);
 
     const defaultTk = useDataApp((state) => state.paramSystem?.TK);
@@ -172,7 +173,7 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
                         }
                     }
                 } else {
-                    showToast(`Không tìm thấy mã BarCode [${value}]`, { type: "warning" });
+                    showToast(lang === 'vi' ? `Không tìm thấy mã BarCode [${value}]` : `BarCode [${value}] not found`, { type: "warning" });
                 }
             }
         })

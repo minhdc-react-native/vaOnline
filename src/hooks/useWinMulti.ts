@@ -1,5 +1,6 @@
 import { usePopup } from "@/components/dialog/popupProvider";
 import { useEvalExpr } from "@/components/UIEngine/hooks/useEvalExpr";
+import { useTranslation } from "@/context/TranslationContext";
 import { schemaWin, schemaWinEmpty } from "@/schema";
 import { api } from "@/utils/apiMethods";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,7 +17,7 @@ interface IProgs {
 export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = { new: true, edit: true } }: IProgs) => {
     const [data, setData] = useState<Partial<Record<ITableWin, IData[]>>>({});
     const [currentTab, setCurrentTab] = useState<ITabWin>(tabs?.[0]);
-
+    const { _ } = useTranslation();
     const evalExpr = useEvalExpr(dataMaster);
 
     const schemaUI = useMemo(() => {
@@ -103,7 +104,7 @@ export const useWinMulti = ({ tabs, idMaster, dataMaster = {}, actionNewEdit = {
             },
             delete: (rowId: string) => {
                 showPopup({
-                    message: "Bạn có muốn xoá dữ liệu",
+                    message: _('MUON_XOA'),
                     iconType: "question",
                     showCancel: true,
                     onConfirm: () => {

@@ -57,6 +57,9 @@ github_pat_11ACRLSZY0qTWrK6aqX6B5_Puqf4JvUiEVQotuIzVa0SwzRDnY6Ypfzv8HdzoTNza236S
 https://www.flaticon.com/
 
 https://snack.expo.dev/@react-native-paper/react-native-paper-example_v5
+
+https://callstack.github.io/react-native-paper/
+
 https://callstack.github.io/react-native-paper/docs/components/ActivityIndicator
 
 # update last version

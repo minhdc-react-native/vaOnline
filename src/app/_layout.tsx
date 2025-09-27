@@ -3,7 +3,7 @@ import { ExpiredDialog, useSessionExpired } from '@/components/dialog/expiredDia
 import { LoadingProvider } from '@/components/dialog/loadingProvider';
 import { PopupProvider, usePopup } from '@/components/dialog/popupProvider';
 import LayoutStack from '@/components/layoutStack';
-import { TranslationProvider } from '@/context/TranslationContext';
+import { TranslationProvider, useTranslation } from '@/context/TranslationContext';
 import { useDataApp } from '@/hooks/zustand/useDataApp';
 import { theme } from '@/theme/theme';
 import '@/utils/globalFunctions';
@@ -62,6 +62,7 @@ const StackApp = () => {
 }
 const BackHandlerView = () => {
   const { showPopup } = usePopup();
+  const { _ } = useTranslation();
   const pathname = usePathname();
   const backHandlerQuestion = useDataApp((state) => state.backHandlerQuestion);
   const setBackHandlerQuestion = useDataApp((state) => state.setBackHandlerQuestion);
@@ -87,7 +88,7 @@ const BackHandlerView = () => {
         showPopup({
           title: backHandlerQuestion.title,
           message: backHandlerQuestion.message,
-          confirmText: "Thoát",
+          confirmText: _('EXIT'),
           showCancel: true,
           onConfirm: () => {
             setBackHandlerQuestion(null);
@@ -99,8 +100,8 @@ const BackHandlerView = () => {
       }
     } else {
       showPopup({
-        title: "Thoát ứng dụng",
-        message: "Bạn có chắc muốn thoát?",
+        title: _('EXIT'),
+        message: _('MUON_THOAT'),
         showCancel: true,
         onConfirm: () => BackHandler.exitApp(),
         iconType: "question"
