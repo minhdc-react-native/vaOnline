@@ -125,7 +125,7 @@ export default function LoginScreen() {
                 <Image source={sloganVacom} style={styles.logo} />
             </View>
             <View style={{ alignSelf: "flex-end", marginBottom: 20 }}>
-                <Button icon={'arrow-right-bold-hexagon-outline'} onPress={() => router.navigate({ pathname: '/(auth)/swipe-listview', params: { lang: data.lang } })}>{data.lang === 'vi' ? 'Về chúng tôi' : 'About us'}</Button>
+                <Button icon={'arrow-right-bold-hexagon-outline'} onPress={() => router.navigate({ pathname: '/(auth)/about-us', params: { lang: data.lang } })}>{data.lang === 'vi' ? 'Về chúng tôi' : 'About us'}</Button>
             </View>
             <Card style={{ padding: 20, backgroundColor: colors.background }} contentStyle={{ gap: 20 }}>
                 <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
@@ -133,8 +133,8 @@ export default function LoginScreen() {
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                         <Pressable style={({ pressed }) => [
                             {
-                                opacity: pressed ? 0.7 : (data?.lang === 'vi' ? 1 : 0.5),
-                                borderWidth: 1, borderColor: data?.lang === 'vi' ? colors.primary : colors.backdrop,
+                                opacity: pressed ? 0.7 : (data?.lang === 'vi' ? 1 : 0.4),
+                                // borderWidth: 1, borderColor: data?.lang === 'vi' ? colors.primary : colors.backdrop,
                                 borderRadius: 5, overflow: "hidden"
                             }
                         ]} onPress={() => onChangeLang('vi')}>
@@ -142,8 +142,8 @@ export default function LoginScreen() {
                         </Pressable>
                         <Pressable style={({ pressed }) => [
                             {
-                                opacity: pressed ? 0.7 : (data?.lang === 'en' ? 1 : 0.5),
-                                borderWidth: 1, borderColor: data?.lang === 'en' ? colors.primary : colors.secondary,
+                                opacity: pressed ? 0.7 : (data?.lang === 'en' ? 1 : 0.4),
+                                // borderWidth: 1, borderColor: data?.lang === 'en' ? colors.primary : colors.secondary,
                                 borderRadius: 5, overflow: "hidden"
                             }
                         ]} onPress={() => onChangeLang('en')}>

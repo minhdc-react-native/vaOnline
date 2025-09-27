@@ -4,7 +4,6 @@ import { VcButtonScanner } from "@/components/vcButtonScanner";
 import VcCheckBox from "@/components/vcCheckbox";
 import { VcHeaderWin } from "@/components/vcHeaderWin";
 import VcSearchList from "@/components/vcSearchList";
-import VcSwipeList from "@/components/vcSwipeList";
 import { VcTabBar } from "@/components/vcTabBar";
 import { useTranslation } from "@/context/TranslationContext";
 import { useVoucher } from "@/hooks/useVoucher";
@@ -14,6 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
 import { Appbar, Divider, FAB, IconButton } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SwipeListView } from "react-native-swipe-list-view";
 import { ItemWinList } from "./items/itemWinList";
 import { ItemWinListAction } from "./items/itemWinListAction";
 import { NewEditWinMulti } from "./newEditWinMulti";
@@ -129,22 +129,26 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                     <>
                         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, backgroundColor: colors.background }}>
                             <VcCheckBox label={_('GOP_MA')} type="switch" value={groupCode} onChange={(value) => setGroupCode(typeof value === "boolean" ? value : value === "C")} />
-                            <VcSearchList style={{ flex: 1, height: 35 }} placeholder={_('MA_KHO')} tableSearch="DMKHO" fField="MA_KHO" value={MA_KHO} onChange={(item) => setMA_KHO(item?.id)} />
+                            <VcSearchList style={{ flex: 1, height: 35 }} placeholder={_('MA_KHO')}
+                                checkSelected={{ isError: "{{BOLD==='C'}}", message: "Bạn phải chọn kho chi tiết", requiredKeys: ["BOLD"] }}
+                                tableSearch="DMKHO" fField="MA_KHO" value={MA_KHO} onChange={(item) => setMA_KHO(item?.id)} />
                             <VcButtonScanner onScanned={onScanBarCode} />
                         </View>
                         <Divider />
                     </>
                 }
                 <View style={{ flex: 1, backgroundColor: colors.vacom.backLayout }}>
-                    <VcSwipeList<IData>
-                        key={detail.currentTab?.TAB_TABLE}
+                    <SwipeListView
                         data={detail.dataDetail ?? []}
-                        itemKey={(item, index) => item.id.toString()}
                         style={{ paddingTop: 5 }}
-                        renderItemContent={(item, index) => <ItemWinList item={item} schemaView={detail.schemaWinDetail.config.itemList}
+                        keyExtractor={(item: IData, index) => (item.id ?? '') + index.toString()}
+                        renderItem={({ item, index }) => <ItemWinList item={item} schemaView={detail.schemaWinDetail.config.itemList}
                             onLayout={detail.handleLayoutDetail} onPress={(id) => detail.handleActionDetail.select(index)} dataSource={dataSource} isHideIcon={detail.numberActionDetail === 0} />}
-                        renderRightActions={(item, index) => <ItemWinListAction item={item} actionMap={actionMap}
-                            schemaView={detail.schemaWinDetail.config.itemAction} height={detail.rowHeightDetails[item?.id ?? '']} />}
+                        renderHiddenItem={({ item }) => <ItemWinListAction item={item} actionMap={actionMap}
+                            schemaView={detail.schemaWinDetail.config.itemAction} height={detail.rowHeightDetails[item.id ?? '']} />}
+                        rightOpenValue={-70 * detail.numberActionDetail}
+                        disableLeftSwipe={detail.numberActionDetail === 0}
+                        disableRightSwipe
                         showsVerticalScrollIndicator={false}
                     />
                 </View>

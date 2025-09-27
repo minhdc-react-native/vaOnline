@@ -1,6 +1,5 @@
 import { FlashList, FlashListProps } from "@shopify/flash-list";
-import React, { useRef } from "react";
-import { StyleSheet } from "react-native";
+import React, { useCallback, useRef } from "react";
 import ReanimatedSwipeable, { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import { Divider } from "react-native-paper";
 
@@ -15,7 +14,7 @@ export type SwipeListProps<T> = Omit<FlashListProps<T>, "renderItem"> & {
 
 function VcSwipeList<T>({
     data,
-    multipleOpen = false,
+    multipleOpen = true,
     renderItemContent,
     renderRightActions,
     renderLeftActions,
@@ -27,19 +26,20 @@ function VcSwipeList<T>({
     // lưu id đang mở gần nhất
     const openRowId = useRef<string | null>(null);
 
-    const handleRowOpen = (id: string) => {
+    const handleRowOpen = useCallback((id: string) => {
         if (!multipleOpen) {
             if (openRowId.current && openRowId.current !== id) {
                 rowRefs[openRowId.current]?.close();
             }
             openRowId.current = id;
         }
-    };
+    }, [multipleOpen, rowRefs]);
 
-    const renderItem = ({ item, index }: { item: T; index: number }) => {
+    const renderItem = useCallback(({ item, index }: { item: T; index: number }) => {
         const key = itemKey(item, index);
         return (
             <ReanimatedSwipeable
+                key={key}
                 // @ts-ignore
                 ref={(ref: SwipeableMethods | null) => (rowRefs[key] = ref)}
                 renderRightActions={renderRightActions ? () => renderRightActions(item, index) : undefined}
@@ -54,7 +54,7 @@ function VcSwipeList<T>({
                 {renderItemContent(item, index)}
             </ReanimatedSwipeable>
         );
-    };
+    }, [handleRowOpen, itemKey, renderItemContent, renderLeftActions, renderRightActions, rowRefs]);
     return (
         <FlashList
             {...rest}
@@ -65,12 +65,5 @@ function VcSwipeList<T>({
         />
     );
 }
-
-const styles = StyleSheet.create({
-    row: {
-        padding: 16,
-        backgroundColor: "#fff",
-    },
-});
 
 export default VcSwipeList;

@@ -1,5 +1,4 @@
 import { VcHeader } from "@/components/vcHeader";
-import VcSwipeList from "@/components/vcSwipeList";
 import { useWinPage } from "@/hooks/useWinPage";
 import { useDataApp } from "@/hooks/zustand/useDataApp";
 import { useLocalSearchParams, useNavigation } from "expo-router";
@@ -7,12 +6,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RefreshControl, View } from "react-native";
 import { ActivityIndicator, Appbar, Divider, FAB } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SwipeListView } from "react-native-swipe-list-view";
 import { IHandleActionConfig } from "../../schema";
 import { layoutHandleAction } from "../../schema/layoutHandleAction";
 import { ItemWinList } from "./items/itemWinList";
 import { ItemWinListAction } from "./items/itemWinListAction";
 import ParamScreen from "./paramScreen";
 import { useActionMap } from "./useActionMap";
+
 interface IProgs {
     menuWin0?: IMenuWin;
 }
@@ -171,15 +172,17 @@ const WindowScreen = ({ menuWin0 }: IProgs) => {
             </Appbar.Header>
             <Divider />
             <View style={{ flex: 1, marginBottom: insets.bottom, paddingHorizontal: 10 }}>
-                <VcSwipeList<IData>
+                <SwipeListView
                     data={data}
-                    itemKey={(item, index) => item.id.toString()}
                     style={{ backgroundColor: colors.vacom.backLayout, paddingTop: 5 }}
-                    renderItemContent={(item) => <ItemWinList item={item} schemaView={schemaUI.config.itemList}
+                    keyExtractor={(item: IData, index) => item.id + index.toString()}
+                    renderItem={({ item }) => <ItemWinList item={item} schemaView={schemaUI.config.itemList}
                         onLayout={handleLayout} onPress={handleAction.edit} dataSource={dataSource} isHideIcon={numberAction === 0} />}
-                    renderRightActions={(item) => <ItemWinListAction item={item} actionMap={actionMapAll}
+                    renderHiddenItem={({ item }) => <ItemWinListAction item={item} actionMap={actionMapAll}
                         schemaView={schemaUI.config.itemAction} height={rowHeights[item.id ?? '']} />}
-
+                    rightOpenValue={-70 * numberAction}
+                    disableLeftSwipe={numberAction === 0}
+                    disableRightSwipe
                     showsVerticalScrollIndicator={false}
                     onEndReached={handleLoadMore}
                     onEndReachedThreshold={0.5}

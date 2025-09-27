@@ -69,7 +69,6 @@ const dpkt0: ISchemaWin = {
     },
     itemAction: {
         type: "rows",
-        style: { width: 70 },
         fields: [
             {
                 type: "cols",

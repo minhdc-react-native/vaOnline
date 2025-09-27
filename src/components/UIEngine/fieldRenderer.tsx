@@ -458,36 +458,42 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     btnLeft: {
-        flex: 1,
-        width: 70,
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         alignItems: 'center',
+        flex: 1,
+        paddingRight: 25,
+        marginLeft: 20
     },
     btnOnlyOne: {
         flex: 1,
-        width: 70,
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         alignItems: 'center',
+        paddingRight: 25,
+        marginLeft: 50,
         borderTopRightRadius: 10,
         borderBottomRightRadius: 10
     },
     btnOnlyOneTop: {
         flex: 1,
-        width: 70,
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         alignItems: 'center',
+        paddingRight: 25,
+        marginLeft: 50,
         borderTopRightRadius: 10
     },
     btnOnlyOneCenter: {
-        width: 70,
-        justifyContent: 'center',
+        flex: 1,
+        justifyContent: 'flex-end',
         alignItems: 'center',
+        paddingRight: 25,
+        marginLeft: 50
     },
     btnOnlyOneBottom: {
         flex: 1,
-        width: 70,
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         alignItems: 'center',
+        paddingRight: 25,
+        marginLeft: 50,
         borderBottomRightRadius: 10
     }
 });

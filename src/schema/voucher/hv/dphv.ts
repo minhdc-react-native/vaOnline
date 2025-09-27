@@ -70,7 +70,6 @@ const dphv0: ISchemaWin = {
     },
     itemAction: {
         type: "cols",
-        style: { width: 140 },
         fields: [
             {
                 type: "rows",
