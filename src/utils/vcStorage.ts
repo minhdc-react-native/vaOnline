@@ -6,6 +6,7 @@ const REMEMBER = 'remember';
 const SELECT_YEAR = 'select_year';
 const ORG_UNIT = 'org_unit';
 const SUB_DOMAIN = 'sub_domain';
+const WAREHOUSE_CODE = 'warehouse_code';
 
 export const saveSubDomain = async (subDomain: string) => {
     try {
@@ -91,4 +92,18 @@ export const clearOrgUnit = async () => {
     try {
         await AsyncStorage.removeItem(ORG_UNIT);
     } catch (error) { }
+};
+
+export const saveWarehouseCode = async (warehouseCode: string) => {
+    try {
+        await AsyncStorage.setItem(WAREHOUSE_CODE, warehouseCode);
+    } catch (error) { }
+};
+
+export const getWarehouseCode = async () => {
+    try {
+        return await AsyncStorage.getItem(WAREHOUSE_CODE);
+    } catch (error) {
+        return null;
+    }
 };

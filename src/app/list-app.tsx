@@ -1,4 +1,5 @@
 import LoadingScreen from '@/components/loadingScreen';
+import { StatusBarOnFocus } from '@/components/statusBarOnFocus';
 import VcSelectList from '@/components/vcSelectList';
 import { VcData } from '@/constants/vcData';
 import { useAuth } from '@/hooks/useAuth';
@@ -34,6 +35,7 @@ export default function ListApp() {
 
     return (
         <View style={{ flex: 1, gap: 50 }}>
+            <StatusBarOnFocus />
             <LinearGradient
                 colors={[colors.elevation.level1, '#fff', '#fff', colors.secondary]}
                 style={styles.container}

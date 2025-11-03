@@ -1,3 +1,4 @@
+import { StatusBarOnFocus } from '@/components/statusBarOnFocus';
 import { TextZoomIn } from '@/components/vcTextAnimation';
 import { router } from 'expo-router';
 import LottieView from 'lottie-react-native';
@@ -9,6 +10,7 @@ const sloganVacom = require('@/assets/images/splash.png') // Logo
 export default function WelcomeScreen() {
     return (
         <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', gap: 20, paddingBottom: 50 }}>
+            <StatusBarOnFocus />
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
                 <Image source={sloganVacom} style={styles.logo} />
                 <TextZoomIn text='Ứng dụng quản lý kế toán Online' />

@@ -134,7 +134,7 @@ export default function LoginScreen() {
                         <Pressable style={({ pressed }) => [
                             {
                                 opacity: pressed ? 0.7 : (data?.lang === 'vi' ? 1 : 0.4),
-                                // borderWidth: 1, borderColor: data?.lang === 'vi' ? colors.primary : colors.backdrop,
+                                // borderWidth: 2, borderColor: data?.lang === 'vi' ? colors.primary : colors.backdrop,
                                 borderRadius: 5, overflow: "hidden"
                             }
                         ]} onPress={() => onChangeLang('vi')}>
@@ -143,7 +143,7 @@ export default function LoginScreen() {
                         <Pressable style={({ pressed }) => [
                             {
                                 opacity: pressed ? 0.7 : (data?.lang === 'en' ? 1 : 0.4),
-                                // borderWidth: 1, borderColor: data?.lang === 'en' ? colors.primary : colors.secondary,
+                                // borderWidth: 2, borderColor: data?.lang === 'en' ? colors.primary : colors.secondary,
                                 borderRadius: 5, overflow: "hidden"
                             }
                         ]} onPress={() => onChangeLang('en')}>

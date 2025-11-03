@@ -8,6 +8,7 @@ import { VcTabBar } from "@/components/vcTabBar";
 import { useTranslation } from "@/context/TranslationContext";
 import { useVoucher } from "@/hooks/useVoucher";
 import { useWinPage } from "@/hooks/useWinPage";
+import { getWarehouseCode, saveWarehouseCode } from "@/utils/vcStorage";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
@@ -40,7 +41,8 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
         itemMenuWin: itemMenuWin
     });
 
-    const [showEditMaster, setShowEditMaster] = useState<boolean>(id === undefined && schemaUI.action?.showEditMaster !== false);
+    // const [showEditMaster, setShowEditMaster] = useState<boolean>(id === undefined && schemaUI.action?.showEditMaster !== false);
+    const [showEditMaster, setShowEditMaster] = useState<boolean>(false);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', () => {
@@ -74,6 +76,8 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
             } else {
                 detail.loadDetail(id?.toString());
             }
+            const warehouseCode = await getWarehouseCode();
+            setMA_KHO(warehouseCode || '');
         }
         getData();
     }, []);
@@ -100,6 +104,11 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
     }, [changeOther, detail.changeOtherDetail, detail.dataDetail]);
     const [MA_KHO, setMA_KHO] = useState('');
     const [groupCode, setGroupCode] = useState(true);
+
+    const setWarehouseCode = useCallback((warehouseCode: string) => {
+        setMA_KHO(warehouseCode);
+        saveWarehouseCode(warehouseCode);
+    }, []);
 
     const onScanBarCode = useCallback((value: string, quantity?: number | null) => {
         if (!isNotEmpty(MA_KHO)) {
@@ -131,7 +140,7 @@ const NewEditWinMaster = ({ menu }: IProgs) => {
                             <VcCheckBox label={_('GOP_MA')} type="switch" value={groupCode} onChange={(value) => setGroupCode(typeof value === "boolean" ? value : value === "C")} />
                             <VcSearchList style={{ flex: 1, height: 35 }} placeholder={_('MA_KHO')}
                                 checkSelected={{ isError: "{{BOLD==='C'}}", message: "Bạn phải chọn kho chi tiết", requiredKeys: ["BOLD"] }}
-                                tableSearch="DMKHO" fField="MA_KHO" value={MA_KHO} onChange={(item) => setMA_KHO(item?.id)} />
+                                tableSearch="DMKHO" fField="MA_KHO" value={MA_KHO} onChange={(item) => setWarehouseCode(item?.id)} />
                             <VcButtonScanner onScanned={onScanBarCode} />
                         </View>
                         <Divider />
