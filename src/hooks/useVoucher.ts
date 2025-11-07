@@ -371,8 +371,8 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
                 changeMaster = {
                     T_TIEN_TT_NT: totals.TIEN_NT,
                     T_TIEN_TT: totals.TIEN,
-                    T_TIEN_NT: totals.TIEN_NT + dataMaster?.T_THUE_NT,
-                    T_TIEN: totals.TIEN + dataMaster?.T_THUE,
+                    T_TIEN_NT: totals.TIEN_NT + (dataMaster?.T_THUE_NT ?? 0),
+                    T_TIEN: totals.TIEN + (dataMaster?.T_THUE ?? 0),
                 }
                 break;
             case TableWin.CTHV:
@@ -381,7 +381,6 @@ export const useVoucher = (tableWin: ITableWin, voucherCode?: string, currentTab
             case TableWin.PSTHUE:
                 if (tableWin === TableWin.DPHV) {
                     const totalVat = pbPsThue();
-                    console.log('totalVat>>', totalVat);
                     if (!totalVat) break;
                     changeMaster = {
                         T_THUE_NT: totalVat.TIEN_NT,

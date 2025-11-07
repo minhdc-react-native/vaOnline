@@ -1,5 +1,6 @@
 import { useTranslation } from "@/context/TranslationContext";
 import { VACOMTheme } from "@/theme/theme";
+import debounce from "lodash.debounce";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { DimensionValue, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { Text, TextInput, useTheme } from "react-native-paper";
@@ -42,12 +43,14 @@ const InputFieldComponent: React.FC<IProps> = ({
     const { _ } = useTranslation();
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleChangeText = useCallback(
-        (val: string) => {
-            setValue(upperCase && val ? val.toUpperCase() : val);
-        },
-        [setValue, upperCase]
-    );
+    const [localValue, setLocalValue] = useState(value);
+
+    const debouncedSearch = useMemo(() => debounce(setValue, 500), [setValue]);
+
+    const handleChangeText = (val: string) => {
+        setLocalValue(val);
+        debouncedSearch(val);
+    };
 
     const isMulti = typeInput === "multi";
     const isPassword = typeInput === "password";
@@ -89,7 +92,6 @@ const InputFieldComponent: React.FC<IProps> = ({
             />
         ) : undefined;
     }, [icon, colors.secondary]);
-
     return (
         <View style={style}>
             <TextInput
@@ -108,7 +110,7 @@ const InputFieldComponent: React.FC<IProps> = ({
                 onBlur={onHandleBlur}
                 secureTextEntry={isPassword && !showPassword}
                 autoCapitalize={autoCapitalize}
-                value={value}
+                value={localValue}
                 left={leftIcon}
                 right={rightFix}
                 multiline={isMulti}

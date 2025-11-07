@@ -88,4 +88,8 @@ rm -rf android/app/build
 
 
 
+rm -rf ~/Library/Developer/Xcode/DerivedData
+
+
+
 

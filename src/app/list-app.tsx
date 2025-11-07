@@ -41,7 +41,7 @@ export default function ListApp() {
                 style={styles.container}
                 locations={[0, 0.3, 0.7, 1]}
             >
-                <Card style={{ marginHorizontal: 20, marginBottom: 50, paddingTop: 20, backgroundColor: colors.background }}>
+                <Card style={{ marginHorizontal: 20, marginBottom: 50, paddingTop: 10, backgroundColor: colors.background }}>
                     <View style={{ flexDirection: "row", paddingHorizontal: 20, alignItems: "center" }}>
                         <VcSelectList clean={false} style={{ flex: 1 }} tableWin='Year' label={lang === 'vi' ? 'Năm làm việc' : 'Year of work'} value={currentYear ?? ''} fId='NAM' fValue='NAM' data={years} onChange={onSelectYear} />
                         <View style={{ flex: 1, justifyContent: "center", alignItems: "flex-end" }} >
@@ -55,13 +55,13 @@ export default function ListApp() {
                         </>}
                     </View>
                 </Card>
-                <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center', gap: 50, paddingHorizontal: 50, flexWrap: "wrap" }}>
+                <View style={{ flexDirection: "row", justifyContent: 'center', alignItems: 'center', gap: 50, paddingHorizontal: 20, flexWrap: "wrap" }}>
                     {listApp.map((app) => (
                         <Pressable key={app.id} style={({ pressed }) => [{ opacity: pressed ? 0.7 : 1, justifyContent: "center", alignItems: "center" }]} onPress={() => onSelectApp(app.id.toString())}>
                             <Card style={{ backgroundColor: app.BACKGROUND_COLOR, width: 100, height: 80, justifyContent: "center", alignItems: "center" }}>
                                 <Icon source={(VcData.iconApp as any)[app.id]} size={50} color={colors.background} />
                             </Card>
-                            <Text variant='titleMedium' style={{ textAlign: "center", flexShrink: 1 }}>{app[lang === 'vi' ? 'NAME' : 'en_NAME']}</Text>
+                            <Text variant='titleMedium' style={{ textAlign: "center", fontWeight: "bold", flexShrink: 1 }}>{app[lang === 'vi' ? 'NAME' : 'en_NAME']}</Text>
                         </Pressable>
                     ))}
                 </View>
