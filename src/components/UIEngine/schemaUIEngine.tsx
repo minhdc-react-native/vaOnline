@@ -51,7 +51,6 @@ export function SchemaUIEngine({
 }: ISchemaUIProps) {
     const paramSystem = useDataApp((state) => state.paramSystem);
     const formState = useFormState(data);
-
     // map nhanh id → object
     const dataSourceMap = useMemo(() => {
         const map0 = new Map<string, Map<string, any>>();

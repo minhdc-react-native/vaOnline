@@ -104,8 +104,10 @@ export default function LoginScreen() {
             const remember = await getRemember();
             const domain = await getSubDomain();
             const lang: 'vi' | 'en' = remember ? remember.lang : _data.lang;
+
             setTranslations(infoLocale[lang ?? 'vi']['app-label']);
             setData({ ..._data, ...remember, domain: domain || '' });
+            console.log('_data>>', { ..._data, ...remember, domain: domain || '' });
         }
         getStorage();
     }, [])

@@ -1,7 +1,7 @@
 import { useTranslation } from "@/context/TranslationContext";
 import { VACOMTheme } from "@/theme/theme";
 import debounce from "lodash.debounce";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DimensionValue, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import { Text, TextInput, useTheme } from "react-native-paper";
 
@@ -38,6 +38,7 @@ const InputFieldComponent: React.FC<IProps> = ({
     height,
     msgError
 }) => {
+    if (value) console.log('fvalue>>', value);
     const prevValue = useRef(value);
     const { colors } = useTheme<VACOMTheme>();
     const { _ } = useTranslation();
@@ -51,6 +52,12 @@ const InputFieldComponent: React.FC<IProps> = ({
         setLocalValue(val);
         debouncedSearch(val);
     };
+
+    useEffect(() => {
+        if (value && value !== localValue) {
+            setLocalValue(value);
+        }
+    }, [value, localValue])
 
     const isMulti = typeInput === "multi";
     const isPassword = typeInput === "password";
